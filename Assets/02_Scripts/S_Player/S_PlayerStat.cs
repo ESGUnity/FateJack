@@ -1,84 +1,75 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
-
-// NOTIFY : Àı´ë ½ºÅÄµå ÈÄ Ä«µå¸¦ ³»´Â ±â¹ÍÀº ¸¸µéÁö ¸¶¶ó... ¤µÁ¦¿Üµµ!!!!!!!!!!!!!!!!!
-// NOTIFY : Ç×»ó ÇÇÇØ¿Í Ã¢Á¶°¡ °øÁ¸ÇÑ´Ù¸é Ç×»ó ÇÇÇØ¸¦ ¸ÕÀú ÁÖ°í Ã¢Á¶ ÀÎµµ ¿ª·ùÇØ¶ó!!!!!!!!!!!!
 
 public class S_PlayerStat : MonoBehaviour
 {
-    [Header("ÇÁ¸®ÆÕ")]
-    [SerializeField] GameObject playerAttackVFX;
-
-    [Header("ÄÄÆ÷³ÍÆ®")]
+    [Header("ì»´í¬ë„ŒíŠ¸")]
     S_PlayerCard pCard;
     S_PlayerSkill pSkill;
 
-    [Header("ÇÇÁ¶¹° °ü·Ã")]
+    [Header("í”¼ì¡°ë¬¼ ê´€ë ¨")]
     [HideInInspector] public int StackSum { get; set; }
     [HideInInspector] public int CurrentLimit { get; set; }
     public const int ORIGIN_LIMIT = 21;
 
-    [Header("½ÃÀÛ ´É·ÂÄ¡ °ª")]
+    [Header("ì‹œì‘ ëŠ¥ë ¥ì¹˜ ê°’")]
     const int START_MAX_HEALTH = 3;
     const int START_MAX_DETERMINATION = 3;
     const int START_GOLD = 3;
 
-    [Header("Ã¼·Â")] // Ã¼·ÂÀÇ standDamagedHealth´Â ½Ã·Ã ½Ã·Ã ³»¿¡ Àı´ë º¯ÇÏÁö ¾Ê´Â´Ù.(ºñÆ²±â ¿µÇâ X) ±×·¡¼­ È÷½ºÅä¸®¾Æ¿¡ ÀúÀåÇÏÁö ¾Ê½À´Ï´Ù.
+    [Header("ì²´ë ¥")] // ì²´ë ¥ì˜ standDamagedHealthëŠ” ì‹œë ¨ ì‹œë ¨ ë‚´ì— ì ˆëŒ€ ë³€í•˜ì§€ ì•ŠëŠ”ë‹¤.(ë¹„í‹€ê¸° ì˜í–¥ X) ê·¸ë˜ì„œ íˆìŠ¤í† ë¦¬ì•„ì— ì €ì¥í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.
     [HideInInspector] public int MaxHealth { get; private set; }
     int currentHealth;
     int standDamagedHealth;
     int additionalHealth; 
 
-    [Header("ÀÇÁö")] // ÀÇÁöÀÇ useDeterminationÀº ½Ã·Ã ³»¿¡ Àı´ë º¯ÇÏÁö ¾Ê´Â´Ù.(ºñÆ²±â ¿µÇâ X) ±×·¡¼­ È÷½ºÅä¸®¿¡ ÀúÀåÇÏÁö ¾Ê½À´Ïµğ.
+    [Header("ì˜ì§€")] // ì˜ì§€ì˜ useDeterminationì€ ì‹œë ¨ ë‚´ì— ì ˆëŒ€ ë³€í•˜ì§€ ì•ŠëŠ”ë‹¤.(ë¹„í‹€ê¸° ì˜í–¥ X) ê·¸ë˜ì„œ íˆìŠ¤í† ë¦¬ì— ì €ì¥í•˜ì§€ ì•ŠìŠµë‹ˆë””.
     [HideInInspector] public int MaxDetermination { get; private set; }
     int currentDetermination;
     int useDetermination;
     int additionalDetermination;
 
-    [Header("°ñµå")]
+    [Header("ê³¨ë“œ")]
     [HideInInspector] public int CurrentGold { get; private set; }
 
-    [Header("ÀüÅõ ´É·ÂÄ¡")]
+    [Header("ì „íˆ¬ ëŠ¥ë ¥ì¹˜")]
     [HideInInspector] public int CurrentStrength { get; private set; }
     [HideInInspector] public int CurrentMind { get; private set; }
     [HideInInspector] public int CurrentLuck { get; private set; }
 
-    [Header("Æ¯¼ö »óÅÂ")]
+    [Header("íŠ¹ìˆ˜ ìƒíƒœ")]
     [HideInInspector] public bool IsBurst { get; set; }
     [HideInInspector] public bool IsCleanHit { get; set; }
     [HideInInspector] public bool IsDelusion { get; set; }
     [HideInInspector] public S_FirstEffectEnum IsFirst { get; set; }
     [HideInInspector] public bool IsExpansion { get; set; }
 
-    [Header("È÷½ºÅä¸®")]
-    [HideInInspector] public int h_HitCardCount { get; private set; } // ÀÌ¹ø °ÔÀÓ¿¡¼­ È÷Æ®ÇÑ Ä«µå °³¼ö¸¸Å­ È°¼ºÈ­
-    [HideInInspector] public int h_SpadeHitCardCount { get; private set; } // ÀÌ¹ø °ÔÀÓ¿¡¼­ È÷Æ®ÇÑ ½ºÆäÀÌµå ¹®¾ç Ä«µå °³¼ö¸¸Å­ È°¼ºÈ­
-    [HideInInspector] public int h_HeartHitCardCount { get; private set; } // ÀÌ¹ø °ÔÀÓ¿¡¼­ È÷Æ®ÇÑ ÇÏÆ® ¹®¾ç Ä«µå °³¼ö¸¸Å­ È°¼ºÈ­
-    [HideInInspector] public int h_DiamondHitCardCount { get; private set; } // ÀÌ¹ø °ÔÀÓ¿¡¼­ È÷Æ®ÇÑ ´ÙÀÌ¾Æ¸óµå ¹®¾ç Ä«µå °³¼ö¸¸Å­ È°¼ºÈ­
-    [HideInInspector] public int h_CloverHitCardCount { get; private set; } // ÀÌ¹ø °ÔÀÓ¿¡¼­ È÷Æ®ÇÑ Å¬·Î¹ö ¹®¾ç Ä«µå °³¼ö¸¸Å­ È°¼ºÈ­
-    [HideInInspector] public int h_HitCardSum { get; private set; } // ÀÌ¹ø °ÔÀÓ¿¡¼­ È÷Æ®ÇÑ Ä«µå ¼ıÀÚ¸¸Å­ È°¼ºÈ­
-    [HideInInspector] public int h_SpadeHitCardSum { get; private set; } // ÀÌ¹ø °ÔÀÓ¿¡¼­ È÷Æ®ÇÑ ½ºÆäÀÌµå ¹®¾ç Ä«µåÀÇ ¼ıÀÚ¸¸Å­ È°¼ºÈ­
-    [HideInInspector] public int h_HeartHitCardSum { get; private set; } // ÀÌ¹ø °ÔÀÓ¿¡¼­ È÷Æ®ÇÑ ÇÏÆ® ¹®¾ç Ä«µåÀÇ ¼ıÀÚ¸¸Å­ È°¼ºÈ­
-    [HideInInspector] public int h_DiamondHitCardSum { get; private set; } // ÀÌ¹ø °ÔÀÓ¿¡¼­ È÷Æ®ÇÑ ´ÙÀÌ¾Æ¸óµå ¹®¾ç Ä«µåÀÇ ¼ıÀÚ¸¸Å­ È°¼ºÈ­
-    [HideInInspector] public int h_CloverHitCardSum { get; private set; } // ÀÌ¹ø °ÔÀÓ¿¡¼­ È÷Æ®ÇÑ Å¬·Î¹ö ¹®¾ç Ä«µåÀÇ ¼ıÀÚ¸¸Å­ È°¼ºÈ­
-    [HideInInspector] public int h_DisengageCount { get; private set; } // ÀÌ¹ø °ÔÀÓ¿¡¼­ Á¦¿ÜµÈ Ä«µå °³¼ö¸¸Å­ È°¼ºÈ­
+    [Header("íˆìŠ¤í† ë¦¬")]
+    [HideInInspector] public int h_HitCardCount { get; private set; } // ì´ë²ˆ ê²Œì„ì—ì„œ íˆíŠ¸í•œ ì¹´ë“œ ê°œìˆ˜ë§Œí¼ í™œì„±í™”
+    [HideInInspector] public int h_SpadeHitCardCount { get; private set; } // ì´ë²ˆ ê²Œì„ì—ì„œ íˆíŠ¸í•œ ìŠ¤í˜ì´ë“œ ë¬¸ì–‘ ì¹´ë“œ ê°œìˆ˜ë§Œí¼ í™œì„±í™”
+    [HideInInspector] public int h_HeartHitCardCount { get; private set; } // ì´ë²ˆ ê²Œì„ì—ì„œ íˆíŠ¸í•œ í•˜íŠ¸ ë¬¸ì–‘ ì¹´ë“œ ê°œìˆ˜ë§Œí¼ í™œì„±í™”
+    [HideInInspector] public int h_DiamondHitCardCount { get; private set; } // ì´ë²ˆ ê²Œì„ì—ì„œ íˆíŠ¸í•œ ë‹¤ì´ì•„ëª¬ë“œ ë¬¸ì–‘ ì¹´ë“œ ê°œìˆ˜ë§Œí¼ í™œì„±í™”
+    [HideInInspector] public int h_CloverHitCardCount { get; private set; } // ì´ë²ˆ ê²Œì„ì—ì„œ íˆíŠ¸í•œ í´ë¡œë²„ ë¬¸ì–‘ ì¹´ë“œ ê°œìˆ˜ë§Œí¼ í™œì„±í™”
+    [HideInInspector] public int h_HitCardSum { get; private set; } // ì´ë²ˆ ê²Œì„ì—ì„œ íˆíŠ¸í•œ ì¹´ë“œ ìˆ«ìë§Œí¼ í™œì„±í™”
+    [HideInInspector] public int h_SpadeHitCardSum { get; private set; } // ì´ë²ˆ ê²Œì„ì—ì„œ íˆíŠ¸í•œ ìŠ¤í˜ì´ë“œ ë¬¸ì–‘ ì¹´ë“œì˜ ìˆ«ìë§Œí¼ í™œì„±í™”
+    [HideInInspector] public int h_HeartHitCardSum { get; private set; } // ì´ë²ˆ ê²Œì„ì—ì„œ íˆíŠ¸í•œ í•˜íŠ¸ ë¬¸ì–‘ ì¹´ë“œì˜ ìˆ«ìë§Œí¼ í™œì„±í™”
+    [HideInInspector] public int h_DiamondHitCardSum { get; private set; } // ì´ë²ˆ ê²Œì„ì—ì„œ íˆíŠ¸í•œ ë‹¤ì´ì•„ëª¬ë“œ ë¬¸ì–‘ ì¹´ë“œì˜ ìˆ«ìë§Œí¼ í™œì„±í™”
+    [HideInInspector] public int h_CloverHitCardSum { get; private set; } // ì´ë²ˆ ê²Œì„ì—ì„œ íˆíŠ¸í•œ í´ë¡œë²„ ë¬¸ì–‘ ì¹´ë“œì˜ ìˆ«ìë§Œí¼ í™œì„±í™”
+    [HideInInspector] public int h_DisengageCount { get; private set; } // ì´ë²ˆ ê²Œì„ì—ì„œ ì œì™¸ëœ ì¹´ë“œ ê°œìˆ˜ë§Œí¼ í™œì„±í™”
     Stack<S_StatHistory> statHistoryStack = new();
 
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static S_PlayerStat instance;
     public static S_PlayerStat Instance { get { return instance; } }
 
     void Awake()
     {
-        // ÄÄÆ÷³ÍÆ® ÇÒ´ç
+        // ì»´í¬ë„ŒíŠ¸ í• ë‹¹
         pCard = GetComponent<S_PlayerCard>();
         pSkill = GetComponent<S_PlayerSkill>();
 
-        // ½Ì±ÛÅÏ
+        // ì‹±ê¸€í„´
         if (instance == null)
         {
             instance = this;
@@ -89,7 +80,8 @@ public class S_PlayerStat : MonoBehaviour
         }
     }
 
-    public void InitStatsByStartGame() // °ÔÀÓ ½ÃÀÛ ½Ã ´É·ÂÄ¡ ÃÊ±âÈ­
+    #region ìŠ¤íƒ¯ ì´ˆê¸°í™” ë° ì„¤ì •
+    public void InitStatsByStartGame() // ê²Œì„ ì‹œì‘ ì‹œ ëŠ¥ë ¥ì¹˜ ì´ˆê¸°í™”
     {
         CurrentLimit = ORIGIN_LIMIT;
         StackSum = 0;
@@ -114,11 +106,11 @@ public class S_PlayerStat : MonoBehaviour
         IsDelusion = false;
         IsExpansion = false;
     }
-    public void CalcHistory(S_CardOrderTypeEnum type, S_Card hitCard) // È÷Æ® ¶Ç´Â Á¦¿Ü ½Ã È÷½ºÅä¸® °è»ê. Ä«µå ³¾ ¶§(Ä«µå¿À´õÅ¥) ¹Ù·Î Àû¿ë
+    public void CalcHistory(S_CardOrderTypeEnum type, S_Card hitCard) // íˆíŠ¸ ë˜ëŠ” ì œì™¸ ì‹œ íˆìŠ¤í† ë¦¬ ê³„ì‚°. ì¹´ë“œ ë‚¼ ë•Œ(ì¹´ë“œì˜¤ë”í) ë°”ë¡œ ì ìš©
     {
         if ((type == S_CardOrderTypeEnum.BasicHit || type == S_CardOrderTypeEnum.IllusionHit) && hitCard != null)
         {
-            // ¹®¾ç¿¡ µû¸¥ È÷½ºÅä¸® Ãß°¡
+            // ë¬¸ì–‘ì— ë”°ë¥¸ íˆìŠ¤í† ë¦¬ ì¶”ê°€
             h_HitCardCount++;
             h_HitCardSum += hitCard.Number;
             switch (hitCard.Suit)
@@ -146,28 +138,28 @@ public class S_PlayerStat : MonoBehaviour
             h_DisengageCount++;
         }
     }
-    public void SaveStatHistory(S_Card hitCard, S_StatHistoryTriggerEnum trigger) // È÷½ºÅä¸® ÀúÀå
+    public void SaveStatHistory(S_Card hitCard, S_StatHistoryTriggerEnum trigger) // íˆìŠ¤í† ë¦¬ ì €ì¥
     {
         S_StatHistory newHistory = new S_StatHistory
         {
-            HistoryTrigger = trigger, // ÀÌ È÷½ºÅä¸®¸¦ ¹ß»ı½ÃÅ² °÷
-            TriggerCard = hitCard, // Æ®¸®°Å Ä«µå
+            HistoryTrigger = trigger, // ì´ íˆìŠ¤í† ë¦¬ë¥¼ ë°œìƒì‹œí‚¨ ê³³
+            TriggerCard = hitCard, // íŠ¸ë¦¬ê±° ì¹´ë“œ
 
-            CurrentLimit = CurrentLimit, // ÇÇÁ¶¹° °ü·Ã
+            CurrentLimit = CurrentLimit, // í”¼ì¡°ë¬¼ ê´€ë ¨
 
-            AdditionalHealth = additionalHealth, // ÇöÀç ´É·ÂÄ¡
+            AdditionalHealth = additionalHealth, // í˜„ì¬ ëŠ¥ë ¥ì¹˜
             AdditionalDetermination = additionalDetermination,
             CurrentGold = CurrentGold,     
 
-            CurrentStrength = CurrentStrength, // Ãß°¡ ´É·ÂÄ¡
+            CurrentStrength = CurrentStrength, // ì¶”ê°€ ëŠ¥ë ¥ì¹˜
             CurrentMind = CurrentMind,
             CurrentLuck = CurrentLuck,
 
-            IsFirst = IsFirst, // Æ¯¼ö »óÅÂ
+            IsFirst = IsFirst, // íŠ¹ìˆ˜ ìƒíƒœ
             IsDelusion = IsDelusion,
             IsExpansion = IsExpansion,
 
-            H_HitCardCount = h_HitCardCount, // È÷½ºÅä¸®
+            H_HitCardCount = h_HitCardCount, // íˆìŠ¤í† ë¦¬
             H_SpadeHitCardCount = h_SpadeHitCardCount,
             H_HeartHitCardCount = h_HeartHitCardCount,
             H_DiamondHitCardCount = h_DiamondHitCardCount,
@@ -184,20 +176,18 @@ public class S_PlayerStat : MonoBehaviour
 
         statHistoryStack.Push(newHistory);
     }
-
-    // ÀüÅõ ½ÃÀÛ ½Ã, ºñÆ²±â, ½ºÅÄµå, ÇÇÁ¶¹° ÀüÅõ Á¾·á
-    public void ResetStatsByTwist() // ºñÆ²±â ½Ã È£Ãâ(ÀÇÁö°¡ 1°³ ÀÌ»óÀÎ °æ¿ì¸¦ Ç×»ó °¡Á¤)
+    public void ResetStatsByTwist() // ë¹„í‹€ê¸° ì‹œ í˜¸ì¶œ(ì˜ì§€ê°€ 1ê°œ ì´ìƒì¸ ê²½ìš°ë¥¼ í•­ìƒ ê°€ì •)
     {
-        // Ä«µå¿Í Àü¸®Ç°¿¡ ÀÇÇÑ È÷½ºÅä¸®´Â ¸ğµÎ ÆËÇÏ±â
+        // ì¹´ë“œì™€ ì „ë¦¬í’ˆì— ì˜í•œ íˆìŠ¤í† ë¦¬ëŠ” ëª¨ë‘ íŒí•˜ê¸°
         while (statHistoryStack.Peek().HistoryTrigger == S_StatHistoryTriggerEnum.Card || statHistoryStack.Peek().HistoryTrigger == S_StatHistoryTriggerEnum.Skill || statHistoryStack.Peek().HistoryTrigger == S_StatHistoryTriggerEnum.Foe)
         {
             statHistoryStack.Pop();
         }
 
-        // ºñÆ²±â·Î ºÒ·¯¿Ã È÷½ºÅä¸® ¼³Á¤
+        // ë¹„í‹€ê¸°ë¡œ ë¶ˆëŸ¬ì˜¬ íˆìŠ¤í† ë¦¬ ì„¤ì •
         S_StatHistory h = statHistoryStack.Peek();
 
-        // È÷½ºÅä¸® µÇµ¹¸®±â
+        // íˆìŠ¤í† ë¦¬ ë˜ëŒë¦¬ê¸°
         h_HitCardCount = h.H_HitCardCount;
         h_SpadeHitCardCount = h.H_SpadeHitCardCount;
         h_HeartHitCardCount = h.H_HeartHitCardCount;
@@ -210,42 +200,41 @@ public class S_PlayerStat : MonoBehaviour
         h_CloverHitCardSum = h.H_CloverHitCardSum;
         h_DisengageCount = h.H_DisengageCount;
 
-        // ÇÇÁ¶¹° Ã¼·Â µÇµ¹¸®±â
+        // í”¼ì¡°ë¬¼ ì²´ë ¥ ë˜ëŒë¦¬ê¸°
         S_FoeInfoSystem.Instance.ResetHealthByTwist();
 
-        // ÇÑ°è ¹× ¼ıÀÚ ÇÕ µÇµ¹¸®±â
+        // í•œê³„ ë° ìˆ«ì í•© ë˜ëŒë¦¬ê¸°
         CurrentLimit = h.CurrentLimit;
         ResetStackSum();
 
-        // Ã¼·Â, ÀÇÁö, °ñµå µÇµ¹¸®±â
+        // ì²´ë ¥, ì˜ì§€, ê³¨ë“œ ë˜ëŒë¦¬ê¸°
         additionalHealth = h.AdditionalHealth;
         additionalDetermination = h.AdditionalDetermination;
         CurrentGold = h.CurrentGold;
 
-        // Ãß°¡ ´É·ÂÄ¡ µÇµ¹¸®±â
+        // ì¶”ê°€ ëŠ¥ë ¥ì¹˜ ë˜ëŒë¦¬ê¸°
         CurrentStrength = h.CurrentStrength;
         CurrentMind = h.CurrentMind;
         CurrentLuck = h.CurrentLuck;
 
-        // Æ¯¼ö »óÅÂ µÇµ¹¸®±â
+        // íŠ¹ìˆ˜ ìƒíƒœ ë˜ëŒë¦¬ê¸°
         IsFirst = h.IsFirst;
         IsDelusion = h.IsDelusion;
         IsExpansion = h.IsExpansion;
 
         CheckBurstAndCleanHit();
         S_StatInfoSystem.Instance.ChangeSpecialAbility();
-        S_PlayerInfoSystem.Instance.ChangeSpecialAbilityVFX();
 
-        // °¢Á¾ °ª ¹Î¸Æ½º Ã¼Å©
+        // ê°ì¢… ê°’ ë¯¼ë§¥ìŠ¤ ì²´í¬
         CheckStatsMinMaxValue();
         S_StatInfoSystem.Instance.ChangeStatVFX();
     }
-    public void SetStatsByStand() // ½ºÅÄµå ½Ã È£Ãâ
+    public void SetStatsByStand() // ìŠ¤íƒ ë“œ ì‹œ í˜¸ì¶œ
     {
-        // ¼ıÀÚ ÇÕ µÇµ¹¸®±â
+        // ìˆ«ì í•© ë˜ëŒë¦¬ê¸°
         ResetStackSum();
     }
-    public void ResetStatsByEndTrial() // ÇÇÁ¶¹° ÀüÅõ Á¾·á ½Ã È£Ãâ
+    public void ResetStatsByEndTrial() // í”¼ì¡°ë¬¼ ì „íˆ¬ ì¢…ë£Œ ì‹œ í˜¸ì¶œ
     {
         CurrentLimit = ORIGIN_LIMIT;
         ResetStackSum();
@@ -268,101 +257,45 @@ public class S_PlayerStat : MonoBehaviour
 
         CheckBurstAndCleanHit();
         S_StatInfoSystem.Instance.ChangeSpecialAbility();
-        S_PlayerInfoSystem.Instance.ChangeSpecialAbilityVFX();
 
-        // °¢Á¾ °ª ¹Î¸Æ½º Ã¼Å©
+        // ê°ì¢… ê°’ ë¯¼ë§¥ìŠ¤ ì²´í¬
         CheckStatsMinMaxValue();
         S_StatInfoSystem.Instance.ChangeStatVFX();
     }
-
-    void CalcStatByLoot(S_Card hitCard) // Á¶°Ç°ú ¼ö½Ä¿¡ µû¶ó¼­ Àü¸®Ç°À» ´ÜÁö Æ®¸®°Å¸¸ ÇÏ´Â ¿ëµµ
-    {
-        //List<S_Card> stacks = pCard.GetStackCards();
-
-        //// Àü¸®Ç° Àü¿ë ¹ü¶÷¿ë(Àü¸®Ç°ÀÇ ¹ü¶÷Àº È÷Æ®ÇÑ Ä«µå°¡ ¾Æ´Ï±â¿¡ Á¶±İ ´Ù¸£°Ô °è»êµÈ´Ù.)
-        //int count = 0;
-        //bool canOverflow = false;
-
-        //// ¸Ş¾Æ¸®, Àü¸®Ç° Àü¿ë ¹ü¶÷, ´ë¹ÌÀå½Ä, ¼ºÀåÇü, Á¶°ÇÇü È®ÀÎ
-        //foreach (S_Loot loot in pLoot.OwnedLoots)
-        //{
-        //    if (hitCard != null && loot.Condition == S_ActivationConditionEnum.Reverb)
-        //    {
-        //        switch (loot.Modify)
-        //        {
-        //            case S_ActivationModifyEnum.AnyCard:
-        //                if (hitCard != null)
-        //                {
-        //                    await loot.ActiveLoot(this, stacks, hitCard);
-        //                }
-        //                break;
-        //        }
-        //    }
-        //    else if (hitCard != null && loot.Condition == S_ActivationConditionEnum.Overflow)
-        //    {
-        //        count = 0;
-        //        canOverflow = false;
-        //        switch (loot.Modify)
-        //        {
-        //            case S_ActivationModifyEnum.AnyCard:
-        //                foreach (var c in stacks)
-        //                {
-        //                    count++;
-        //                }
-        //                canOverflow = true;
-        //                break;
-        //        }
-
-
-        //        if (canOverflow && count >= loot.OverflowNumber)
-        //        {
-        //            await loot.ActiveLoot(this, stacks, hitCard);
-        //        }
-        //    }
-        //    else if (loot.Condition == S_ActivationConditionEnum.Loot_Condition || loot.Condition == S_ActivationConditionEnum.Loot_Growth)
-        //    {
-        //        await loot.ActiveLoot(this, stacks, hitCard);
-        //    }
-        //}
-
-        //// °è»ê ÈÄ 
-        //S_LootInfoSystem.Instance.UpdateLootBoardVFX();
-    }
-
-    // ÇÇÁ¶¹° °ü·Ã
+    #endregion
+    #region ê°ì¢… ë³´ì¡° í•¨ìˆ˜
     public void ResetStackSum()
     {
         StackSum = 0;
         S_StatInfoSystem.Instance.ChangeStatVFX();
     }
-    public async Task GetDamagedByStand(int value)
+    public async Task GetDamagedByStand(int value) // ë°ë¯¸ì§€
     {
         standDamagedHealth += value;
         CheckStatsMinMaxValue();
         S_StatInfoSystem.Instance.ChangeStatVFX();
 
-        // ·Î±× »ı¼º
-        S_EffectActivator.Instance.GenerateEffectLog($"Ã¼·Â -{value}");
+        // ë¡œê·¸ ìƒì„±
+        S_EffectActivator.Instance.GenerateEffectLog($"ì²´ë ¥ -{value}");
 
-        // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
+        // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
         await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Health);
     }
-    // °¢Á¾ ½ºÅÈ MinMax Á¦ÇÑ
-    public void CheckStatsMinMaxValue() // Ã¼·Â ¹× ÀÇÁö °è»ê
+    public void CheckStatsMinMaxValue() // ê°ì¢… ìŠ¤íƒ¯ MinMax ì œí•œ
     {
-        // Ã¼·Â
+        // ì²´ë ¥
         currentHealth = MaxHealth - standDamagedHealth + additionalHealth;
-        if (currentHealth <= 0) // °ÔÀÓ ¿À¹ö
+        if (currentHealth <= 0) // ê²Œì„ ì˜¤ë²„
         {
             S_GameOverSystem.Instance.AppearGameOverPanel();
         }
-        if (currentHealth > MaxHealth) // °ú´Ù Ä¡À¯´Â ¾ø´Ù.
+        if (currentHealth > MaxHealth) // ê³¼ë‹¤ ì¹˜ìœ ëŠ” ì—†ë‹¤.
         {
             currentHealth = MaxHealth;
             additionalHealth = standDamagedHealth;
         }
 
-        // ÀÇÁö
+        // ì˜ì§€
         currentDetermination = MaxDetermination - useDetermination + additionalDetermination;
         if (currentDetermination < 0)
         {
@@ -375,7 +308,7 @@ public class S_PlayerStat : MonoBehaviour
             additionalDetermination = useDetermination;
         }
 
-        // ³ª¸ÓÁö ´É·ÂÄ¡
+        // ë‚˜ë¨¸ì§€ ëŠ¥ë ¥ì¹˜
         //if (StackSum < 0) StackSum = 0;
         if (CurrentLimit < 0) CurrentLimit = 0;
         if (CurrentGold < 0) CurrentGold = 0;
@@ -383,27 +316,25 @@ public class S_PlayerStat : MonoBehaviour
         if (CurrentMind < 0) CurrentMind = 0;
         if (CurrentLuck < 0) CurrentLuck = 0;
     }
-    // ÀÇÁö
-    public bool CanUseDetermination()
+    public bool CanUseDetermination() // ì˜ì§€ ì‚¬ìš© ê°€ëŠ¥ ì—¬ë¶€
     {
         CheckStatsMinMaxValue();
         return currentDetermination > 0;
     }
-    public void UseDetermination()
+    public void UseDetermination() // ì˜ì§€ ì‚¬ìš©
     {
         useDetermination++;
         CheckStatsMinMaxValue();
         S_StatInfoSystem.Instance.ChangeStatVFX();
     }
-    // Æ¯¼ö È¿°ú
     public void CheckBurstAndCleanHit()
     {
-        if (StackSum > CurrentLimit) // ½ºÅÃ ÇÕÀÌ ÇÑ°è¸¦ ÃÊ°úÇß´Ù¸é
+        if (StackSum > CurrentLimit) // ìŠ¤íƒ í•©ì´ í•œê³„ë¥¼ ì´ˆê³¼í–ˆë‹¤ë©´
         {
             IsBurst = true;
             IsCleanHit = false;
         }
-        else if (StackSum == CurrentLimit) // ½ºÅÃ ÇÕÀÌ ÇÑ°è¿Í °°´Ù¸é
+        else if (StackSum == CurrentLimit) // ìŠ¤íƒ í•©ì´ í•œê³„ì™€ ê°™ë‹¤ë©´
         {
             IsBurst = false;
             IsCleanHit = true;
@@ -414,7 +345,6 @@ public class S_PlayerStat : MonoBehaviour
             IsCleanHit = false;
         }
     }
-    // Get
     public int GetCurrentHealth()
     {
         CheckStatsMinMaxValue();
@@ -425,7 +355,8 @@ public class S_PlayerStat : MonoBehaviour
         CheckStatsMinMaxValue();
         return currentDetermination;
     }
-    #region ´É·ÂÄ¡ °è»ê(Áö¿ì¸é ¾ÈµÊ)
+    #endregion
+    #region ëŠ¥ë ¥ì¹˜ ê³„ì‚°
     public void AddOrSubtractStackSum(int value)
     {
         StackSum += value;
@@ -475,42 +406,34 @@ public class S_PlayerStat : MonoBehaviour
         S_StatInfoSystem.Instance.ChangeStatVFX();
     }
     #endregion
-
-    public void ActiveVFXCollection() // °¢Á¾ ¼öÄ¡(´É·ÂÄ¡, ¼ıÀÚ ÇÕ, ÇÑ°è, ÇÇÁ¶¹° Ã¼·Â, Àü¸®Ç° µî) º¯È­ VFX
-    {
-        S_StatInfoSystem.Instance.ChangeStatVFX();
-        S_StatInfoSystem.Instance.ChangeSpecialAbility();
-        S_SkillInfoSystem.Instance.UpdateSkillObject();
-        S_FoeInfoSystem.Instance.ChangeHealthValueVFX();
-    }
 }
 
 
-public struct S_StatHistory // ºñÆ²±â¸¦ À§ÇÑ °¢Á¾ ´É·ÂÄ¡ ¹× Æ¯¼ö »óÅÂ ÀúÀåÇÏ´Â È÷½ºÅä¸® ±¸Á¶Ã¼
+public struct S_StatHistory // ë¹„í‹€ê¸°ë¥¼ ìœ„í•œ ê°ì¢… ëŠ¥ë ¥ì¹˜ ë° íŠ¹ìˆ˜ ìƒíƒœ ì €ì¥í•˜ëŠ” íˆìŠ¤í† ë¦¬ êµ¬ì¡°ì²´
 {
-    // ÀÌ È¿°úµéÀ» ¹ß»ı½ÃÅ² Ä«µå
+    // ì´ íš¨ê³¼ë“¤ì„ ë°œìƒì‹œí‚¨ ì¹´ë“œ
     public S_StatHistoryTriggerEnum HistoryTrigger;
     public S_Card TriggerCard;
 
-    // ÇÇÁ¶¹° °ü·Ã
+    // í”¼ì¡°ë¬¼ ê´€ë ¨
     public int CurrentLimit;
 
-    // ÇöÀç ´É·ÂÄ¡
+    // í˜„ì¬ ëŠ¥ë ¥ì¹˜
     public int AdditionalHealth;
     public int AdditionalDetermination;
     public int CurrentGold;
 
-    // Ãß°¡ ´É·ÂÄ¡
+    // ì¶”ê°€ ëŠ¥ë ¥ì¹˜
     public int CurrentStrength;
     public int CurrentMind;
     public int CurrentLuck;
 
-    // Æ¯¼ö »óÅÂ
+    // íŠ¹ìˆ˜ ìƒíƒœ
     public S_FirstEffectEnum IsFirst;
     public bool IsDelusion;
     public bool IsExpansion;
 
-    // ¿ª»ç
+    // ì—­ì‚¬
     public int H_HitCardCount;
     public int H_SpadeHitCardCount;
     public int H_HeartHitCardCount;
@@ -535,7 +458,7 @@ public enum S_StatHistoryTriggerEnum
     StartTrial,
     EndTrial
 }
-public enum S_FirstEffectEnum // ¿ì¼± È¿°ú ¿­°ÅÇü
+public enum S_FirstEffectEnum // ìš°ì„  íš¨ê³¼ ì—´ê±°í˜•
 {
     None,
     Spade,

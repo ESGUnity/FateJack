@@ -4,140 +4,23 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.EventSystems;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using static UnityEngine.Rendering.DebugUI;
 
-public class S_DeckCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class S_DeckCard : S_CardObject, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
-    // Ä«µå Á¤º¸
-    [HideInInspector] public S_Card CardInfo;
-
-    // Ä«µå ¾Ö´Ô °ü·Ã
-    [HideInInspector] public PRS OriginPRS;
-    [HideInInspector] public int OriginOrder;
-    [HideInInspector] public const float POINTER_ENTER_ANIMATION_TIME = 0.15f;
-
-    // Ä«µå Ç¥½Ã °ü·Ã
-    [SerializeField] SpriteRenderer sprite_CardBase;
-    [SerializeField] TMP_Text text_CardNumber;
-    [SerializeField] SpriteRenderer sprite_CardSuit;
-    [SerializeField] SpriteRenderer sprite_CardEffect;
-    [SerializeField] SpriteRenderer sprite_CursedEffect;
-    [SerializeField] SpriteRenderer sprite_CardFrame;
-
-    // ÀÇÁö È÷Æ®³ª »óÁ¡¿¡¼­ »ç¿ë
-    [HideInInspector] public bool IsSelectedByDetermination;
-    [HideInInspector] public bool IsSelectedByRemoveCard; // Á¦¿ÜÇÒ Ä«µå ¼±ÅÃ ½Ã. »óÁ¡ Àü¿ë
-
-    public void SetCardInfo(S_Card card)
-    {
-        // Ä«µå Á¤º¸ ¼³Á¤
-        CardInfo = card;
-
-        if (CardInfo.Equals(default)) return;
-
-        // Ä«µå º£ÀÌ½º ¼³Á¤
-        string cardBaseAddress = "";
-        switch (card.CardEffect.Grade)
-        {
-            case S_CardEffectGradeEnum.Normal:
-                cardBaseAddress = "Sprite_NormalCardBase";
-                break;
-            case S_CardEffectGradeEnum.Superior:
-                cardBaseAddress = "Sprite_SuperiorCardBase";
-                break;
-            case S_CardEffectGradeEnum.Rare:
-                cardBaseAddress = "Sprite_RareCardBase";
-                break;
-            case S_CardEffectGradeEnum.Mythic:
-                cardBaseAddress = "Sprite_MythicCardBase";
-                break;
-        }
-        var cardBaseOpHandle = Addressables.LoadAssetAsync<Sprite>(cardBaseAddress);
-        cardBaseOpHandle.Completed += OnCardBaseLoadComplete;
-
-        // Ä«µå ¼ıÀÚ ¼³Á¤
-        text_CardNumber.text = card.Number.ToString();
-
-        // Ä«µå ¹®¾ç ¼³Á¤
-        string cardSuitAddress = "";
-        switch (card.Suit)
-        {
-            case S_CardSuitEnum.Spade:
-                cardSuitAddress = "Sprite_SpadeSuit";
-                break;
-            case S_CardSuitEnum.Heart:
-                cardSuitAddress = "Sprite_HeartSuit";
-                break;
-            case S_CardSuitEnum.Diamond:
-                cardSuitAddress = "Sprite_DiamondSuit";
-                break;
-            case S_CardSuitEnum.Clover:
-                cardSuitAddress = "Sprite_CloverSuit";
-                break;
-        }
-        var cardSuitOpHandle = Addressables.LoadAssetAsync<Sprite>(cardSuitAddress);
-        cardSuitOpHandle.Completed += OnCardSuitLoadComplete;
-
-        // Ä«µå È¿°ú ¼³Á¤
-        var cardEffectOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_{card.CardEffect.Key}");
-        cardEffectOpHandle.Completed += OnCardEffectLoadComplete;
-
-        UpdateDeckCardState();
-    }
-    void OnCardBaseLoadComplete(AsyncOperationHandle<Sprite> opHandle)
-    {
-        if (opHandle.Status == AsyncOperationStatus.Succeeded)
-        {
-            sprite_CardBase.sprite = opHandle.Result;
-        }
-    }
-    void OnCardSuitLoadComplete(AsyncOperationHandle<Sprite> opHandle)
-    {
-        if (opHandle.Status == AsyncOperationStatus.Succeeded)
-        {
-            sprite_CardSuit.sprite = opHandle.Result;
-        }
-    }
-    void OnCardEffectLoadComplete(AsyncOperationHandle<Sprite> opHandle)
-    {
-        if (opHandle.Status == AsyncOperationStatus.Succeeded)
-        {
-            sprite_CardEffect.sprite = opHandle.Result;
-        }
-    }
-    public void SetOrder(int order) // Ä«µå ¿ä¼ÒÀÇ ¼ÒÆÃ ¿À´õ¸¦ Á¤·Ä
-    {
-        // Ä«µå º£ÀÌ½º
-        sprite_CardBase.sortingLayerName = "WorldObject";
-        sprite_CardBase.sortingOrder = order;
-
-        // Ä«µå È¿°ú
-        sprite_CardEffect.sortingLayerName = "WorldObject";
-        sprite_CardEffect.sortingOrder = order + 1;
-        sprite_CursedEffect.sortingLayerName = "WorldObject";
-        sprite_CursedEffect.sortingOrder = order + 3;
-        sprite_CardFrame.sortingLayerName = "WorldObject";
-        sprite_CardFrame.sortingOrder = order + 5;
-
-        // Ä«µå ¼ıÀÚ
-        text_CardNumber.GetComponent<MeshRenderer>().sortingLayerName = "WorldObject";
-        text_CardNumber.GetComponent<MeshRenderer>().sortingOrder = order + 2;
-
-        // Ä«µå ¹®¾ç
-        sprite_CardSuit.sortingLayerName = "WorldObject";
-        sprite_CardSuit.sortingOrder = order + 2;
-    }
-    #region ¹öÆ° ÇÔ¼ö
+    #region ë²„íŠ¼ í•¨ìˆ˜
     bool isEnter = false;
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.OnDeckInfo || S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Store || S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.StoreByRemove)
+        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.OnDeckInfo || S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Store || S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.StoreByDeckInfo)
         {
-            SetOrder(1000);
-            GetComponent<Transform>().DOLocalMove(OriginPRS.Pos + new Vector3(0, 0.05f, 0), POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
-            GetComponent<Transform>().DOScale(OriginPRS.Scale + new Vector3(0.12f, 0.12f, 0.12f), POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+            transform.DOKill();
 
-            S_HoverCardSystem.Instance.ActivePanelByDeckCard(CardInfo, transform.position);
+            SetOrder(1000);
+            transform.DOLocalMove(OriginPRS.Pos + POINTER_ENTER_POS, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+            transform.DOScale(OriginPRS.Scale * POINTER_ENTER_SCALE_AMOUNT, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+            transform.DOLocalRotate(Vector3.zero, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+
+            S_HoverInfoSystem.Instance.ActivateHoverInfo(CardInfo, gameObject);
 
             isEnter = true;
         }
@@ -146,46 +29,44 @@ public class S_DeckCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         if (isEnter)
         {
-            SetOrder(OriginOrder);
-            GetComponent<Transform>().DOLocalMove(OriginPRS.Pos, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
-            GetComponent<Transform>().DOScale(OriginPRS.Scale, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+            transform.DOKill();
 
-            S_HoverCardSystem.Instance.DisablePanelOnCard();
+            SetOrder(OriginOrder);
+            transform.DOLocalMove(OriginPRS.Pos, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+            transform.DOScale(OriginPRS.Scale, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+            transform.DOLocalRotate(OriginPRS.Rot, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+
+            S_HoverInfoSystem.Instance.DeactiveHoverInfo();
 
             isEnter = false;
         }
     }
+    public void BackToOriginPRSByDeterminationHit()
+    {
+        transform.DOLocalMove(OriginPRS.Pos, 0);
+        transform.DOScale(OriginPRS.Scale, 0);
+        transform.DOLocalRotate(OriginPRS.Rot, 0);
+
+        S_HoverInfoSystem.Instance.DeactiveHoverInfo();
+    }
     public virtual void OnPointerClick(PointerEventData eventData)
     {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.StoreByRemove)
+        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.StoreByDeckInfo) // ìƒí’ˆ ì¤‘ ì¹´ë“œ ì„ íƒí•˜ëŠ” ìƒí’ˆì˜ ì¹´ë“œ ì„ íƒ ì‹œ
         {
-            if (IsSelectedByRemoveCard)
-            {
-                S_StoreInfoSystem.Instance.CancelSelectCardByStore(CardInfo);
-                IsSelectedByRemoveCard = false;
-            }
-            else
-            {
-                S_StoreInfoSystem.Instance.SelectCardByRemoveCard(CardInfo);
-                IsSelectedByRemoveCard = true;
-            }
+            S_StoreInfoSystem.Instance.SelectCardInDeck(CardInfo, transform.position);
         }
-        else if (CardInfo.IsInDeck)
+        else if (CardInfo.IsInDeck) // ì˜ì§€ íˆíŠ¸ ì‹œ
         {
             S_DeckInfoSystem.Instance.SelectCardByDeterminationHit(CardInfo);
-
-            if (IsSelectedByDetermination)
-            {
-                S_DeckInfoSystem.Instance.CancelSelectCardByDeterminationHit();
-            }
         }
     }
     #endregion
-    #region Ä«µåÀÇ »óÅ×¿¡ µû¸¥ È¿°ú
-    public void UpdateDeckCardState()
+    #region ì¹´ë“œì˜ ìƒíƒœì— ë”°ë¥¸ íš¨ê³¼
+    public override void UpdateCardState()
     {
+        base.UpdateCardState();
+
         OnIsInDeckAlphaValue();
-        OnCursedEffect();
     }
     public void OnIsInDeckAlphaValue()
     {
@@ -197,26 +78,6 @@ public class S_DeckCard : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         {
             SetAlphaValue(0.25f, 0);
         }
-    }
-    public void OnCursedEffect()
-    {
-        if (CardInfo.IsCursed)
-        {
-            sprite_CursedEffect.gameObject.SetActive(true);
-        }
-        else
-        {
-            sprite_CursedEffect.gameObject.SetActive(false);
-        }
-    }
-    public void SetAlphaValue(float value, float duration)
-    {
-        sprite_CardBase.DOFade(value, duration);
-        text_CardNumber.DOFade(value, duration);
-        sprite_CardSuit.DOFade(value, duration);
-        sprite_CardEffect.DOFade(value, duration);
-        sprite_CursedEffect.DOFade(value, duration);
-        sprite_CardFrame.DOFade(value, duration);
     }
     #endregion
 }

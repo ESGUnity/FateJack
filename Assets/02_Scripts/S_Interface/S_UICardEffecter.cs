@@ -1,8 +1,10 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using static UnityEngine.Rendering.GPUSort;
 
 // 덱 카드 저주, 제외, 카드 획득, 카드 소멸 등 UICard를 사용하는 모든 VFX
@@ -15,9 +17,12 @@ public class S_UICardEffecter : MonoBehaviour
     [Header("컴포넌트")]
     GameObject layoutGroup_ExpansionCards;
     GameObject image_HideExpansionCardsBtn;
+    TMP_Text text_HideExpansionCardsBtn;
 
     [Header("씬 오브젝트")]
     [SerializeField] GameObject sprite_BlackBackgroundByExpansionCards;
+    [SerializeField] GameObject sprite_WorldObjectBlockingBackground;
+
 
     [Header("애님 관련")]
     Vector2 curseDeckCardStartPos = new Vector2(0, -150);
@@ -26,8 +31,6 @@ public class S_UICardEffecter : MonoBehaviour
     Vector2 exclusionDeckCardEndPos = new Vector2(0, 150);
     float SHOW_EXPANSION_TIME = 0.2f;
     bool isShowExpansionCards = false;
-    Vector2 hideExpansionCardsBtnHidePos = new Vector2(150, -50);
-    Vector2 hideExpansionCardsBtnOriginPos = new Vector2(0, -50);
 
     // 싱글턴
     static S_UICardEffecter instance;
@@ -37,10 +40,12 @@ public class S_UICardEffecter : MonoBehaviour
     {
         // 자식 오브젝트의 컴포넌트 가져오기
         Transform[] transforms = GetComponentsInChildren<Transform>(true);
+        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
 
         // 히트 버튼 관련 컴포넌트 할당
         layoutGroup_ExpansionCards = Array.Find(transforms, c => c.gameObject.name.Equals("LayoutGroup_ExpansionCards")).gameObject;
         image_HideExpansionCardsBtn = Array.Find(transforms, c => c.gameObject.name.Equals("Image_HideExpansionCardsBtn")).gameObject;
+        text_HideExpansionCardsBtn = Array.Find(texts, c => c.gameObject.name.Equals("Text_HideExpansionCardsBtn"));
 
         // 싱글턴
         if (instance == null)
@@ -52,11 +57,31 @@ public class S_UICardEffecter : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
+    #region 연출
+    public void AppearBlockingPanel()
+    {
+        sprite_BlackBackgroundByExpansionCards.SetActive(true);
+        sprite_WorldObjectBlockingBackground.SetActive(true);
+        sprite_BlackBackgroundByExpansionCards.GetComponent<SpriteRenderer>().DOKill();
+        sprite_BlackBackgroundByExpansionCards.GetComponent<SpriteRenderer>().DOFade(0.8f, SHOW_EXPANSION_TIME);
+    }
+    public void DisappearBlockingPanel()
+    {
+        sprite_BlackBackgroundByExpansionCards.GetComponent<SpriteRenderer>().DOKill();
+        sprite_BlackBackgroundByExpansionCards.GetComponent<SpriteRenderer>().DOFade(0, SHOW_EXPANSION_TIME)
+            .OnComplete(() =>
+            {
+                sprite_BlackBackgroundByExpansionCards.SetActive(false);
+                sprite_WorldObjectBlockingBackground.SetActive(false);
+            });
+    }
+    #endregion
     #region 각종 UICard 효과
     public void CurseDeckCardVFX(S_Card card)
     {
         GameObject go = Instantiate(prefab_UICard, transform);
+        go.GetComponent<S_UICard>().SetCardInfo(card);
+
         RectTransform rt = go.GetComponent<RectTransform>();
         S_UICard uiCard = go.GetComponent<S_UICard>();
 
@@ -89,6 +114,8 @@ public class S_UICardEffecter : MonoBehaviour
     public async Task ExclusionDeckCardVFXAsync(S_Card card)
     {
         GameObject go = Instantiate(prefab_UICard, transform);
+        go.GetComponent<S_UICard>().SetCardInfo(card);
+
         RectTransform rt = go.GetComponent<RectTransform>();
         S_UICard uiCard = go.GetComponent<S_UICard>();
 
@@ -117,6 +144,8 @@ public class S_UICardEffecter : MonoBehaviour
         foreach (S_Card card in cards)
         {
             GameObject go = Instantiate(prefab_UICard, transform);
+            go.GetComponent<S_UICard>().SetCardInfo(card);
+
             RectTransform rt = go.GetComponent<RectTransform>();
             S_UICard uiCard = go.GetComponent<S_UICard>();
 
@@ -140,8 +169,10 @@ public class S_UICardEffecter : MonoBehaviour
     }
     #endregion
     #region 전개 관련
-    public void ShowExpansionCards()
+    public void StartExpansionCards()
     {
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.HittingCard;
+
         List<S_Card> cards = S_PlayerCard.Instance.DrawRandomCard(3);
 
         // 카드 세팅
@@ -154,16 +185,22 @@ public class S_UICardEffecter : MonoBehaviour
         }
 
         // 블락 패널 켜기
-        sprite_BlackBackgroundByExpansionCards.SetActive(true);
-        sprite_BlackBackgroundByExpansionCards.GetComponent<SpriteRenderer>().DOFade(1f, SHOW_EXPANSION_TIME);
+        AppearBlockingPanel();
 
         // 버튼 켜기
         image_HideExpansionCardsBtn.SetActive(true);
-        image_HideExpansionCardsBtn.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-        image_HideExpansionCardsBtn.GetComponent<RectTransform>().DOAnchorPos(hideExpansionCardsBtnOriginPos, SHOW_EXPANSION_TIME).SetEase(Ease.OutQuart);
+        text_HideExpansionCardsBtn.gameObject.SetActive(true);
+        image_HideExpansionCardsBtn.GetComponent<Image>().DOKill();
+        text_HideExpansionCardsBtn.DOKill();
+        image_HideExpansionCardsBtn.GetComponent<Image>().DOFade(1f, SHOW_EXPANSION_TIME);
+        text_HideExpansionCardsBtn.DOFade(1f, SHOW_EXPANSION_TIME);
 
+        isShowExpansionCards = true;
+
+        // 히트 버튼 퇴장
+        S_HitBtnSystem.Instance.DisappearHitBtn();
     }
-    public void DeshowExpansionCards()
+    public void EndExpansionCards()
     {
         // 카드 숨기기
         foreach (Transform t in layoutGroup_ExpansionCards.transform)
@@ -171,18 +208,23 @@ public class S_UICardEffecter : MonoBehaviour
             t.gameObject.GetComponent<S_ExpansionUICard>().SetAlphaValue(0, SHOW_EXPANSION_TIME);
         }
 
-        // 블락 패널 끄고 카드 오브젝트 파괴
-        sprite_BlackBackgroundByExpansionCards.GetComponent<SpriteRenderer>().DOFade(0, SHOW_EXPANSION_TIME)
+        // 블락 패널 끄기
+        DisappearBlockingPanel();
+
+        // 버튼 끄기 & 전개 카드 파괴
+        image_HideExpansionCardsBtn.GetComponent<Image>().DOKill();
+        text_HideExpansionCardsBtn.DOKill();
+        image_HideExpansionCardsBtn.GetComponent<Image>().DOFade(0f, SHOW_EXPANSION_TIME);
+        text_HideExpansionCardsBtn.DOFade(0f, SHOW_EXPANSION_TIME)
             .OnComplete(() =>
             {
-                sprite_BlackBackgroundByExpansionCards.SetActive(false);
+                image_HideExpansionCardsBtn.SetActive(false);
+                text_HideExpansionCardsBtn.gameObject.SetActive(false);
                 DestroyExpansionCards();
             });
 
-        // 버튼 끄기
-        image_HideExpansionCardsBtn.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-        image_HideExpansionCardsBtn.GetComponent<RectTransform>().DOAnchorPos(hideExpansionCardsBtnHidePos, SHOW_EXPANSION_TIME).SetEase(Ease.OutQuart)
-            .OnComplete(() => image_HideExpansionCardsBtn.SetActive(false));
+        // 히트 버튼 다시 등장
+        S_HitBtnSystem.Instance.AppearHitBtn();
     }
     void DestroyExpansionCards()
     {
@@ -197,6 +239,8 @@ public class S_UICardEffecter : MonoBehaviour
     {
         if (isShowExpansionCards)
         {
+            isShowExpansionCards = false;
+
             // 카드 숨기기
             foreach (Transform t in layoutGroup_ExpansionCards.transform)
             {
@@ -204,20 +248,24 @@ public class S_UICardEffecter : MonoBehaviour
             }
 
             // 블락 패널 끄기
-            sprite_BlackBackgroundByExpansionCards.GetComponent<SpriteRenderer>().DOFade(0, SHOW_EXPANSION_TIME)
-                .OnComplete(() => sprite_BlackBackgroundByExpansionCards.SetActive(false));
+            DisappearBlockingPanel();
+
+            text_HideExpansionCardsBtn.text = "카드 보기";
         }
         else
         {
+            isShowExpansionCards = true;
+
             // 카드 보이기
             foreach (Transform t in layoutGroup_ExpansionCards.transform)
             {
-                t.gameObject.GetComponent<S_ExpansionUICard>().SetAlphaValue(1, SHOW_EXPANSION_TIME);
+                t.gameObject.GetComponent<S_ExpansionUICard>().SetAlphaValue(1f, SHOW_EXPANSION_TIME);
             }
 
             // 블락 패널 켜기
-            sprite_BlackBackgroundByExpansionCards.SetActive(true);
-            sprite_BlackBackgroundByExpansionCards.GetComponent<SpriteRenderer>().DOFade(1f, SHOW_EXPANSION_TIME);
+            AppearBlockingPanel();
+
+            text_HideExpansionCardsBtn.text = "숨기기";
         }
     }
     #endregion

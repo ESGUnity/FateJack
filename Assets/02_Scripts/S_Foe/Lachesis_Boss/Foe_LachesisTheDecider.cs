@@ -7,28 +7,25 @@ public class Foe_LachesisTheDecider : S_Foe
     public Foe_LachesisTheDecider() : base
     (
         "Foe_LachesisTheDecider",
-        "Á¤ÇÏ´Â ÀÚ ¶óÄÉ½Ã½º",
-        "ÇÑ ÅÏ¿¡ Ä«µå¸¦ 8Àå ÀÌ»ó È÷Æ®Çß´Ù¸é ½ºÅÄµå ½Ã µ¦¿¡ ÀÖ´Â Ä«µå Àı¹İÀ» ÀúÁÖÇÕ´Ï´Ù.",
+        "ì •í•˜ëŠ” ì ë¼ì¼€ì‹œìŠ¤",
+        "í•œ í„´ì— ì¹´ë“œë¥¼ 6ì¥ ì´ìƒ íˆíŠ¸í–ˆë‹¤ë©´ ìŠ¤íƒ ë“œ ì‹œ ë±ì— ìˆëŠ” ì¹´ë“œ ì ˆë°˜ì„ ì €ì£¼í•©ë‹ˆë‹¤.",
         S_FoeTypeEnum.Lachesis_Boss,
         S_FoeAbilityConditionEnum.Stand,
         S_FoePassiveEnum.NeedActivatedCount
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount >= 8;
-        return CanActivateEffect;
-    }
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
             await eA.CurseRandomCards(this, S_PlayerCard.Instance.GetImmediateDeckCards().Count / 2, S_CardSuitEnum.None, -1, true, false);
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
         ActivatedCount = S_PlayerCard.Instance.GetPreStackCards().Where(x => x.IsCurrentTurnHit).Count();
+
+        IsMeetCondition = ActivatedCount >= 6;
     }
     public override void StartNewTurn(int currentTrial)
     {
@@ -36,7 +33,7 @@ public class Foe_LachesisTheDecider : S_Foe
     }
     public override string GetDescription()
     {
-        return $"{AbilityDescription}\nÀÌ¹ø ÅÏ¿¡ È÷Æ®ÇÑ Ä«µå °³¼ö : {ActivatedCount}";
+        return $"{AbilityDescription}\nì´ë²ˆ í„´ì— íˆíŠ¸í•œ ì¹´ë“œ ê°œìˆ˜ : {ActivatedCount}";
     }
     public override S_Foe Clone()
     {

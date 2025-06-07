@@ -7,25 +7,20 @@ public class Foe_OizysTheRebel : S_Foe
     public Foe_OizysTheRebel() : base
     (
         "Foe_OizysTheRebel",
-        "°İµ¿ÇÏ´Â ¿ÀÀÌÁö½º",
-        "½ºÅÄµå ½Ã ÀÇÁö¸¦ ¸ğµÎ ÀÒ½À´Ï´Ù.",
+        "ê²©ë™í•˜ëŠ” ì˜¤ì´ì§€ìŠ¤",
+        "ìŠ¤íƒ ë“œ ì‹œ ì˜ì§€ë¥¼ ëª¨ë‘ ìƒìŠµë‹ˆë‹¤.",
         S_FoeTypeEnum.Lachesis_Elite,
         S_FoeAbilityConditionEnum.Stand,
         S_FoePassiveEnum.None
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = true;
-        return CanActivateEffect;
-    }
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
         await eA.AddOrSubtractDetermination(this, null, -3);
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetCondition(S_Card card = null)
     {
-
+        IsMeetCondition = true;
     }
     public override string GetDescription()
     {

@@ -1,5 +1,3 @@
-using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class Foe_ClothoFateWeaver : S_Foe
@@ -7,25 +5,21 @@ public class Foe_ClothoFateWeaver : S_Foe
     public Foe_ClothoFateWeaver() : base
     (
         "Foe_ClothoFateWeaver",
-        "¿î¸íÀ» Áş´Â ÀÚ Å¬·ÎÅä",
-        "½ºÅÃ¿¡ °¢ ¹®¾çÀÇ Ä«µå°¡ 1Àå ÀÌ»ó ¾ø´Ù¸é ÇÃ·¹ÀÌ¾î¸¦ °ø°İ ½Ã Áï½Ã Ã³Ä¡ÇÕ´Ï´Ù.",
+        "ìš´ëª…ì„ ì§“ëŠ” ì í´ë¡œí† ",
+        "ìŠ¤íƒì— ì—†ëŠ” ë¬¸ì–‘ì´ ìˆë‹¤ë©´ í”Œë ˆì´ì–´ë¥¼ ê³µê²© ì‹œ ì¦‰ì‹œ ì²˜ì¹˜í•©ë‹ˆë‹¤.",
         S_FoeTypeEnum.Clotho_Boss,
         S_FoeAbilityConditionEnum.DeathAttack,
         S_FoePassiveEnum.NeedActivatedCount
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount < 4;
-        return CanActivateEffect;
-    }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
         ActivatedCount = S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(1);
+        IsMeetCondition = ActivatedCount < 4;
     }
     public override string GetDescription()
     {
-        return $"{AbilityDescription}\n½ºÅÃ¿¡ Á¸ÀçÇÏ´Â ¹®¾ç °³¼ö : {ActivatedCount}";
+        return $"{AbilityDescription}\nìŠ¤íƒì— ìˆëŠ” ë¬¸ì–‘ ê°œìˆ˜ : {ActivatedCount}";
     }
     public override S_Foe Clone()
     {

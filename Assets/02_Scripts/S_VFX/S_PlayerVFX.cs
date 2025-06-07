@@ -3,38 +3,66 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.UI;
 
 public class S_PlayerVFX : MonoBehaviour
 {
-    public async Task VFXAsync(S_PlayerVFXEnum vfx, Vector2 pos)
+    SpriteRenderer sprite_PlayerVFX;
+
+    //public async Task VFXAsync(S_PlayerVFXEnum vfx, Vector3 pos)
+    //{
+    //    sprite_PlayerVFX = GetComponent<SpriteRenderer>();
+
+    //    // Ïä§ÌîÑÎùºÏù¥Ìä∏ Î∂àÎü¨Ïò§Í∏∞
+    //    var opHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_PlayerVFX_{vfx.ToString()}");
+    //    opHandle.Completed += OnVFXEffectLoadComplete;
+
+    //    // VFX Í∞ÅÏ¢Ö Ï¥àÍ∏∞Ìôî
+    //    transform.position = pos;
+    //    transform.localScale = Vector3.zero;
+    //    sprite_PlayerVFX.DOFade(0, 0);
+
+    //    // Ïï†Îãò Ìä∏Ïúà
+    //    Sequence seq = DOTween.Sequence();
+
+    //    seq.Append(transform.DOScale(Vector3.one, S_EffectActivator.Instance.GetEffectLifeTime())).SetEase(Ease.OutQuad)
+    //        .Join(sprite_PlayerVFX.DOFade(0.8f, S_EffectActivator.Instance.GetEffectLifeTime() / 3).SetEase(Ease.OutQuad))
+    //        .AppendInterval(S_EffectActivator.Instance.GetEffectLifeTime() / 3)
+    //        .Append(sprite_PlayerVFX.DOFade(0f, S_EffectActivator.Instance.GetEffectLifeTime() / 3).SetEase(Ease.OutQuad))
+    //        .OnComplete(() => Destroy(gameObject));
+
+    //    await seq.AsyncWaitForCompletion();
+    //}
+    public async Task VFXAsync(S_PlayerVFXEnum vfx, GameObject go)
     {
-        // Ω∫«¡∂Û¿Ã∆Æ ∫“∑Øø¿±‚
+        transform.SetParent(go.transform);
+        sprite_PlayerVFX = GetComponent<SpriteRenderer>();
+
+        // Ïä§ÌîÑÎùºÏù¥Ìä∏ Î∂àÎü¨Ïò§Í∏∞
         var opHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_PlayerVFX_{vfx.ToString()}");
         opHandle.Completed += OnVFXEffectLoadComplete;
 
-        // VFX ∞¢¡æ √ ±‚»≠
-        GetComponent<RectTransform>().anchoredPosition = pos;
+        // VFX Í∞ÅÏ¢Ö Ï¥àÍ∏∞Ìôî
+        transform.localPosition = Vector3.zero;
+        transform.localEulerAngles = Vector3.zero;
         transform.localScale = Vector3.zero;
-        GetComponent<Image>().DOFade(0, 0);
+        sprite_PlayerVFX.DOFade(0, 0);
 
-        // æ÷¥‘ ∆Æ¿©
+        // Ïï†Îãò Ìä∏Ïúà
         Sequence seq = DOTween.Sequence();
 
         seq.Append(transform.DOScale(Vector3.one, S_EffectActivator.Instance.GetEffectLifeTime())).SetEase(Ease.OutQuad)
-            .Join(GetComponent<Image>().DOFade(0.8f, S_EffectActivator.Instance.GetEffectLifeTime() / 3).SetEase(Ease.OutQuad))
+            .Join(sprite_PlayerVFX.DOFade(0.8f, S_EffectActivator.Instance.GetEffectLifeTime() / 3).SetEase(Ease.OutQuad))
             .AppendInterval(S_EffectActivator.Instance.GetEffectLifeTime() / 3)
-            .Append(GetComponent<Image>().DOFade(0f, S_EffectActivator.Instance.GetEffectLifeTime() / 3).SetEase(Ease.OutQuad))
+            .Append(sprite_PlayerVFX.DOFade(0f, S_EffectActivator.Instance.GetEffectLifeTime() / 3).SetEase(Ease.OutQuad))
             .OnComplete(() => Destroy(gameObject));
 
         await seq.AsyncWaitForCompletion();
     }
-
     void OnVFXEffectLoadComplete(AsyncOperationHandle<Sprite> opHandle)
     {
         if (opHandle.Status == AsyncOperationStatus.Succeeded)
         {
-            GetComponent<Image>().sprite = opHandle.Result;
+            sprite_PlayerVFX.sprite = opHandle.Result;
         }
     }
 }

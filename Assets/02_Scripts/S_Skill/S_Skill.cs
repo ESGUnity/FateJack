@@ -9,9 +9,10 @@ public class S_Skill
     public S_SkillPassiveEnum Passive;
     public int ActivatedCount;
 
-    public bool IsAccumulate; // �������̳�?
-    public int AccumulateValue;
-    public bool CanActivateEffect;
+    public bool IsAccumulate; // 성장형이냐?
+    public int CurrentAccumulateValue;
+    public int TrialAccumulateValue;
+    public bool IsMeetCondition;
 
     public S_Skill(string key, string name, string description, S_SkillConditionEnum condition, S_SkillPassiveEnum passive, bool isAccumulate)
     {
@@ -21,25 +22,25 @@ public class S_Skill
         Condition = condition;
         Passive = passive;
         IsAccumulate = isAccumulate;
-        CanActivateEffect = false;
-
-        S_GameFlowManager.Instance.OnNewTurn += StartNewTurn;
+        IsMeetCondition = false;
     }
-
-    public virtual bool IsMeetCondition(S_Card card = null)
+    public void SubscribeGameFlowManager() // 생성 시 반드시 클론과 사용
     {
-        CanActivateEffect = false;
-        return CanActivateEffect;
+        S_GameFlowManager.Instance.OnNewTurn += StartNewTurn;
     }
     public virtual async Task ActiveSkill(S_EffectActivator eA, S_Card hitCard)
     {
         await Task.Delay(1);
     }
-    public virtual void StartNewTurn(int currentTrial)
+    public virtual void CheckMeetConditionByBasic(S_Card card = null)
     {
-        
+
     }
-    public virtual void ActivateCount(S_Card card, bool isTwist = false)
+    public virtual void CheckMeetConditionByActivatedCount(S_Card card = null)
+    {
+
+    }
+    public virtual void StartNewTurn(int currentTrial)
     {
 
     }

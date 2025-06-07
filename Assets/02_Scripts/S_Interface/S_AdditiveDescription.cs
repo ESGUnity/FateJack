@@ -1,127 +1,355 @@
+using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class S_AdditiveDescription : MonoBehaviour
 {
-    [SerializeField] TMP_Text text_AdditiveDescriptionTitle;
-    [SerializeField] TMP_Text text_AdditiveDescription;
+    [SerializeField] Image image_Base;
+    [SerializeField] TMP_Text text_Title;
+    [SerializeField] TMP_Text text_Description;
 
-    public void SetAdditiveDescriptionText(string text)
+    // ë¬¸ì–‘ê³¼ ìˆ«ì ê´€ë ¨
+    Color suitAndNumberPanelColor = new Color(0f, 0f, 0f, 0f);
+    Color suitAndNumberTextRedColor = new Color(0.85f, 0f, 0f, 1f);
+    Color suitAndNumberTextBlackColor = new Color(0.15f, 0.15f, 0.15f, 1f);
+    Color basicEffectByNumberPanelColor = new Color(0.2f, 0.2f, 0.2f, 1f);
+    const float SUIT_AND_NUMBER_FONT_SIZE = 24f;
+
+    Color conditionPanelColor = new Color(0.27f, 0.6f, 0.8f, 1f);
+    Color debuffPanelColor = new Color(0f, 0.5f, 0.8f, 1f);
+    Color effectPanelColor = new Color(0.26f, 0.6f, 0.46f, 1f);
+    Color additiveDescriptionPanelColor = new Color(0.3f, 0.3f, 0.3f, 1f);
+    const float ORIGIN_TITLE_FONT_SIZE = 21f;
+    const float ORIGIN_DESCRIPTION_FONT_SIZE = 17f;
+    const float ADDITIVE_TITLE_FONT_SIZE = 17f;
+    const float ADDITIVE_DESCRIPTION_FONT_SIZE = 15f;
+
+    Color origionTextColor = new Color(0.95f, 0.95f, 0.95f, 1f);
+
+    #region ì¹´ë“œ ì„¤ëª…
+    public void SetDescription(S_CardSuitEnum suit, int number) // ìˆ˜íŠ¸ì™€ ìˆ«ìì— ë”°ë¥¸ íŒ¨ë„ ìƒì„±
+    {
+        string suitText = "";
+        suitText = suit switch
+        {
+            S_CardSuitEnum.Spade => "ìŠ¤í˜ì´ë“œ",
+            S_CardSuitEnum.Heart => "í•˜íŠ¸",
+            S_CardSuitEnum.Diamond => "ë‹¤ì´ì•„ëª¬ë“œ",
+            S_CardSuitEnum.Clover => "í´ë¡œë²„",
+            _ => ""
+        };
+
+        text_Title.text = $"{suitText}ì˜ {number}";
+        if (suit == S_CardSuitEnum.Heart || suit == S_CardSuitEnum.Diamond)
+        {
+            text_Title.color = suitAndNumberTextRedColor;
+        }
+        else
+        {
+            text_Title.color = suitAndNumberTextBlackColor;
+        }
+        text_Title.fontSize = SUIT_AND_NUMBER_FONT_SIZE;
+
+        text_Description.text = "";
+
+        image_Base.color = suitAndNumberPanelColor;
+    }
+    public void SetDescription(S_BattleStatEnum stat, int number, S_Card card) // ìŠ¤íƒ¯ê³¼ ìˆ«ìì— ë”°ë¥¸ íŒ¨ë„ ìƒì„±
+    {
+        StringBuilder sb = new();
+        sb.Append($"ìˆ«ì í•© {number} ì¦ê°€");
+
+        string statText = "";
+        statText = stat switch
+        {
+            S_BattleStatEnum.Strength => "í˜",
+            S_BattleStatEnum.Mind => "ì •ì‹ ë ¥",
+            S_BattleStatEnum.Luck => "í–‰ìš´",
+            S_BattleStatEnum.Random => "ë¬´ì‘ìœ„ ëŠ¥ë ¥ì¹˜",
+            _ => ""
+        };
+        sb.Append($"\n{statText} {number} ì¦ê°€");
+        text_Title.text = sb.ToString();
+        text_Title.fontSize = ADDITIVE_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        StringBuilder sb2 = new();
+        if (card.IsCursed)
+        {
+            sb2.Append($"ì €ì£¼ë°›ìŒ!\n");
+        }
+        if (card.IsIllusion)
+        {
+            sb2.Append($"ìƒì„±ë¨");
+        }
+        text_Description.text = sb2.ToString();
+        text_Description.fontSize = ADDITIVE_DESCRIPTION_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = basicEffectByNumberPanelColor;
+    }
+    public void SetDescription(S_CardBasicConditionEnum bc)
+    {
+        text_Title.text = $"ì¡°ê±´({S_CardEffectMetadata.GetWeights(bc)})";
+        text_Title.fontSize = ORIGIN_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.text = S_CardEffectMetadata.GetName(bc);
+        text_Description.fontSize = ORIGIN_TITLE_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = conditionPanelColor;
+    }
+    public void SetDescription(S_CardAdditiveConditionEnum ac, S_Card card)
+    {
+        text_Title.text = $"ì¡°ê±´ ì œì•½({S_CardEffectMetadata.GetWeights(ac)})";
+        text_Title.fontSize = ORIGIN_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.text = S_CardEffectMetadata.GetName(ac);
+        switch (ac)
+        {
+            case S_CardAdditiveConditionEnum.Legion_SameSuit:
+                text_Description.text = $"{text_Description.text}\ní˜„ì¬ ìˆ«ì í•© : {S_EffectChecker.Instance.GetSameSuitSumInStack(card.Suit)}";
+                break;
+            case S_CardAdditiveConditionEnum.GreatLegion_SameSuit:
+                text_Description.text = $"{text_Description.text}\ní˜„ì¬ ìˆ«ì í•© : {S_EffectChecker.Instance.GetSameSuitSumInStack(card.Suit)}";
+                break;
+            case S_CardAdditiveConditionEnum.Finale:
+                text_Description.text = $"{text_Description.text}\nì—†ëŠ” ë¬¸ì–‘ ê°œìˆ˜ : {4 - S_EffectChecker.Instance.GetDeckSuitCount()}";
+                break;
+            case S_CardAdditiveConditionEnum.Finale_Climax:
+                text_Description.text = $"{text_Description.text}\nì—†ëŠ” ë¬¸ì–‘ ê°œìˆ˜ : {4 - S_EffectChecker.Instance.GetDeckSuitCount()}";
+                break;
+            case S_CardAdditiveConditionEnum.Chaos:
+                text_Description.text = $"{text_Description.text}\nì¡°ê±´ ë§Œì¡± ë¬¸ì–‘ : {S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(1)}";
+                break;
+            case S_CardAdditiveConditionEnum.Chaos_Anarchy:
+                text_Description.text = $"{text_Description.text}\nì¡°ê±´ ë§Œì¡± ë¬¸ì–‘ : {S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(2)}";
+                break;
+            case S_CardAdditiveConditionEnum.GrandChaos_Anarchy:
+                text_Description.text = $"{text_Description.text}\nì¡°ê±´ ë§Œì¡± ë¬¸ì–‘ : {S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(3)}";
+                break;
+            case S_CardAdditiveConditionEnum.Chaos_Overflow:
+                text_Description.text = $"{text_Description.text}\nì¡°ê±´ ë§Œì¡± ë¬¸ì–‘ : {S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStackInCurrentTurn(1)}";
+                break;
+            case S_CardAdditiveConditionEnum.Offensive:
+                text_Description.text = $"{text_Description.text}\nìˆ«ì ìµœëŒ€ ê¸¸ì´ : {S_EffectChecker.Instance.GetContinueNumMaxLengthInStack()}";
+                break;
+            case S_CardAdditiveConditionEnum.Offensive_SameSuit:
+                text_Description.text = $"{text_Description.text}\nìˆ«ì ìµœëŒ€ ê¸¸ì´ : {S_EffectChecker.Instance.GetContinueNumSameSuitMaxLengthInStack()}";
+                break;
+            case S_CardAdditiveConditionEnum.AllOutOffensive:
+                text_Description.text = $"{text_Description.text}\nìˆ«ì ìµœëŒ€ ê¸¸ì´ : {S_EffectChecker.Instance.GetContinueNumMaxLengthInStack()}";
+                break;
+            case S_CardAdditiveConditionEnum.AllOutOffensive_SameSuit:
+                text_Description.text = $"{text_Description.text}\nìˆ«ì ìµœëŒ€ ê¸¸ì´ : {S_EffectChecker.Instance.GetContinueNumSameSuitMaxLengthInStack()}";
+                break;
+            case S_CardAdditiveConditionEnum.Offensive_Overflow:
+                text_Description.text = $"{text_Description.text}\nìˆ«ì ìµœëŒ€ ê¸¸ì´ : {S_EffectChecker.Instance.GetContinueNumMaxLengthInStackInCurrentTurn()}";
+                break;
+            case S_CardAdditiveConditionEnum.Precision_SameSuit:
+                text_Description.text = $"{text_Description.text}\ní˜„ì¬ ì¹´ë“œ ì¥ìˆ˜ : {S_EffectChecker.Instance.GetSameSuitCardsInStack(card.Suit).Count}";
+                break;
+            case S_CardAdditiveConditionEnum.HyperPrecision_SameSuit:
+                text_Description.text = $"{text_Description.text}\ní˜„ì¬ ì¹´ë“œ ì¥ìˆ˜ : {S_EffectChecker.Instance.GetSameSuitCardsInStack(card.Suit).Count}";
+                break;
+            case S_CardAdditiveConditionEnum.Precision_SameNumber:
+                text_Description.text = $"{text_Description.text}\ní˜„ì¬ ì¹´ë“œ ì¥ìˆ˜ : {S_EffectChecker.Instance.GetSameNumberCardsInStack(card.Number).Count}";
+                break;
+            case S_CardAdditiveConditionEnum.HyperPrecision_SameNumber:
+                text_Description.text = $"{text_Description.text}\ní˜„ì¬ ì¹´ë“œ ì¥ìˆ˜ : {S_EffectChecker.Instance.GetSameNumberCardsInStack(card.Number).Count}";
+                break;
+            case S_CardAdditiveConditionEnum.Precision_PlethoraNumber:
+                text_Description.text = $"{text_Description.text}\ní˜„ì¬ ì¹´ë“œ ì¥ìˆ˜ : {S_EffectChecker.Instance.GetPlethoraNumberCardsInStack().Count}";
+                break;
+            case S_CardAdditiveConditionEnum.HyperPrecision_PlethoraNumber:
+                text_Description.text = $"{text_Description.text}\ní˜„ì¬ ì¹´ë“œ ì¥ìˆ˜ : {S_EffectChecker.Instance.GetPlethoraNumberCardsInStack().Count}";
+                break;
+            case S_CardAdditiveConditionEnum.Overflow:
+                text_Description.text = $"{text_Description.text}\ní˜„ì¬ ì¹´ë“œ ì¥ìˆ˜ : {S_EffectChecker.Instance.GetCardsInStackInCurrentTurn().Count}";
+                break;
+            case S_CardAdditiveConditionEnum.Unity:
+                text_Description.text = $"{text_Description.text}\ní˜„ì¬ ë¬¸ì–‘ ê°œìˆ˜ : {S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(1)}";
+                break;
+            case S_CardAdditiveConditionEnum.Unity_Drastic:
+                text_Description.text = $"{text_Description.text}\ní˜„ì¬ ë¬¸ì–‘ ê°œìˆ˜ : {S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(1)}";
+                break;
+        }
+
+        text_Description.fontSize = ORIGIN_TITLE_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = conditionPanelColor;
+    }
+    public void SetDescription(S_CardDebuffConditionEnum debuff)
+    {
+        text_Title.text = $"ë””ë²„í”„ ì œì•½({S_CardEffectMetadata.GetWeights(debuff)})";
+        text_Title.fontSize = ORIGIN_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.text = S_CardEffectMetadata.GetName(debuff);
+        text_Description.fontSize = ORIGIN_TITLE_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = debuffPanelColor;
+    }
+    public void SetDescription(S_CardBasicEffectEnum be)
+    {
+        text_Title.text = $"íš¨ê³¼(-{S_CardEffectMetadata.GetWeights(be)})";
+        text_Title.fontSize = ORIGIN_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.text = S_CardEffectMetadata.GetName(be);
+        text_Description.fontSize = ORIGIN_TITLE_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = effectPanelColor;
+    }
+    public void SetDescription(S_CardAdditiveEffectEnum ae, S_Card card)
+    {
+        text_Title.text = $"ì¶”ê°€ íš¨ê³¼(-{S_CardEffectMetadata.GetWeights(ae)})";
+        text_Title.fontSize = ORIGIN_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.text = S_CardEffectMetadata.GetName(ae);
+        switch (ae)
+        {
+            case S_CardAdditiveEffectEnum.Reflux_Stack:
+                text_Description.text = $"{text_Description.text}\në°œë™ íšŸìˆ˜ : {S_EffectChecker.Instance.GetCardsInStack().Count / 4}";
+                break;
+            case S_CardAdditiveEffectEnum.Reflux_PlethoraNumber:
+                text_Description.text = $"{text_Description.text}\në°œë™ íšŸìˆ˜ : {S_EffectChecker.Instance.GetPlethoraNumberCardsInStack().Count / 3}";
+                break;
+            case S_CardAdditiveEffectEnum.Reflux_Deck:
+                text_Description.text = $"{text_Description.text}\në°œë™ íšŸìˆ˜ : {S_EffectChecker.Instance.GetCardsInDeck().Count / 6}";
+                break;
+            case S_CardAdditiveEffectEnum.Reflux_Chaos:
+                text_Description.text = $"{text_Description.text}\në°œë™ íšŸìˆ˜ : {S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(1) / 6}";
+                break;
+            case S_CardAdditiveEffectEnum.Reflux_Offensive:
+                text_Description.text = $"{text_Description.text}\në°œë™ íšŸìˆ˜ : {S_EffectChecker.Instance.GetContinueNumMaxLengthInStack() / 2}";
+                break;
+            case S_CardAdditiveEffectEnum.Reflux_Curse:
+                text_Description.text = $"{text_Description.text}\në°œë™ íšŸìˆ˜ : {S_EffectChecker.Instance.GetCursedCardsInDeckAndStack().Count / 3}";
+                break;
+            case S_CardAdditiveEffectEnum.Reflux_Exclusion:
+                text_Description.text = $"{text_Description.text}\në°œë™ íšŸìˆ˜ : {S_PlayerCard.Instance.GetPreExclusionTotalCards().Count / 3}";
+                break;
+        }
+        text_Description.fontSize = ORIGIN_TITLE_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = effectPanelColor;
+    }
+    #endregion
+    #region ì¹´ë“œ ì¶”ê°€ ì„¤ëª…
+    public void SetAdditiveDescription(string text)
     {
         switch (text)
         {
-            case "ÀÜ·ù":
-                text_AdditiveDescriptionTitle.text = "ÀÜ·ù(@@)";
-                text_AdditiveDescription.text = "ÀÌ Ä«µå°¡ È÷Æ®µÉ ¶§, Á÷Àü¿¡ È÷Æ®ÇÑ Ä«µå¿Í ÀÌ Ä«µå°¡ @@¶ó¸é ¹ßµ¿ÇÕ´Ï´Ù.";
+            case "ì €ì£¼ë°›ìŒ!":
+                text_Title.text = text;
+                text_Description.text = "ì¹´ë“œì˜ íš¨ê³¼ê°€ ë°œë™í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.";
                 break;
-            case "¹ßÇö":
-                text_AdditiveDescriptionTitle.text = "¹ßÇö";
-                text_AdditiveDescription.text = "ÀÌ Ä«µå°¡ È÷Æ®µÉ ¶§ ¹ßµ¿ÇÕ´Ï´Ù.";
-                break;
-            case "¿¹°ß":
-                text_AdditiveDescriptionTitle.text = "¿¹°ß(@@)";
-                text_AdditiveDescription.text = "ÀÌ Ä«µå°¡ È÷Æ®µÉ ¶§, ´ÙÀ½¿¡ È÷Æ®ÇÑ Ä«µå¿Í ÀÌ Ä«µå°¡ @@¶ó¸é ¹ßµ¿ÇÕ´Ï´Ù.";
-                break;
-            case "¹ü¶÷":
-                text_AdditiveDescriptionTitle.text = "¹ü¶÷(@@, X)";
-                text_AdditiveDescription.text = "ÀÌ Ä«µå°¡ È÷Æ®µÉ ¶§, ½ºÅÃ¿¡ @@ÀÎ Ä«µå°¡ X ÀÌ»óÀÖ´Ù¸é ¹ßµ¿ÇÕ´Ï´Ù.";
-                break;
-            case "¸Ş¾Æ¸®":
-                text_AdditiveDescriptionTitle.text = "¸Ş¾Æ¸®(@@)";
-                text_AdditiveDescription.text = "@@ÀÎ Ä«µå¸¦ È÷Æ®ÇÒ ¶§¸¶´Ù ¹ßµ¿ÇÕ´Ï´Ù.";
-                break;
-            case "´ë¹ÌÀå½Ä":
-                text_AdditiveDescriptionTitle.text = "´ë¹ÌÀå½Ä";
-                text_AdditiveDescription.text = "µ¦¿¡¼­ ÇÑ ¹®¾çÀÇ Ä«µå°¡ ¸ğµÎ ¾ø¾îÁú ¶§¸¶´Ù ¹ßµ¿ÇÕ´Ï´Ù.";
-                break;
-            case "ÀÌÅ»":
-                text_AdditiveDescriptionTitle.text = "ÀÌÅ»";
-                text_AdditiveDescription.text = "Ä«µå°¡ Á¦¿ÜµÉ ¶§¸¶´Ù ¹ßµ¿ÇÕ´Ï´Ù.";
-                break;
-            case "½ºÅÄµå":
-                text_AdditiveDescriptionTitle.text = "½ºÅÄµå";
-                text_AdditiveDescription.text = "½ºÅÄµå¸¦ ÇÒ ¶§¸¶´Ù ¹ßµ¿ÇÕ´Ï´Ù.";
-                break;
-            case "¿µ¿ø":
-                text_AdditiveDescriptionTitle.text = "¿µ¿ø(´É·ÂÄ¡, X)";
-                text_AdditiveDescription.text = "±âº» ´É·ÂÄ¡ +X";
-                break;
-            case "Ãß°¡":
-                text_AdditiveDescriptionTitle.text = "Ãß°¡(´É·ÂÄ¡, X)";
-                text_AdditiveDescription.text = "Ãß°¡ ´É·ÂÄ¡ +X";
-                break;
-            case "¹èÀ²":
-                text_AdditiveDescriptionTitle.text = "¹èÀ²(´É·ÂÄ¡, X)";
-                text_AdditiveDescription.text = "¹èÀ² ´É·ÂÄ¡ +X";
-                break;
-            case "Á¶ÀÛ":
-                text_AdditiveDescriptionTitle.text = "Á¶ÀÛ";
-                text_AdditiveDescription.text = "¼ıÀÚ ÇÕÀ» ¹Ù²ß´Ï´Ù.";
-                break;
-            case "ÀúÇ×":
-                text_AdditiveDescriptionTitle.text = "ÀúÇ×";
-                text_AdditiveDescription.text = "ÇÑ°è¸¦ ¹Ù²ß´Ï´Ù.";
-                break;
-            case "ÇÇÇØ":
-                text_AdditiveDescriptionTitle.text = "ÇÇÇØ";
-                text_AdditiveDescription.text = "ÇÇÁ¶¹°¿¡ µ¥¹ÌÁö¸¦ Áİ´Ï´Ù.";
-                break;
-            case "È¸º¹":
-                text_AdditiveDescriptionTitle.text = "È¸º¹";
-                text_AdditiveDescription.text = "Ã¼·ÂÀ» ¾ò½À´Ï´Ù.";
-                break;
-            case "´Ü·Ã":
-                text_AdditiveDescriptionTitle.text = "´Ü·Ã";
-                text_AdditiveDescription.text = "ÀÇÁö¸¦ ¾ò½À´Ï´Ù.";
-                break;
-            case "¾àÅ»":
-                text_AdditiveDescriptionTitle.text = "¾àÅ»";
-                text_AdditiveDescription.text = "°ñµå¸¦ ¾ò½À´Ï´Ù.";
-                break;
-            case "Ã¢Á¶":
-                text_AdditiveDescriptionTitle.text = "Ã¢Á¶";
-                text_AdditiveDescription.text = "Ä«µå¸¦ »õ·Ó°Ô »ı¼ºÇÑ ÈÄ È÷Æ®ÇÕ´Ï´Ù.";
-                break;
-            case "¿ª·ù":
-                text_AdditiveDescriptionTitle.text = "¿ª·ù";
-                text_AdditiveDescription.text = "½ºÅÃÀÌ³ª µ¦¿¡¼­ Ä«µå¸¦ º¹»çÇÏ¿© »ı¼ºÇÑ ÈÄ È÷Æ®ÇÕ´Ï´Ù.";
-                break;
-            case "ÀÎµµ":
-                text_AdditiveDescriptionTitle.text = "ÀÎµµ";
-                text_AdditiveDescription.text = "µ¦¿¡¼­ Æ¯Á¤ Ä«µå¸¦ È÷Æ®ÇÕ´Ï´Ù.";
-                break;
-            case "È¯»ó":
-                text_AdditiveDescriptionTitle.text = "È¯»ó";
-                text_AdditiveDescription.text = "ÀÌ¹ø ½Ã·ÃÀÌ ³¡³ª¸é ¼Ò¸êµË´Ï´Ù.";
-                break;
-            case "Á¦¿Ü":
-                text_AdditiveDescriptionTitle.text = "Á¦¿Ü";
-                text_AdditiveDescription.text = "ÀÌ¹ø ½Ã·Ã¿¡¼­ ÀÌ Ä«µå¸¦ »ç¿ëÇÒ ¼ö ¾ø½À´Ï´Ù.";
-                break;
-            case "ÀúÁÖ":
-                text_AdditiveDescriptionTitle.text = "ÀúÁÖ";
-                text_AdditiveDescription.text = "Ä«µåÀÇ È¿°ú°¡ ¹ßµ¿ÇÏÁö ¾Ê½À´Ï´Ù.";
-                break;
-            case "ÀúÁÖÇØÁ¦":
-                text_AdditiveDescriptionTitle.text = "ÀúÁÖÇØÁ¦";
-                text_AdditiveDescription.text = "Ä«µåÀÇ ÀúÁÖ¸¦ ÇØÁ¦ÇÕ´Ï´Ù.";
-                break;
-            case "¿ì¼±":
-                text_AdditiveDescriptionTitle.text = "¿ì¼±";
-                text_AdditiveDescription.text = "´ÙÀ½¿¡ È÷Æ®ÇÒ Ä«µå¸¦ Æ¯Á¤ÇÕ´Ï´Ù.";
-                break;
-            case "¸Á»ó":
-                text_AdditiveDescriptionTitle.text = "¸Á»ó";
-                text_AdditiveDescription.text = "´ÙÀ½¿¡ È÷Æ®ÇÒ Ä«µå¸¦ ÀúÁÖÇÕ´Ï´Ù.";
-                break;
-            case "¼Ò¸ê":
-                text_AdditiveDescriptionTitle.text = "¼Ò¸ê";
-                text_AdditiveDescription.text = "µ¦¿¡¼­ Á¦°ÅµË´Ï´Ù.";
+            case "ìƒì„±ë¨":
+                text_Title.text = text;
+                text_Description.text = "ì´ ì¹´ë“œëŠ” ì‹œë ¨ ì¢…ë£Œ í›„ ì‚¬ë¼ì§‘ë‹ˆë‹¤.";
                 break;
             default:
-                text_AdditiveDescriptionTitle.text = "-";
-                text_AdditiveDescription.text = "-";
+                text_Title.text = "ERROR! S_ADDITIVEDESCRIPTION SEND";
+                text_Description.text = "ERROR! S_ADDITIVEDESCRIPTION SEND";
                 break;
         }
+        text_Title.fontSize = ADDITIVE_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.fontSize = ADDITIVE_DESCRIPTION_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = additiveDescriptionPanelColor;
     }
+    public void SetAdditiveDescription(S_CardBasicConditionEnum bc)
+    {
+        text_Title.text = S_CardEffectMetadata.GetName(bc);
+        text_Title.fontSize = ADDITIVE_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.text = S_CardEffectMetadata.GetDescription(bc);
+        text_Description.fontSize = ADDITIVE_DESCRIPTION_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = additiveDescriptionPanelColor;
+    }
+    public void SetAdditiveDescription(S_CardAdditiveConditionEnum ac)
+    {
+        text_Title.text = S_CardEffectMetadata.GetName(ac);
+        text_Title.fontSize = ADDITIVE_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.text = S_CardEffectMetadata.GetDescription(ac);
+        text_Description.fontSize = ADDITIVE_DESCRIPTION_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = additiveDescriptionPanelColor;
+    }
+    public void SetAdditiveDescription(S_CardDebuffConditionEnum debuff)
+    {
+        text_Title.text = S_CardEffectMetadata.GetName(debuff);
+        text_Title.fontSize = ADDITIVE_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.text = S_CardEffectMetadata.GetDescription(debuff);
+        text_Description.fontSize = ADDITIVE_DESCRIPTION_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = additiveDescriptionPanelColor;
+    }
+    public void SetAdditiveDescription(S_CardBasicEffectEnum be)
+    {
+        text_Title.text = S_CardEffectMetadata.GetName(be);
+        text_Title.fontSize = ADDITIVE_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.text = S_CardEffectMetadata.GetDescription(be);
+        text_Description.fontSize = ADDITIVE_DESCRIPTION_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = additiveDescriptionPanelColor;
+    }
+    public void SetAdditiveDescription(S_CardAdditiveEffectEnum ae)
+    {
+        text_Title.text = S_CardEffectMetadata.GetName(ae);
+        text_Title.fontSize = ADDITIVE_TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.text = S_CardEffectMetadata.GetDescription(ae);
+        text_Description.fontSize = ADDITIVE_DESCRIPTION_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = additiveDescriptionPanelColor;
+    }
+    #endregion
+    #region ëŠ¥ë ¥ ì„¤ëª…
+    public void SetDescriptionBySkillName(S_Skill skill)
+    {
+        text_Title.text = $"{skill.Name}";
+        text_Title.fontSize = SUIT_AND_NUMBER_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        text_Description.text = "";
+        image_Base.color = suitAndNumberPanelColor;
+    }
+    public void SetDescriptionBySkillDescription(S_Skill skill)
+    {
+        text_Title.text = "";
+
+        text_Description.text = $"{skill.GetDescription()}";
+        text_Description.fontSize = ORIGIN_DESCRIPTION_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = basicEffectByNumberPanelColor;
+    }
+    #endregion
 }

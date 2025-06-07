@@ -1,30 +1,26 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 
 public class S_FoeManager : MonoBehaviour
 {
-    [Header("ÇÁ¸®ÆÕ")]
-    [SerializeField] GameObject prefab_Foe;
-
-    [Header("ÀÌ¹ø °ÔÀÓÀÇ ¸ğµç Àû")]
+    [Header("ì´ë²ˆ ê²Œì„ì˜ ëª¨ë“  ì ")]
     Queue<(S_Foe, int)> allFoeQueue = new();
 
-    [Header("Àû ´É·ÂÄ¡ °ü·Ã")]
-    const float BASIC_HEALTH_VALUE = 30;
+    [Header("ì  ëŠ¥ë ¥ì¹˜ ê´€ë ¨")]
+    const float BASIC_HEALTH_VALUE = 100;
     const float HEALTH_GROWTH_RATE = 1.4f;
     const float ELITE_GROWTH_RATE = 1.25f;
     const float BOSS_GROWTH_RATE = 1.7f;
 
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static S_FoeManager instance;
     public static S_FoeManager Instance { get { return instance; } }
 
     void Awake()
     {
-        // ½Ì±ÛÅÏ
+        // ì‹±ê¸€í„´
         if (instance == null)
         {
             instance = this;
@@ -50,7 +46,7 @@ public class S_FoeManager : MonoBehaviour
             S_Foe foeInfo;
             int health;
 
-            if (i == 8) // ¸¶Áö¸·Àº Ç×»ó º¸½º
+            if (i == 8) // ë§ˆì§€ë§‰ì€ í•­ìƒ ë³´ìŠ¤
             {
                 foeInfo = S_FoeList.GetRandomFoe(bossType);
                 health = Mathf.RoundToInt(BASIC_HEALTH_VALUE * Mathf.Pow(HEALTH_GROWTH_RATE, i + 1) * ELITE_GROWTH_RATE);
@@ -94,12 +90,16 @@ public class S_FoeManager : MonoBehaviour
     {
         (S_Foe, int) info = allFoeQueue.Dequeue();
 
-        // ÇÇÁ¶¹° ¿ÀºêÁ§Æ® »ı¼º
-        GameObject go = Instantiate(prefab_Foe);
-        go.GetComponent<S_FoeObject>().SetCreatureInfo(info.Item1, info.Item2);
+        // í”¼ì¡°ë¬¼ ì˜¤ë¸Œì íŠ¸ ìƒì„±
+        S_FoeInfo foeInfo = new S_FoeInfo();
+        foeInfo.SetFoeInfoInfo(info.Item1, info.Item2);
 
-        // UI ¼¼ÆÃ
-        S_FoeInfoSystem.Instance.SetFoe(go.GetComponent<S_FoeObject>());
+        // UI ì„¸íŒ…
+        S_FoeInfoSystem.Instance.SetFoe(foeInfo);
+    }
+    public (S_Foe, int) PeekNextFoe()
+    {
+        return allFoeQueue.Peek();
     }
 }
 

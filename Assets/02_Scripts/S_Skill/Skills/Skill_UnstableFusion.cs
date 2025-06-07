@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class Skill_UnstableFusion : S_Skill
@@ -8,18 +5,16 @@ public class Skill_UnstableFusion : S_Skill
     public Skill_UnstableFusion() : base
     (
         "Skill_UnstableFusion",
-        "ºÒ¾ÈÁ¤ÇÑ À¶ÇÕ",
-        "½ºÆäÀÌµå¿Í Å¬·Î¹ö¸¦ °°Àº ¹®¾çÀ¸·Î Ãë±ŞÇÕ´Ï´Ù.",
+        "ë¶ˆì•ˆì •í•œ ìœµí•©",
+        "ìŠ¤í˜ì´ë“œì™€ í´ë¡œë²„ë¥¼ ê°™ì€ ë¬¸ì–‘ìœ¼ë¡œ ì·¨ê¸‰í•©ë‹ˆë‹¤.",
         S_SkillConditionEnum.None,
         S_SkillPassiveEnum.SameBlack,
         false
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
+    public override void CheckMeetConditionByBasic(S_Card card = null)
     {
-        CanActivateEffect = false;
-
-        return CanActivateEffect;
+        IsMeetCondition = false;
     }
     public override string GetDescription()
     {

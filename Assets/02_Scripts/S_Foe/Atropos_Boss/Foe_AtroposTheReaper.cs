@@ -6,46 +6,48 @@ public class Foe_AtroposTheReaper : S_Foe
     public Foe_AtroposTheReaper() : base
     (
         "Foe_AtroposTheReaper",
-        "°ÅµÎ´Â ÀÚ ¾ÆÆ®·ÎÆ÷½º",
-        "Ä«µå¸¦ 2Àå È÷Æ®ÇÒ ¶§¸¶´Ù ¸Á»óÀ» ¾ò½À´Ï´Ù.",
+        "ê±°ë‘ëŠ” ìž ì•„íŠ¸ë¡œí¬ìŠ¤",
+        "ì¹´ë“œë¥¼ 2ìž¥ ížˆíŠ¸í•  ë•Œë§ˆë‹¤ ë§ìƒì„ ì–»ìŠµë‹ˆë‹¤.",
         S_FoeTypeEnum.Atropos_Boss,
         S_FoeAbilityConditionEnum.Reverb,
         S_FoePassiveEnum.NeedActivatedCount
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount >= 2;
-
-        return CanActivateEffect;
-    }
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
             await eA.GetDelusion(this, null);
 
             ActivatedCount = 0;
+            IsMeetCondition = false;
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        if (isTwist)
+        int count = S_PlayerCard.Instance.GetPreStackCards().Count % 2;
+
+        if (S_PlayerCard.Instance.GetPreStackCards().Count == 0)
         {
-            ActivatedCount--;
-            if (ActivatedCount <= 0)
-            {
-                ActivatedCount = 3;
-            }
+            ActivatedCount = 0;
         }
         else
         {
-            ActivatedCount++;
+            if (count == 0)
+            {
+                ActivatedCount = 2;
+            }
+            else
+            {
+                ActivatedCount = count;
+            }
         }
+
+        IsMeetCondition = ActivatedCount >= 2;
     }
     public override string GetDescription()
     {
-        return $"{AbilityDescription}\n{ActivatedCount}Àå Â°";
+        return $"{AbilityDescription}\nížˆíŠ¸í•œ ì¹´ë“œ : {ActivatedCount}ìž¥ ì§¸";
     }
     public override S_Foe Clone()
     {

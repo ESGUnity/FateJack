@@ -8,7 +8,7 @@ public static class S_FoeList
     {
         new Foe_GateKeeper(), new Foe_TaboosWatcher(),
 
-        // ½ÃÇè´ë
+        // ì‹œí—˜ëŒ€
     };
     public static List<S_Foe> Clotho_Elite = new()
     {
@@ -45,46 +45,47 @@ public static class S_FoeList
         new Foe_AtroposTheReaper(), new Foe_AtroposTwillightFate(),
     };
 
-    public static S_Foe GetRandomFoe(S_FoeTypeEnum foeType) // ¹«ÀÛÀ§ ÇÇÁ¶¹° ´É·ÂÀ» °¡Á®¿À±â
+    public static S_Foe GetRandomFoe(S_FoeTypeEnum foeType) // ë¬´ì‘ìœ„ í”¼ì¡°ë¬¼ ëŠ¥ë ¥ì„ ê°€ì ¸ì˜¤ê¸°
     {
-        // ½Ã·ÃÀ» ¼¼ÆÃ
+        // ì‹œë ¨ì„ ì„¸íŒ…
         int realTrial = S_GameFlowManager.Instance.CurrentTrial + 1;
 
-        // ÇÇÁ¶¹° Ã£±â
+        // í”¼ì¡°ë¬¼ ì°¾ê¸°
         List<S_Foe> list = new();
 
-        if (realTrial % 3 == 0) // 3¹øÂ° ÇÇÁ¶¹°ÀÏ ½Ã °­·ÂÇÑ°É·Î.
+        switch (foeType)
         {
-            switch (foeType)
-            {
-                case S_FoeTypeEnum.Clotho:
-                    list = Clotho_Elite;
-                    break;
-                case S_FoeTypeEnum.Lachesis:
-                    list = Lachesis_Elite;
-                    break;
-                case S_FoeTypeEnum.Atropos:
-                    list = Atropos_Elite;
-                    break;
-            }
-        }
-        else
-        {
-            switch (foeType)
-            {
-                case S_FoeTypeEnum.Clotho:
-                    list = Clotho;
-                    break;
-                case S_FoeTypeEnum.Lachesis:
-                    list = Lachesis;
-                    break;
-                case S_FoeTypeEnum.Atropos:
-                    list = Atropos;
-                    break;
-            }
+            case S_FoeTypeEnum.Clotho:
+                list = Clotho;
+                break;
+            case S_FoeTypeEnum.Lachesis:
+                list = Lachesis;
+                break;
+            case S_FoeTypeEnum.Atropos:
+                list = Atropos;
+                break;
+            case S_FoeTypeEnum.Clotho_Elite:
+                list = Clotho_Elite;
+                break;
+            case S_FoeTypeEnum.Lachesis_Elite:
+                list = Lachesis_Elite;
+                break;
+            case S_FoeTypeEnum.Atropos_Elite:
+                list = Atropos_Elite;
+                break;
+            case S_FoeTypeEnum.Clotho_Boss:
+                list = Clotho_Boss;
+                break;
+            case S_FoeTypeEnum.Lachesis_Boss:
+                list = Lachesis_Boss;
+                break;
+            case S_FoeTypeEnum.Atropos_Boss:
+                list = Atropos_Boss;
+                break;
+
         }
 
-        // ÇÇÁ¶¹° »ı¼º
+        // í”¼ì¡°ë¬¼ ìƒì„±
         int randomIndex = Random.Range(0, list.Count);
         return list[randomIndex].Clone();
     }

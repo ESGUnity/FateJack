@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using System;
 using TMPro;
 using UnityEngine;
@@ -12,10 +12,15 @@ public class S_InGameUISystem : MonoBehaviour
     TMP_Text text_CurrentTurn;
 
     [Header("프리팹")]
-    [SerializeField] GameObject logPrefab;
+    [SerializeField] GameObject prefab_Log;
 
     [Header("로그")]
-    Vector2 logPos = new Vector2(0, -233);
+    float lastLogTime = -999f;
+    const float LOG_APPEAR_TIME = 0.3f;
+    const float LOG_LIFE_TIME = 1.5f;
+    const float LOG_COOLDOWN = 1.5f;
+    Vector2 logPos = new Vector2(0, -240);
+    const float logMoveYAmount = 10f;
 
     [Header("현재 턴 UI")]
     Vector2 currentTurnUIHidePos = new Vector2(0, -120);
@@ -23,9 +28,11 @@ public class S_InGameUISystem : MonoBehaviour
     const float CURRENT_TURN_UI_APPEAR_TIME = 0.5f;
     const float CURRENT_TURN_UI_WAIT_TIME = 0.2f;
 
+
     // 싱글턴
     static S_InGameUISystem instance;
     public static S_InGameUISystem Instance { get { return instance; } }
+
     void Awake()
     {
         // 자식 컴포넌트 가져오기
@@ -54,6 +61,7 @@ public class S_InGameUISystem : MonoBehaviour
 
         InitPos();
     }
+
     public void InitPos()
     {
         panel_CurrentTurnBase.GetComponent<RectTransform>().anchoredPosition = currentTurnUIHidePos;
@@ -79,20 +87,40 @@ public class S_InGameUISystem : MonoBehaviour
             .Join(text_CurrentTurn.DOFade(0f, CURRENT_TURN_UI_APPEAR_TIME).SetEase(Ease.InQuart))
             .OnComplete(() => panel_CurrentTurnBase.SetActive(false));
     }
+
+    string pendingLog;
     public void CreateLog(string log) // 로그 생성
     {
-        // 로그 인스턴스 생성
-        GameObject go = Instantiate(logPrefab, transform);
+        bool isSameLog = log == pendingLog;
+        bool isInCooldown = Time.time - lastLogTime < LOG_COOLDOWN;
 
-        // 로그 텍스트 설정
-        TMP_Text logText = go.GetComponent<TMP_Text>();
-        logText.raycastTarget = false;
-        logText.text = log;
-        logText.GetComponent<RectTransform>().anchoredPosition = logPos;
+        if (isSameLog && isInCooldown) return;
 
-        // 로그 애니메이션 설정
-        Sequence logSequence = DOTween.Sequence();
-        logSequence.Append(logText.GetComponent<RectTransform>().DOAnchorPos(logPos + new Vector2(0, 70), 2.5f))
-           .Insert(1f, logText.DOFade(0f, 1.5f));
+        lastLogTime = Time.time;
+        pendingLog = log;
+
+        ShowNewLog(log);
     }
+
+    void ShowNewLog(string log)
+    {
+        GameObject go = Instantiate(prefab_Log, transform);
+        TMP_Text text = go.GetComponent<TMP_Text>();
+        RectTransform rect = go.GetComponent<RectTransform>();
+        text.text = log;
+        text.raycastTarget = false;
+
+        text.DOFade(0, 0);
+
+        Sequence seq = DOTween.Sequence();
+
+        seq.Append(rect.DOAnchorPosY(logMoveYAmount, LOG_LIFE_TIME)).SetEase(Ease.OutQuart)
+           .Join(text.DOFade(1f, LOG_APPEAR_TIME)).SetEase(Ease.OutQuart)
+           .Insert(LOG_LIFE_TIME - LOG_APPEAR_TIME, text.DOFade(0, LOG_APPEAR_TIME)).SetEase(Ease.OutQuart)
+           .OnComplete(() =>
+           {
+               Destroy(go);
+           });
+    }
+
 }

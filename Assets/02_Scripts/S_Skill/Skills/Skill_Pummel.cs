@@ -8,25 +8,19 @@ public class Skill_Pummel : S_Skill
     public Skill_Pummel() : base
     (
         "Skill_Pummel",
-        "³­Å¸",
-        "ÇÑ ÅÏ¿¡ Á¤È®È÷ Ä«µå¸¦ 3Àå¸¸ È÷Æ®ÇÏ°í ½ºÅÄµå ½Ã ¹«ÀÛÀ§ ´É·ÂÄ¡ 2°³¸¦ °öÇÑ¸¸Å­ ÇÇÇØ¸¦ 3¹ø Áİ´Ï´Ù.",
+        "ë‚œíƒ€",
+        "í•œ í„´ì— ì¹´ë“œë¥¼ ì •í™•íˆ 3ì¥ë§Œ íˆíŠ¸í•˜ê³  ìŠ¤íƒ ë“œ ì‹œ ë¬´ì‘ìœ„ ëŠ¥ë ¥ì¹˜ 2ê°œë¥¼ ê³±í•œë§Œí¼ í”¼í•´ë¥¼ 3ë²ˆ ì¤ë‹ˆë‹¤.",
         S_SkillConditionEnum.Stand,
         S_SkillPassiveEnum.NeedActivatedCount,
         false
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount == 3;
-
-        return CanActivateEffect;
-    }
     public override async Task ActiveSkill(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
             List<S_BattleStatEnum> list = new() { S_BattleStatEnum.Strength_Mind, S_BattleStatEnum.Strength_Luck, S_BattleStatEnum.Mind_Luck };
-            S_BattleStatEnum stat = list[Random.Range(0, list.Count)];
+            S_BattleStatEnum stat;
 
             for (int i = 0; i < 3; i++)
             {
@@ -35,32 +29,24 @@ public class Skill_Pummel : S_Skill
                 switch (stat)
                 {
                     case S_BattleStatEnum.Strength_Mind:
-                        await eA.HarmCreature(this, new List<S_Card>(), stat, S_PlayerStat.Instance.CurrentStrength * S_PlayerStat.Instance.CurrentMind);
+                        await eA.HarmFoe(this, null, stat, S_PlayerStat.Instance.CurrentStrength * S_PlayerStat.Instance.CurrentMind);
                         break;
                     case S_BattleStatEnum.Strength_Luck:
-                        await eA.HarmCreature(this, new List<S_Card>(), stat, S_PlayerStat.Instance.CurrentStrength * S_PlayerStat.Instance.CurrentLuck);
+                        await eA.HarmFoe(this, null, stat, S_PlayerStat.Instance.CurrentStrength * S_PlayerStat.Instance.CurrentLuck);
                         break;
                     case S_BattleStatEnum.Mind_Luck:
-                        await eA.HarmCreature(this, new List<S_Card>(), stat, S_PlayerStat.Instance.CurrentMind * S_PlayerStat.Instance.CurrentLuck);
+                        await eA.HarmFoe(this, null, stat, S_PlayerStat.Instance.CurrentMind * S_PlayerStat.Instance.CurrentLuck);
                         break;
                 }
             }
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        if (isTwist)
-        {
-            ActivatedCount = 0;
-        }
-        else
-        {
-            int currentHitCount = S_PlayerCard.Instance.GetPreStackCards()
-                .Where(x => x.IsCurrentTurnHit)
-                .Count();
+        ActivatedCount = S_PlayerCard.Instance.GetPreStackCards().Where(x => x.IsCurrentTurnHit).Count();
 
-            ActivatedCount = currentHitCount;
-        }
+        IsMeetCondition = ActivatedCount == 3;
+
     }
     public override void StartNewTurn(int currentTrial)
     {
@@ -68,7 +54,7 @@ public class Skill_Pummel : S_Skill
     }
     public override string GetDescription()
     {
-        return $"{Description}\n{ActivatedCount}Àå Â°";
+        return $"{Description}\níˆíŠ¸í•œ ì¹´ë“œ : {ActivatedCount}ì¥";
     }
     public override S_Skill Clone()
     {

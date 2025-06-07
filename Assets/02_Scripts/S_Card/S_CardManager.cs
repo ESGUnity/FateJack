@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class S_CardManager : MonoBehaviour
 {
-    [Header("Ä«µå »ı¼º °ü·Ã")]
+    [Header("ì¹´ë“œ ìƒì„± ê´€ë ¨")]
     int idCount = 0;
 
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static S_CardManager instance;
     public static S_CardManager Instance { get { return instance; } }
 
     void Awake()
     {
-        // ½Ì±ÛÅÏ
+        // ì‹±ê¸€í„´
         if (instance == null)
         {
             instance = this;
@@ -24,29 +24,30 @@ public class S_CardManager : MonoBehaviour
         }
     }
 
-    public List<S_Card> GenerateCardByStartGame() // °ÔÀÓ ½ÃÀÛ ½Ã ÃÖÃÊ µ¦ »ı¼º
+    public List<S_Card> GenerateCardByStartGame() // ê²Œì„ ì‹œì‘ ì‹œ ìµœì´ˆ ë± ìƒì„±
     {
         List<S_Card> cardList = new();
 
-        // ÃÖÃÊ µ¦Àº 1ºÎÅÍ 10±îÁöÀÇ ¼ıÀÚ, °¢ ¹®¾çÀÌ 10Àå¾¿ Á¸Àç, ¹ßÇö¿¡ °¢ ¹«ÀÛÀ§ ´É·ÂÄ¡ Áõ°¡°¡ ºÙÀº Ä«µåµé
+        // ìµœì´ˆ ë±ì€ 1ë¶€í„° 10ê¹Œì§€ì˜ ìˆ«ì, ê° ë¬¸ì–‘ì´ 10ì¥ì”© ì¡´ì¬, ë°œí˜„ì— ê° ë¬´ì‘ìœ„ ëŠ¥ë ¥ì¹˜ ì¦ê°€ê°€ ë¶™ì€ ì¹´ë“œë“¤
         for (int j = 1; j < 5; j++)
         {
             for (int i = 1; i < 11; i++)
             {
                 S_CardSuitEnum suit = (S_CardSuitEnum)j;
-                S_BattleStatEnum stat = GetNumberStatValue(suit);
+                S_BattleStatEnum stat = GetBattleStat(suit);
 
-                List<S_CardBasicEffectEnum> basic = new() { S_CardBasicEffectEnum.Increase_Strength, S_CardBasicEffectEnum.Increase_Mind, S_CardBasicEffectEnum.Increase_Luck };
+                List<S_CardBasicEffectEnum> basic = new() { S_CardBasicEffectEnum.Growth_Strength, S_CardBasicEffectEnum.Growth_Mind, S_CardBasicEffectEnum.Growth_Luck };
                 S_Card card = new S_Card(idCount, i, suit, stat, S_CardBasicConditionEnum.Unleash, S_CardAdditiveConditionEnum.None, S_CardDebuffConditionEnum.None, basic[Random.Range(0, basic.Count)], S_CardAdditiveEffectEnum.None);
                 cardList.Add(card);
 
                 idCount++;
+                //cardList.Add(GenerateRandomCard());
             }
         }
         
         return cardList;
     }
-    public S_Card GenerateRandomCard(int cardNumber = -1, S_CardSuitEnum cardSuit = S_CardSuitEnum.Random) // ¹«ÀÛÀ§ Ä«µå »ı¼º
+    public S_Card GenerateRandomCard(int cardNumber = -1, S_CardSuitEnum cardSuit = S_CardSuitEnum.Random) // ë¬´ì‘ìœ„ ì¹´ë“œ ìƒì„±
     {
         int number;
         if (cardNumber == -1) number = Random.Range(1, 11);
@@ -56,11 +57,11 @@ public class S_CardManager : MonoBehaviour
         if (cardSuit == S_CardSuitEnum.Random) suit = GetRandomSuit();
         else suit = cardSuit;
 
-        S_BattleStatEnum stat = GetNumberStatValue(suit); // Å¬·Î¹öÀÏ °æ¿ì ¹«ÀÛÀ§ ½ºÅÈÀ¸·Î Á¤ÇÏ±â
+        S_BattleStatEnum stat = GetBattleStat(suit); // í´ë¡œë²„ì¼ ê²½ìš° ë¬´ì‘ìœ„ ìŠ¤íƒ¯ìœ¼ë¡œ ì •í•˜ê¸°
 
         S_CardBasicConditionEnum basicCondition = GetRandomBasicCondition();
         S_CardAdditiveConditionEnum additiveCondition = GetRandomAdditiveCondition(basicCondition);
-        S_CardDebuffConditionEnum debuffCondition = GetRandomDebuffCondition(basicCondition);
+        S_CardDebuffConditionEnum debuffCondition = GetRandomDebuffCondition();
         S_CardBasicEffectEnum basicEffect = GetEffectByConditionWeights(basicCondition, additiveCondition, debuffCondition, out S_CardAdditiveEffectEnum additiveEffect);
         S_Card card = new S_Card(idCount, number, suit, stat, basicCondition, additiveCondition, debuffCondition, basicEffect, additiveEffect);
 
@@ -68,7 +69,7 @@ public class S_CardManager : MonoBehaviour
 
         return card;
     }
-    S_CardSuitEnum GetRandomSuit() // ¹«ÀÛÀ§ ¹®¾ç ¼³Á¤
+    S_CardSuitEnum GetRandomSuit() // ë¬´ì‘ìœ„ ë¬¸ì–‘ ì„¤ì •
     {
         List<S_CardSuitEnum> list = new List<S_CardSuitEnum> { S_CardSuitEnum.Spade, S_CardSuitEnum.Heart, S_CardSuitEnum.Diamond, S_CardSuitEnum.Clover };
 
@@ -76,7 +77,7 @@ public class S_CardManager : MonoBehaviour
 
         return list[randomIndex];
     }
-    S_BattleStatEnum GetNumberStatValue(S_CardSuitEnum suit) // ¹®¾ç¿¡ µû¸¥ ÀüÅõ ´É·ÂÄ¡ ¼³Á¤
+    S_BattleStatEnum GetBattleStat(S_CardSuitEnum suit) // ë¬¸ì–‘ì— ë”°ë¥¸ ì „íˆ¬ ëŠ¥ë ¥ì¹˜ ì„¤ì •
     {
         S_BattleStatEnum stat = S_BattleStatEnum.Strength;
 
@@ -86,24 +87,11 @@ public class S_CardManager : MonoBehaviour
             case S_CardSuitEnum.Heart: stat = S_BattleStatEnum.Mind; break;
             case S_CardSuitEnum.Diamond: stat = S_BattleStatEnum.Luck; break;
             case S_CardSuitEnum.Clover: stat = S_BattleStatEnum.Random; break;
-                //float randomValue = Random.Range(0f, 1f);
-                //if (randomValue < 0.33333f) // Èû È®·ü
-                //{
-                //    stat = S_BattleStatEnum.Strength; break;
-                //}
-                //else if (randomValue < 0.66666f) // Á¤½Å·Â È®·ü
-                //{
-                //    stat = S_BattleStatEnum.Mind; break;
-                //}
-                //else // Çà¿î È®·ü
-                //{
-                //    stat = S_BattleStatEnum.Luck; break;
-                //}
         }
 
         return stat;
     }
-    S_CardBasicConditionEnum GetRandomBasicCondition() // ±âº» Á¶°Ç ¼³Á¤
+    S_CardBasicConditionEnum GetRandomBasicCondition() // ê¸°ë³¸ ì¡°ê±´ ì„¤ì •
     {
         S_CardBasicConditionEnum[] array = System.Enum.GetValues(typeof(S_CardBasicConditionEnum))
             .Cast<S_CardBasicConditionEnum>()
@@ -114,15 +102,15 @@ public class S_CardManager : MonoBehaviour
 
         return array[randomIndex];
     }
-    S_CardAdditiveConditionEnum GetRandomAdditiveCondition(S_CardBasicConditionEnum basicCondition) // Ãß°¡ Á¶°Ç ¼³Á¤
+    S_CardAdditiveConditionEnum GetRandomAdditiveCondition(S_CardBasicConditionEnum basicCondition) // ì¶”ê°€ ì¡°ê±´ ì„¤ì •
     {
         float randomF = Random.Range(0f, 1f);
 
-        if (randomF > 0.5f) // 50% È®·ü·Î Ãß°¡ Á¶°Ç ¾È ºÙÀ½.
+        if (randomF > 0.5f) // 50% í™•ë¥ ë¡œ ì¶”ê°€ ì¡°ê±´ ì•ˆ ë¶™ìŒ.
         {
             return S_CardAdditiveConditionEnum.None;
         }
-        else // 50% È®·ü·Î ±âº» Á¶°Ç¿¡ µû¶ó Ãß°¡ Á¶°ÇÀÌ ºÙÀ½.
+        else // 50% í™•ë¥ ë¡œ ê¸°ë³¸ ì¡°ê±´ì— ë”°ë¼ ì¶”ê°€ ì¡°ê±´ì´ ë¶™ìŒ.
         {
             S_CardAdditiveConditionEnum[] array = System.Enum.GetValues(typeof(S_CardAdditiveConditionEnum))
               .Cast<S_CardAdditiveConditionEnum>()
@@ -159,15 +147,15 @@ public class S_CardManager : MonoBehaviour
             return array[randomIndex];
         }
     }
-    S_CardDebuffConditionEnum GetRandomDebuffCondition(S_CardBasicConditionEnum basicCondition) // µğ¹öÇÁ ¼³Á¤
+    S_CardDebuffConditionEnum GetRandomDebuffCondition() // ë””ë²„í”„ ì„¤ì •
     {
         float randomF = Random.Range(0f, 1f);
 
-        if (randomF > 0.25f) // 75% È®·ü·Î µğ¹öÇÁ ¾È ºÙÀ½.
+        if (randomF > 0.25f) // 75% í™•ë¥ ë¡œ ë””ë²„í”„ ì•ˆ ë¶™ìŒ.
         {
             return S_CardDebuffConditionEnum.None;
         }
-        else // 25% È®·ü·Î ±âº» Á¶°Ç¿¡ µû¸¥ µğ¹öÇÁ ºÙÀ½.
+        else // 25% í™•ë¥ ë¡œ ë””ë²„í”„ ë¶™ìŒ.
         {
             S_CardDebuffConditionEnum[] array = System.Enum.GetValues(typeof(S_CardDebuffConditionEnum))
               .Cast<S_CardDebuffConditionEnum>()
@@ -178,83 +166,318 @@ public class S_CardManager : MonoBehaviour
             return array[randomIndex];
         }
     }
-    S_CardBasicEffectEnum GetEffectByConditionWeights(S_CardBasicConditionEnum basicCondition, S_CardAdditiveConditionEnum additiveCondition, S_CardDebuffConditionEnum debuffCondition, out S_CardAdditiveEffectEnum additiveEffect) // È¿°ú ¼³Á¤
+    S_CardBasicEffectEnum GetEffectByConditionWeights(S_CardBasicConditionEnum basicCondition, S_CardAdditiveConditionEnum additiveCondition, S_CardDebuffConditionEnum debuffCondition, out S_CardAdditiveEffectEnum additiveEffect)
     {
+        additiveEffect = S_CardAdditiveEffectEnum.None;
+
+        // ì¡°ê±´ ê°€ì¤‘ì¹˜
         int conditionWeights = S_CardEffectMetadata.GetWeights(basicCondition) + S_CardEffectMetadata.GetWeights(additiveCondition) + S_CardEffectMetadata.GetWeights(debuffCondition);
 
-        // ±âº» È¿°ú ¸ÕÀú °¡Á®¿À±â
-        List<S_CardBasicEffectEnum> effects = new();
-        for (int i = 1; i <= conditionWeights; i++)
-        {
-            effects.AddRange(S_CardEffectMetadata.GetBasicEffect(i));
-        }
-        
-        // °áÀÇ¶ó¸é Á¶ÀÛ·ù´Â ºÙÁö ¾Ê°Ô »©ÁÖ±â. Ã¢Á¶¶û ÀÎµµµµ ±¸Çö ¾ÈµÉ °Å °°À¸¸é »©±â
-        if (basicCondition == S_CardBasicConditionEnum.Resolve)
-        {
-            effects = effects.Where(x => 
-                x != S_CardBasicEffectEnum.Manipulation && 
-                x != S_CardBasicEffectEnum.Manipulation_Cheat)
-                .ToList();
-        }
+        // ë§Œì¡±í•˜ëŠ” í›„ë³´ë“¤
+        var validPairs = new List<(S_CardBasicEffectEnum basic, S_CardAdditiveEffectEnum additive, int totalWeight)>();
 
-        float randomF = Random.Range(0f, 1f);
-        if (randomF > 0.7f) // 30% È®·ü·Î Ãß°¡ È¿°ú ¾ø´Â °æ¿ì
-        {
-            // È¿°ú¸¦ °¡ÁßÄ¡ ¼ø¼­·Î Á¤·Ä
-            effects = effects
-                .OrderByDescending(x => S_CardEffectMetadata.GetWeights(x))
-                .ThenBy(x => new System.Random().Next())
-                .ToList();
+        // ë°¸ë¥˜
+        var basicValues = (S_CardBasicEffectEnum[])System.Enum.GetValues(typeof(S_CardBasicEffectEnum));
+        var additiveValues = (S_CardAdditiveEffectEnum[])System.Enum.GetValues(typeof(S_CardAdditiveEffectEnum));
 
-            // °¡ÁßÄ¡°¡ ³ôÀº ¼ø¼­·Î È¿°ú 3°³ »Ì±â
-            List<S_CardBasicEffectEnum> e = new();
-            if (effects.Count >= 3)
+        foreach (S_CardBasicEffectEnum basic in basicValues)
+        {
+            if (basic == S_CardBasicEffectEnum.None) continue;
+
+            // ê²°ì˜ ì¡°ê±´ì´ë©´ ì¡°ì‘ë¥˜ ì œì™¸
+            if (basicCondition == S_CardBasicConditionEnum.Resolve &&
+                (basic == S_CardBasicEffectEnum.Manipulation || basic == S_CardBasicEffectEnum.Manipulation_CardNumber))
             {
-                for (int i = 0; i < 5; i++)
+                continue;
+            }
+
+            // ë©”ì•„ë¦¬ ì¡°ê±´ì´ë©´ ìƒì„± ë° ì¸ë„ë¥˜ ì œì™¸
+            if (basicCondition == S_CardBasicConditionEnum.Reverb)
+            {
+                if (basic == S_CardBasicEffectEnum.Creation_Random || basic == S_CardBasicEffectEnum.Creation_SameSuit || basic == S_CardBasicEffectEnum.Creation_SameNumber || basic == S_CardBasicEffectEnum.Creation_PlethoraNumber ||
+                    basic == S_CardBasicEffectEnum.Guidance_LeastSuit || basic == S_CardBasicEffectEnum.Guidance_LeastNumber)
                 {
-                    e.Add(effects[0]);
-                }
-                for (int i = 0; i < 3; i++)
-                {
-                    e.Add(effects[1]);
-                }
-                for (int i = 0; i < 2; i++)
-                {
-                    e.Add(effects[2]);
+                    continue;
                 }
             }
 
-            // Ãß°¡ È¿°ú´Â µğÆúÆ® Ã³¸®
-            additiveEffect = default;
+            int basicWeight = S_CardEffectMetadata.GetWeights(basic);
 
-            return e[Random.Range(0, effects.Count)];
+            if (Random.value < 0.3f) // í™•ë¥  ë¶„ê¸° (ì¶”ê°€ íš¨ê³¼ ì—†ìŒ)
+            {
+                if (basicWeight <= conditionWeights)
+                {
+                    validPairs.Add((basic, S_CardAdditiveEffectEnum.None, basicWeight));
+                }
+            }
+            else // 70% í™•ë¥ ë¡œ ì¶”ê°€ íš¨ê³¼ ìˆìŒ
+            {
+                foreach (S_CardAdditiveEffectEnum additive in additiveValues)
+                {
+                    int additiveWeight = S_CardEffectMetadata.GetWeights(additive);
+                    int total = basicWeight + additiveWeight;
+
+                    if (total <= conditionWeights)
+                    {
+                        validPairs.Add((basic, additive, total));
+                    }
+                }
+            }
         }
-        else // 70% È®·ü·Î Ãß°¡ È¿°ú ´Ş¸®´Â °æ¿ì
+
+        // fallback ì‹œ
+        if (validPairs.Count == 0)
         {
-            S_CardBasicEffectEnum basic = effects[Random.Range(0, effects.Count)];
-
-            // Ãß°¡ È¿°ú¸¦ À§ÇÑ °¡ÁßÄ¡ ÀÎ¼ö º°µµ·Î »ı¼º
-            int newWeights = conditionWeights - S_CardEffectMetadata.GetWeights(basic);
-
-            List<S_CardAdditiveEffectEnum> additives = new();
-            for (int i = 1; i <= newWeights; i++)
+            foreach (var basic in basicValues)
             {
-                additives.AddRange(S_CardEffectMetadata.GetAdditiveEffect(i));
-            }
+                if (basic == S_CardBasicEffectEnum.None) continue;
 
-            if (additives.Count > 0) // Ãß°¡ È¿°ú°¡ ÀÖ´Ù¸é
-            {
-                additiveEffect = additives[Random.Range(0, additives.Count)];
-            }
-            else // ¾ø´Ù¸é Ãß°¡ È¿°ú´Â µğÆúÆ® Ã³¸®
-            {
-                additiveEffect = default;
-            }
+                if (basicCondition == S_CardBasicConditionEnum.Resolve &&
+                    (basic == S_CardBasicEffectEnum.Manipulation || basic == S_CardBasicEffectEnum.Manipulation_CardNumber))
+                {
+                    continue;
+                }
 
-            return basic;
+                int basicWeight = S_CardEffectMetadata.GetWeights(basic);
+                validPairs.Add((basic, S_CardAdditiveEffectEnum.None, basicWeight));
+            }
         }
+
+        // ê°€ì¤‘ì¹˜ ê³„ì‚° ë° ì„ íƒ
+        int totalWeightSum = 0;
+        var weightedPairs = new List<(S_CardBasicEffectEnum basic, S_CardAdditiveEffectEnum additive, int weight)>();
+
+        foreach (var pair in validPairs)
+        {
+            int weight = Mathf.Max(1, 100 - (conditionWeights - pair.totalWeight) * 10);
+            weightedPairs.Add((pair.basic, pair.additive, weight));
+            totalWeightSum += weight;
+        }
+
+        int rand = Random.Range(0, totalWeightSum);
+        int current = 0;
+        foreach (var item in weightedPairs)
+        {
+            current += item.weight;
+            if (rand < current)
+            {
+                additiveEffect = item.additive;
+                return item.basic;
+            }
+        }
+
+        // ìµœì•…ì˜ fallback (ì´ë¡ ìƒ ë°œìƒ ì•ˆí•¨)
+        var first = weightedPairs[0];
+        additiveEffect = first.additive;
+        return first.basic;
     }
+    #region ìƒí’ˆì— ì˜í•œ ì¹´ë“œ íš¨ê³¼ ë³€ê²½
+    public void ChangeAllProperty(S_Card card) // ì¹´ë“œì˜ ëª¨ë“  ì†ì„±ì„ ë°”ê¿‰ë‹ˆë‹¤.
+    {
+        ChangeAnotherSuit(card);
+        card.StatValue = GetBattleStat(card.Suit);
+        ChangeAnotherNumber(card);
+        card.BasicCondition = GetRandomBasicCondition();
+        card.AdditiveCondition = GetRandomAdditiveCondition(card.BasicCondition);
+        card.Debuff = GetRandomDebuffCondition();
+        card.BasicEffect = GetEffectByConditionWeights(card.BasicCondition, card.AdditiveCondition, card.Debuff, out S_CardAdditiveEffectEnum additiveEffect);
+        card.AdditiveEffect = additiveEffect;
+    }
+    public void ChangeAnotherSuit(S_Card card)
+    {
+        List<S_CardSuitEnum> list = new List<S_CardSuitEnum> { S_CardSuitEnum.Spade, S_CardSuitEnum.Heart, S_CardSuitEnum.Diamond, S_CardSuitEnum.Clover };
+        list = list.Where(x => x != card.Suit).ToList();
+
+        int randomIndex = Random.Range(0, list.Count);
+
+        card.Suit = list[randomIndex];
+        card.StatValue = GetBattleStat(card.Suit);
+    }
+    public void ChangeAnotherNumber(S_Card card)
+    {
+        List<int> list = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        list = list.Where(x => x != card.Number).ToList();
+
+        int randomIndex = Random.Range(0, list.Count);
+
+        card.Number = list[randomIndex];
+    }
+    public void ChangeAllCondition(S_Card card) // ì¡°ê±´ ê°€ì¤‘ì¹˜ê°€ íš¨ê³¼ ê°€ì¤‘ì¹˜ë³´ë‹¤ ê°™ê±°ë‚˜ í¬ê²Œ ì¡°ì •ë¨.
+    {
+        // 1. ê¸°ë³¸ ì¡°ê±´ ë¬´ì‘ìœ„ ì„ íƒ
+        S_CardBasicConditionEnum[] basicOptions = System.Enum.GetValues(typeof(S_CardBasicConditionEnum))
+            .Cast<S_CardBasicConditionEnum>()
+            .Where(x => x != S_CardBasicConditionEnum.None)
+            .ToArray();
+
+        // íŠ¹ì • íš¨ê³¼ ì¡°í•©ì— ë”°ë¥¸ ì œì™¸ ì¡°ê±´
+        if (card.BasicEffect == S_CardBasicEffectEnum.Manipulation || card.BasicEffect == S_CardBasicEffectEnum.Manipulation_CardNumber)
+        {
+            basicOptions = basicOptions.Where(x => x != S_CardBasicConditionEnum.Resolve).ToArray();
+        }
+        // ìƒì„± ë° ì¸ë„ë¥˜ íš¨ê³¼ë©´ ë©”ì•„ë¦¬ ì œì™¸
+        if (card.BasicEffect == S_CardBasicEffectEnum.Creation_Random || card.BasicEffect == S_CardBasicEffectEnum.Creation_SameSuit || card.BasicEffect == S_CardBasicEffectEnum.Creation_SameNumber || card.BasicEffect == S_CardBasicEffectEnum.Creation_PlethoraNumber ||
+                card.BasicEffect == S_CardBasicEffectEnum.Guidance_LeastSuit || card.BasicEffect == S_CardBasicEffectEnum.Guidance_LeastNumber)
+        {
+            basicOptions = basicOptions.Where(x => x != S_CardBasicConditionEnum.Reverb).ToArray();
+        }
+
+        card.BasicCondition = basicOptions[Random.Range(0, basicOptions.Length)];
+        int basicWeight = S_CardEffectMetadata.GetWeights(card.BasicCondition);
+        int effectWeight = S_CardEffectMetadata.GetWeights(card.BasicEffect) + S_CardEffectMetadata.GetWeights(card.AdditiveEffect);
+
+        // 2. í›„ë³´ ìƒì„±
+        var additiveOptions = System.Enum.GetValues(typeof(S_CardAdditiveConditionEnum)).Cast<S_CardAdditiveConditionEnum>();
+        var debuffOptions = System.Enum.GetValues(typeof(S_CardDebuffConditionEnum)).Cast<S_CardDebuffConditionEnum>();
+
+        if (card.BasicCondition != S_CardBasicConditionEnum.Reverb)
+        {
+            additiveOptions = additiveOptions.Where(x =>
+                x != S_CardAdditiveConditionEnum.Reverb_SameSuit &&
+                x != S_CardAdditiveConditionEnum.Reverb_SameNumber &&
+                x != S_CardAdditiveConditionEnum.Reverb_PlethoraNumber &&
+                x != S_CardAdditiveConditionEnum.Reverb_CursedCard
+            );
+        }
+
+        bool hasAdditive = Random.value < 0.5f;
+        bool hasDebuff = Random.value < 0.25f;
+
+        var additiveCandidates = hasAdditive ? additiveOptions : new[] { S_CardAdditiveConditionEnum.None };
+        var debuffCandidates = hasDebuff ? debuffOptions : new[] { S_CardDebuffConditionEnum.None };
+
+        List<(S_CardAdditiveConditionEnum additive, S_CardDebuffConditionEnum debuff, int totalWeight)> validCandidates = new();
+
+        foreach (var add in additiveCandidates)
+        {
+            int addWeight = S_CardEffectMetadata.GetWeights(add);
+            foreach (var deb in debuffCandidates)
+            {
+                int debWeight = S_CardEffectMetadata.GetWeights(deb);
+                int total = basicWeight + addWeight + debWeight;
+
+                if (total >= effectWeight)
+                {
+                    validCandidates.Add((add, deb, total));
+                }
+            }
+        }
+
+        // 3. ì˜ˆì™¸ ì²˜ë¦¬: ì¡°ê±´ ê°€ì¤‘ì¹˜ë¥¼ ë§Œì¡±í•˜ëŠ” ì¡°í•©ì´ ì—†ì„ ê²½ìš° â†’ ê°•ì œë¡œ ì¡°í•© ìƒì„±
+        if (validCandidates.Count == 0)
+        {
+            // ëª¨ë“  ì¡°í•© ì¤‘ ì¡°ê±´ ê°€ì¤‘ì¹˜ê°€ ê°€ì¥ ë†’ì€ ê²ƒ ì„ íƒ
+            var forcedCandidates = new List<(S_CardAdditiveConditionEnum additive, S_CardDebuffConditionEnum debuff, int totalWeight)>();
+
+            foreach (var add in additiveOptions)
+            {
+                int addWeight = S_CardEffectMetadata.GetWeights(add);
+                foreach (var deb in debuffOptions)
+                {
+                    int debWeight = S_CardEffectMetadata.GetWeights(deb);
+                    int total = basicWeight + addWeight + debWeight;
+
+                    if (total >= effectWeight)
+                    {
+                        forcedCandidates.Add((add, deb, total));
+                    }
+                }
+            }
+
+            // ê°€ì¤‘ì¹˜ ì°¨ì´ ìµœì†Œ ì¡°í•© ì„ íƒ
+            var closest = forcedCandidates.OrderBy(x => Mathf.Abs(x.totalWeight - effectWeight)).First();
+            card.AdditiveCondition = closest.additive;
+            card.Debuff = closest.debuff;
+            return;
+        }
+
+        // 4. ê°€ì¤‘ì¹˜ ê¸°ë°˜ ì„ íƒ
+        var weightedList = validCandidates.Select(x => new
+        {
+            x.additive,
+            x.debuff,
+            weight = Mathf.Max(1, 100 - (x.totalWeight - effectWeight) * 10)
+        }).ToList();
+
+        int totalWeightSum = weightedList.Sum(x => x.weight);
+        int rand = Random.Range(0, totalWeightSum);
+        int current = 0;
+
+        foreach (var item in weightedList)
+        {
+            current += item.weight;
+            if (rand < current)
+            {
+                card.AdditiveCondition = item.additive;
+                card.Debuff = item.debuff;
+                return;
+            }
+        }
+
+        // fallback
+        card.AdditiveCondition = weightedList[0].additive;
+        card.Debuff = weightedList[0].debuff;
+    }
+    public void ChangeAllEffect(S_Card card) // íš¨ê³¼ ê°€ì¤‘ì¹˜ê°€ ì¡°ê±´ ê°€ì¤‘ì¹˜ë³´ë‹¤ ê°™ê±°ë‚˜ ë‚®ê²Œ ì¡°ì •ë¨
+    {
+        card.BasicEffect = GetEffectByConditionWeights(card.BasicCondition, card.AdditiveCondition, card.Debuff, out card.AdditiveEffect);
+    }
+    public void ChangeBasicCondition(S_Card card)
+    {
+        card.BasicCondition = GetRandomBasicCondition();
+    }
+    public void ChangeAdditiveCondition(S_Card card) // ë§ˆì§€ë§‰ì— ì´ íš¨ê³¼ë¥¼ ë°”ê¾¸ë‹ˆ êµ³ì´ ê²°ì˜ë‚˜ ë©”ì•„ë¦¬ì— ë”°ë¥¸ ì¡°ê±´ ì œì•½ ì œê±° ë¶ˆí•„ìš”
+    {
+        S_CardAdditiveConditionEnum[] array = System.Enum.GetValues(typeof(S_CardAdditiveConditionEnum))
+            .Cast<S_CardAdditiveConditionEnum>()
+            //.Where(x => x != S_CardAdditiveConditionEnum.None)
+            .ToArray();
+
+        int randomIndex = Random.Range(0, array.Length);
+        card.AdditiveCondition = array[randomIndex];
+    }
+    public void ChangedDebuffCondition(S_Card card)
+    {
+        S_CardDebuffConditionEnum[] array = System.Enum.GetValues(typeof(S_CardDebuffConditionEnum))
+            .Cast<S_CardDebuffConditionEnum>()
+            .ToArray();
+
+        int randomIndex = Random.Range(0, array.Length);
+        card.Debuff = array[randomIndex];
+    }
+    public void AddDebuffCondition(S_Card card)
+    {
+        S_CardDebuffConditionEnum[] array = System.Enum.GetValues(typeof(S_CardDebuffConditionEnum))
+            .Cast<S_CardDebuffConditionEnum>()
+            .Where(x => x != S_CardDebuffConditionEnum.None)
+            .ToArray();
+
+        int randomIndex = Random.Range(0, array.Length);
+        card.Debuff = array[randomIndex];
+    }
+    public void DeleteDebuffCondition(S_Card card)
+    {
+        card.Debuff = S_CardDebuffConditionEnum.None;
+    }
+    public void ChangeBasicEffect(S_Card card) // ë§ˆì§€ë§‰ì— ì´ ì»¨ë””ì…˜ì„ ë°”ê¾¸ë‹ˆ êµ³ì´ ê²°ì˜ë‚˜ ë©”ì•„ë¦¬ì— ë”°ë¥¸ íš¨ê³¼ ì œê±° ë¶ˆí•„ìš”
+    {
+        S_CardBasicEffectEnum[] array = System.Enum.GetValues(typeof(S_CardBasicEffectEnum))
+            .Cast<S_CardBasicEffectEnum>()
+            .Where(x => x != S_CardBasicEffectEnum.None)
+            .ToArray();
+
+        card.BasicEffect = array[Random.Range(0, array.Length)];
+    }
+    public void ChangeAdditiveEffect(S_Card card)
+    {
+        S_CardAdditiveEffectEnum[] array = System.Enum.GetValues(typeof(S_CardAdditiveEffectEnum))
+            .Cast<S_CardAdditiveEffectEnum>()
+            //.Where(x => x != S_CardAdditiveEffectEnum.None)
+            .ToArray();
+
+        card.AdditiveEffect = array[Random.Range(0, array.Length)];
+    }
+    #endregion
 }
 
 public enum S_CardSuitEnum
@@ -319,24 +542,24 @@ public enum S_CardDebuffConditionEnum
 {
     None,
     Breakdown,
-    Paranoia,
+    Delusion,
     Spell,
     Rebel,
 }
 public enum S_CardBasicEffectEnum
 {
     None,
-    Increase_Strength,
-    Increase_Mind,
-    Increase_Luck,
-    Increase_AllStat,
-    Break_Zenith,
-    Break_Genesis,
+    Growth_Strength,
+    Growth_Mind,
+    Growth_Luck,
+    Growth_AllStat,
+    Break_MostStat,
+    Break_RandomStat,
     Manipulation,
-    Manipulation_Cheat,
-    Manipulation_Judge,
+    Manipulation_CardNumber,
+    Manipulation_CleanHit,
     Resistance,
-    Resistance_Indomitable,
+    Resistance_CardNumber,
     Harm_Strength,
     Harm_Mind,
     Harm_Luck,
@@ -346,12 +569,12 @@ public enum S_CardBasicEffectEnum
     Harm_Carnage,
     Tempering,
     Plunder,
-    Plunder_Raid,
-    Creation,
+    Plunder_Break,
+    Creation_Random,
     Creation_SameSuit,
     Creation_SameNumber,
     Creation_PlethoraNumber,
-    AreaExpansion,
+    Expansion,
     First_SameSuit,
     First_LeastSuit,
     First_SameNumber,

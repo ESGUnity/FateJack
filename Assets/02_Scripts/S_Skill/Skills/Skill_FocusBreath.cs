@@ -7,46 +7,48 @@ public class Skill_FocusBreath : S_Skill
     public Skill_FocusBreath() : base
     (
         "Skill_FocusBreath",
-        "ÀüÁýÁß È£Èí",
-        "Ä«µå¸¦ 3Àå È÷Æ®ÇÒ ¶§¸¶´Ù Àü°³¸¦ ¾ò½À´Ï´Ù.",
+        "ì „ì§‘ì¤‘ í˜¸í¡",
+        "ì¹´ë“œë¥¼ 3ìž¥ ížˆíŠ¸í•  ë•Œë§ˆë‹¤ ì „ê°œë¥¼ ì–»ìŠµë‹ˆë‹¤.",
         S_SkillConditionEnum.Reverb,
         S_SkillPassiveEnum.NeedActivatedCount,
         false
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount >= 3;
-
-        return CanActivateEffect;
-    }
     public override async Task ActiveSkill(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
-            await eA.GetExpansion(this, new List<S_Card>() { hitCard });
+            await eA.GetExpansion(this, hitCard);
 
             ActivatedCount = 0;
+            IsMeetCondition = false;
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        if (isTwist)
+        int count  = S_PlayerCard.Instance.GetPreStackCards().Count % 3;
+
+        if (S_PlayerCard.Instance.GetPreStackCards().Count == 0)
         {
-            ActivatedCount--;
-            if (ActivatedCount <= 0)
-            {
-                ActivatedCount = 3;
-            }
+            ActivatedCount = 0;
         }
         else
         {
-            ActivatedCount++;
+            if (count == 0)
+            {
+                ActivatedCount = 3;
+            }
+            else
+            {
+                ActivatedCount = count;
+            }
         }
+
+        IsMeetCondition = ActivatedCount >= 3;
     }
     public override string GetDescription()
     {
-        return $"{Description}\n{ActivatedCount}Àå Â°";
+        return $"{Description}\nížˆíŠ¸í•œ ì¹´ë“œ : {ActivatedCount}ìž¥ ì§¸";
     }
     public override S_Skill Clone()
     {

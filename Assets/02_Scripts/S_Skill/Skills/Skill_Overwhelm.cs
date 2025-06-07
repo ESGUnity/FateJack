@@ -7,37 +7,29 @@ public class Skill_Overwhelm : S_Skill
     public Skill_Overwhelm() : base
     (
         "Skill_Overwhelm",
-        "¾Ğµµ",
-        "½ºÅÃ¿¡ ½ºÆäÀÌµå Ä«µå°¡ Á¤È®È÷ 6ÀÇ ¹è¼ö¸¸Å­ ÀÖ´Ù¸é ½ºÅÄµå ½Ã ÈûÀ» 2¹è Áõ°¡½ÃÅµ´Ï´Ù.",
+        "ì••ë„",
+        "ìŠ¤íƒì— ìŠ¤í˜ì´ë“œ ì¹´ë“œê°€ ì •í™•íˆ 6ì˜ ë°°ìˆ˜ë§Œí¼ ìˆë‹¤ë©´ ìŠ¤íƒ ë“œ ì‹œ í˜ì„ 2ë°° ì¦ê°€ì‹œí‚µë‹ˆë‹¤.",
         S_SkillConditionEnum.Stand,
         S_SkillPassiveEnum.NeedActivatedCount,
         false
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount % 6 == 0 ? true : false;
-
-        return CanActivateEffect;
-    }
     public override async Task ActiveSkill(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
-            await eA.AddBattleStats(this, new List<S_Card>(), S_BattleStatEnum.Strength, 2);
+            await eA.AddBattleStats(this, null, S_BattleStatEnum.Strength, S_PlayerStat.Instance.CurrentStrength);
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
         ActivatedCount = S_EffectChecker.Instance.GetSameSuitCardsInStack(S_CardSuitEnum.Spade).Count;
-    }
-    public override void StartNewTurn(int currentTrial)
-    {
 
+        IsMeetCondition = ActivatedCount > 0 && ActivatedCount % 6 == 0;
     }
     public override string GetDescription()
     {
-        return $"{Description}\n{ActivatedCount}Àå Â°";
+        return $"{Description}\nìŠ¤í˜ì´ë“œ ì¹´ë“œ : {ActivatedCount}ì¥";
     }
     public override S_Skill Clone()
     {

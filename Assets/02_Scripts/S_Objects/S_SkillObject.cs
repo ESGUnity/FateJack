@@ -1,129 +1,96 @@
 using DG.Tweening;
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.EventSystems;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.UI;
 
-public class S_SkillObject : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+// ìƒì ì—ì„œë§Œ ì“°ì´ëŠ” ì˜¤ë¸Œì íŠ¸í˜• ëŠ¥ë ¥(ì›ë˜ ëŠ¥ë ¥ì€ UIë‹¤)
+public class S_SkillObject : MonoBehaviour
 {
-    [Header("´É·Â Á¤º¸")]
+    [Header("ì£¼ìš” ì •ë³´")]
     [HideInInspector] public S_Skill SkillInfo;
 
-    [Header("¾À ¿ÀºêÁ§Æ®")]
-    [SerializeField] GameObject sprite_IsMeetConditionEffect;
+    [Header("ì»´í¬ë„ŒíŠ¸")]
+    [SerializeField] SpriteRenderer sprite_Skill;
+    [SerializeField] SpriteRenderer sprite_DecideBtn;
+    [SerializeField] TMP_Text text_Decide;
 
-    [Header("ÄÄÆ÷³ÍÆ®")]
-    Image image_Icon;
-    TMP_Text text_Count;
-
-    [Header("¿¬Ãâ °ü·Ã")]
-    Vector3 originScale;
-    const float BOUNCING_SCALE_AMOUNT = 1.25f;
+    [Header("VFX")]
+    [HideInInspector] public PRS OriginPRS;
+    [HideInInspector] public int OriginOrder;
+    public const float POINTER_ENTER_ANIMATION_TIME = 0.15f;
+    const float POINTER_ENTER_SCALE_AMOUNT = 1.2f;
 
     void Awake()
     {
-        // ÀÚ½Ä ¿ÀºêÁ§Æ®ÀÇ ÄÄÆ÷³ÍÆ® °¡Á®¿À±â
+        // ìì‹ ì˜¤ë¸Œì íŠ¸ì˜ ì»´í¬ë„ŒíŠ¸ ê°€ì ¸ì˜¤ê¸°
         Transform[] transforms = GetComponentsInChildren<Transform>(true);
         TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
-        Image[] images = GetComponentsInChildren<Image>(true);
+        SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>(true);
 
-        // ÄÄÆ÷³ÍÆ® ÇÒ´ç
-        image_Icon = Array.Find(images, c => c.gameObject.name.Equals("Image_Icon"));
-        text_Count = Array.Find(texts, c => c.gameObject.name.Equals("Text_Count"));
-
-        originScale = transform.localScale;
-    }
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit || 
-            S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.HittingCard || 
-            S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Store || 
-            S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Dialog)
-        {
-            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(Camera.main, GetComponent<RectTransform>().position);
-            S_HoverSkillSystem.Instance.PointerEnterForSkillObject(SkillInfo, screenPos);
-        }
-    }
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        S_HoverSkillSystem.Instance.PointerExitForSkillObject();
-    }
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.StoreByRemove)
-        {
-            S_StoreInfoSystem.Instance.SelectSkillByOption(SkillInfo);
-        }
+        // ì»´í¬ë„ŒíŠ¸ í• ë‹¹
+        sprite_Skill = System.Array.Find(sprites, c => c.gameObject.name.Equals("Sprite_Skill"));
+        sprite_DecideBtn = System.Array.Find(sprites, c => c.gameObject.name.Equals("Sprite_DecideBtn"));
+        text_Decide = System.Array.Find(texts, c => c.gameObject.name.Equals("Text_Decide"));
     }
 
-    public void SetSkillObjectInfo(S_Skill skill) // ÃÊ±âÈ­
+    #region ì´ˆê¸°í™”
+    public void SetSkillInfo(S_Skill skill)
     {
         SkillInfo = skill;
 
-        if (SkillInfo.Passive == S_SkillPassiveEnum.NeedActivatedCount)
-        {
-            text_Count.gameObject.SetActive(true);
-            text_Count.text = SkillInfo.ActivatedCount.ToString();
-        }
-        else
-        {
-            text_Count.gameObject.SetActive(false);
-        }
+        var cardEffectOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_{skill.Key}");
+        cardEffectOpHandle.Completed += OnSkillSpriteLoadComplete;
 
-        // ÀÌ¹ÌÁö ¼¼ÆÃ
-        var skillOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_{SkillInfo.Key}");
-        skillOpHandle.Completed += OnSkillSpriteLoadComplete;
+        // ì†ŒíŒ…ì˜¤ë” ì„¤ì •
+        SetOrder(1);
     }
     void OnSkillSpriteLoadComplete(AsyncOperationHandle<Sprite> opHandle)
     {
         if (opHandle.Status == AsyncOperationStatus.Succeeded)
         {
-            image_Icon.sprite = opHandle.Result;
+            sprite_Skill.sprite = opHandle.Result;
         }
     }
-
-    public void UpdateSkillObject() // ´É·Â ¿ÀºêÁ§Æ® ¾÷µ¥ÀÌÆ®
+    public void SetOrder(int order) // ìƒí’ˆì˜ ì˜¤ë” ì„¤ì •
     {
-        if (SkillInfo.Passive == S_SkillPassiveEnum.NeedActivatedCount)
-        {
-            ChangeCountVFXTween(int.Parse(text_Count.text), SkillInfo.ActivatedCount, text_Count);
-        }
-        else
-        {
-            text_Count.gameObject.SetActive(false);
-        }
+        sprite_Skill.sortingLayerName = "WorldObject";
+        sprite_Skill.sortingOrder = order;
 
-        if (SkillInfo.CanActivateEffect)
-        {
-            sprite_IsMeetConditionEffect.SetActive(true);
-        }
-        else
-        {
-            sprite_IsMeetConditionEffect.SetActive(false);
-        }
+        sprite_DecideBtn.sortingLayerName = "WorldObject";
+        sprite_DecideBtn.sortingOrder = order + 1;
+
+        text_Decide.GetComponent<MeshRenderer>().sortingLayerName = "WorldObject";
+        text_Decide.GetComponent<MeshRenderer>().sortingOrder = order + 2;
     }
-    void ChangeCountVFXTween(int oldValue, int newValue, TMP_Text statText)
+    public void SetAlphaValue(float value, float duration)
     {
-        int currentNumber = oldValue;
-        DOTween.To
-            (
-                () => currentNumber,
-                x => { currentNumber = x; statText.text = currentNumber.ToString(); },
-                newValue,
-                S_EffectActivator.Instance.GetEffectLifeTime() * 0.8f
-            ).SetEase(Ease.OutQuart);
+        sprite_Skill.DOFade(value, duration);
+        sprite_DecideBtn.DOFade(value, duration);
+        text_Decide.DOFade(value, duration);
     }
-
-    public void BouncingVFX()
+    #endregion
+    #region í¬ì¸í„° í•¨ìˆ˜
+    public void PointerEnterOnSkillSprite()
     {
-        transform.DOKill();
+        sprite_Skill.transform.DOScale(OriginPRS.Scale * POINTER_ENTER_SCALE_AMOUNT, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
 
-        Sequence seq = DOTween.Sequence();
-
-        seq.Append(transform.DOScale(originScale * BOUNCING_SCALE_AMOUNT, S_EffectActivator.Instance.GetEffectLifeTime() / 4).SetEase(Ease.OutQuad))
-            .Append(transform.DOScale(originScale, S_EffectActivator.Instance.GetEffectLifeTime() / 4).SetEase(Ease.OutQuad));
+        S_HoverInfoSystem.Instance.ActivateHoverInfo(SkillInfo, sprite_Skill.gameObject);
     }
+    public void PointerExitOnSkillSprite()
+    {
+        sprite_Skill.transform.DOScale(OriginPRS.Scale, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+
+        S_HoverInfoSystem.Instance.DeactiveHoverInfo();
+    }
+    public void ClickDecideBtn()
+    {
+        S_StoreInfoSystem.Instance.DecideSkillOption(SkillInfo);
+
+        S_HoverInfoSystem.Instance.DeactiveHoverInfo();
+
+        Destroy(gameObject);
+    }
+    #endregion
 }

@@ -6,36 +6,33 @@ using UnityEngine;
 
 public class S_EffectActivator : MonoBehaviour
 {
-    [Header("ÇÁ¸®ÆÕ")]
+    [SerializeField] GameObject sprite_Foe;
+
+    [Header("í”„ë¦¬íŒ¹")]
     [SerializeField] GameObject prefab_EffectLog;
 
-    [Header("ÄÄÆ÷³ÍÆ®")]
+    [Header("ì»´í¬ë„ŒíŠ¸")]
     S_PlayerCard pCard;
     S_PlayerStat pStat;
     S_PlayerSkill pSkill;
 
-    [Header("¾Ö´Ô °ü·Ã")]
+    [Header("ì• ë‹˜ ê´€ë ¨")]
     float EFFECT_SPEED = 1;
     const float HIT_AND_SORT_STACK_TIME = 0.3f;
-    const float EFFECT_LIFE_TIME = 0.5f;
-    const float EFFECT_LOG_LIFE_TIME = 0.8f; // ·Î±×´Â È¿°úº¸´Ù Á¶±İ ´õ ¿À·¡ »ì¾Æ³²´Â´Ù.
+    const float EFFECT_LIFE_TIME = 0.35f;
+    const float EFFECT_LOG_LIFE_TIME = 0.85f; // ë¡œê·¸ëŠ” íš¨ê³¼ë³´ë‹¤ ì¡°ê¸ˆ ë” ì˜¤ë˜ ì‚´ì•„ë‚¨ëŠ”ë‹¤.
     int logStartPosX = 80;
     int logStartPosY = 40;
-    int logStartPosYOffset = 300;
+    int logStartPosYOffset = 250;
     int logMoveAmount = 30;
 
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static S_EffectActivator instance;
     public static S_EffectActivator Instance { get { return instance; } }
 
     void Awake()
     {
-        // ÄÄÆ÷³ÍÆ® ÇÒ´ç
-        pCard = S_PlayerCard.Instance;
-        pStat = S_PlayerStat.Instance;
-        pSkill = S_PlayerSkill.Instance;
-
-        // ½Ì±ÛÅÏ
+        // ì‹±ê¸€í„´
         if (instance == null)
         {
             instance = this;
@@ -45,248 +42,222 @@ public class S_EffectActivator : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-    #region ÁÖ¿ä È¿°ú ¹ßµ¿
-    public async Task ActivateHitCard(S_Card hitCard, S_CardOrderTypeEnum type) // È÷Æ® ½Ã ¹ßÇö, ¸Ş¾Æ¸® ¹ßµ¿
+    void Start()
     {
-        List<S_Card> hittedCards = new List<S_Card> { hitCard };
+        // ì»´í¬ë„ŒíŠ¸ í• ë‹¹
+        pCard = S_PlayerCard.Instance;
+        pStat = S_PlayerStat.Instance;
+        pSkill = S_PlayerSkill.Instance;
+    }
 
-        // Ä«µå ¼ıÀÚ¿¡ µû¸¥ ¼ıÀÚ ÇÕ°ú ´É·ÂÄ¡ °è»ê
-        if (hitCard.AdditiveEffect == S_CardAdditiveEffectEnum.ColdBlood) // ³ÃÇ÷ÀÏ °æ¿ì ¾ÈÇÔ.
+    #region ì£¼ìš” íš¨ê³¼ ë°œë™
+    public async Task ActivateHitCard(S_Card hitCard, S_CardOrderTypeEnum type) // íˆíŠ¸ ì‹œ ë°œí˜„, ë©”ì•„ë¦¬ ë°œë™
+    {
+        // ì¹´ë“œ ìˆ«ìì— ë”°ë¥¸ ìˆ«ì í•©ê³¼ ëŠ¥ë ¥ì¹˜ ê³„ì‚°
+        if (hitCard.AdditiveEffect == S_CardAdditiveEffectEnum.ColdBlood) // ëƒ‰í˜ˆì¼ ê²½ìš° ì•ˆí•¨.
         {
-            // ¹Ù¿î½Ì Ä«µå
-            if (hittedCards != null && hittedCards.Count > 0)
+            // ë°”ìš´ì‹± ì¹´ë“œ
+            if (hitCard != null)
             {
-                S_StackInfoSystem.Instance.BouncingStackCards(hittedCards);
+                S_StackInfoSystem.Instance.BouncingStackCard(hitCard);
             }
 
-            // ·Î±× »ı¼º
-            GenerateEffectLog("³ÃÇ÷ Ä«µå!");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog("ëƒ‰í˜ˆ ì¹´ë“œ!");
         }
-        else if (type == S_CardOrderTypeEnum.IllusionHit) // È¯»ó Ä«µå¿©µµ ¾ÈÇÔ.
+        else // ëƒ‰í˜ˆì´ ì•„ë‹ˆë¼ë©´ ê³„ì‚°
         {
-            // ¹Ù¿î½Ì Ä«µå
-            if (hittedCards != null && hittedCards.Count > 0)
-            {
-                S_StackInfoSystem.Instance.BouncingStackCards(hittedCards);
-            }
-
-            // ·Î±× »ı¼º
-            GenerateEffectLog("È¯»ó Ä«µå!");
-        }
-        else if (type == S_CardOrderTypeEnum.BasicHit)// ³ÃÇ÷µµ È¯»óµµ ¾Æ´Ñ ±×³É È÷Æ®¶ó¸é ¼ıÀÚ ÇÕ °è»ê
-        {
-            await AddOrSubtractStackSum(hittedCards, hitCard.Number);
-            await AddOrSubtractBattleStats(hittedCards, hitCard.StatValue, hitCard.Number);
+            await AddOrSubtractStackSum(hitCard, hitCard.Number);
+            await AddOrSubtractBattleStats(hitCard, hitCard.StatValue, hitCard.Number);
         }
 
-        // È÷Æ® Ä«µå°¡ ¹ßÇö ½Ã
-        if (!hitCard.IsCursed && hitCard.BasicCondition == S_CardBasicConditionEnum.Unleash && hitCard.CanActivateEffect)
+        // íˆíŠ¸ ì¹´ë“œê°€ ë°œí˜„ ì‹œ
+        if (!hitCard.IsCursed && hitCard.BasicCondition == S_CardBasicConditionEnum.Unleash && hitCard.IsMeetCondition)
         {
-            // È¿°ú ¹ßµ¿
+            // íš¨ê³¼ ë°œë™
             await ActivateBasicEffect(hitCard);
             await ActivateDebuff(hitCard);
             await ActivateAdditiveEffect(hitCard);
-
-            hitCard.CanActivateEffect = false;
-            S_StackInfoSystem.Instance.UpdateStackCardsState();
         }
-        else if (hitCard.IsCursed && hitCard.BasicCondition == S_CardBasicConditionEnum.Unleash && hitCard.CanActivateEffect) // ¹ßÇöÀÎµ¥ Ãß°¡ Á¶°Çµµ ÃæÁ·Çß´Âµ¥ ÀúÁÖ¹Ş¾Ò´Ù¸é ÀúÁÖ¹ŞÀº Ä«µå!¶ó°í Ç¥½ÃÇØÁÖ±â
+        else if (hitCard.IsCursed && hitCard.BasicCondition == S_CardBasicConditionEnum.Unleash && hitCard.IsMeetCondition) // ë°œí˜„ì¸ë° ì¶”ê°€ ì¡°ê±´ë„ ì¶©ì¡±í–ˆëŠ”ë° ì €ì£¼ë°›ì•˜ë‹¤ë©´ ì €ì£¼ë°›ì€ ì¹´ë“œ!ë¼ê³  í‘œì‹œí•´ì£¼ê¸°
         {
-            await CursedCardActivateEffect(hittedCards);
+            await CursedCardActivateEffect(hitCard);
         }
+        S_PlayerCard.Instance.CheckCardMeetConditionAfterEffect(hitCard);
 
-        // È÷Æ® Ä«µå¿¡ ÀÇÇÑ ¸Ş¾Æ¸® ¹ßµ¿
+        // íˆíŠ¸ ì¹´ë“œì— ì˜í•œ ë©”ì•„ë¦¬ ë°œë™
         foreach (S_Card targetCard in pCard.GetPreStackCards())
         {
-            if (!targetCard.IsCursed && targetCard.BasicCondition == S_CardBasicConditionEnum.Reverb && targetCard.CanActivateEffect)
+            if (!targetCard.IsCursed && targetCard.BasicCondition == S_CardBasicConditionEnum.Reverb && targetCard.IsMeetCondition && targetCard != hitCard)
             {
-                // È¿°ú ¹ßµ¿
+                // íš¨ê³¼ ë°œë™
                 await ActivateBasicEffect(targetCard, hitCard);
                 await ActivateDebuff(targetCard, hitCard);
                 await ActivateAdditiveEffect(targetCard, hitCard);
-
-                targetCard.CanActivateEffect = IsMeetAdditiveCondition(targetCard);
-                S_StackInfoSystem.Instance.UpdateStackCardsState();
             }
-            else if (targetCard.IsCursed && targetCard.BasicCondition == S_CardBasicConditionEnum.Reverb && targetCard.CanActivateEffect)
+            else if (targetCard.IsCursed && targetCard.BasicCondition == S_CardBasicConditionEnum.Reverb && targetCard.IsMeetCondition && targetCard != hitCard)
             {
-                await CursedCardActivateEffect(new List<S_Card> { targetCard });
+                await CursedCardActivateEffect(targetCard);
             }
+
+            S_PlayerCard.Instance.CheckCardMeetConditionAfterEffect(targetCard);
         }
 
-        // Ä«µåµéÀÇ ÃÊ·ÏºÒ Ã¼Å©(¹ßÇö, ÀÏºÎ ¸Ş¾Æ¸®µéÀº ²¨Áü)
-        foreach (S_Card targetCard in pCard.GetPreStackCards())
-        {
-            targetCard.CanActivateEffect = IsMeetAdditiveCondition(targetCard);
-
-            if (targetCard.BasicCondition == S_CardBasicConditionEnum.Unleash)
-            {
-                targetCard.CanActivateEffect = false;
-            }
-        }
-        S_StackInfoSystem.Instance.UpdateStackCardsState();
-
-        // Ä«µå¿¡ ÀÇÇÑ È÷½ºÅä¸® ÀúÀå
+        // ì¹´ë“œì— ì˜í•œ íˆìŠ¤í† ë¦¬ ì €ì¥
         pStat.SaveStatHistory(hitCard, S_StatHistoryTriggerEnum.Card);
     }
-    public async Task ActivatedResolveCard() // ½ºÅÄµå ½Ã °áÀÇ ¹ßµ¿
+    public async Task ActivatedResolveCard() // ìŠ¤íƒ ë“œ ì‹œ ê²°ì˜ ë°œë™
     {
-        // °áÀÇ ¹ßµ¿
+        // ê²°ì˜ ë°œë™
         foreach (S_Card targetCard in pCard.GetPreStackCards())
         {
-            if (!targetCard.IsCursed && targetCard.BasicCondition == S_CardBasicConditionEnum.Resolve && targetCard.CanActivateEffect)
+            if (!targetCard.IsCursed && targetCard.BasicCondition == S_CardBasicConditionEnum.Resolve && targetCard.IsMeetCondition)
             {
-                // È¿°ú ¹ßµ¿
+                // íš¨ê³¼ ë°œë™
                 await ActivateBasicEffect(targetCard);
                 await ActivateDebuff(targetCard);
                 await ActivateAdditiveEffect(targetCard);
             }
-            else if (targetCard.IsCursed && targetCard.BasicCondition == S_CardBasicConditionEnum.Resolve && targetCard.CanActivateEffect)
+            else if (targetCard.IsCursed && targetCard.BasicCondition == S_CardBasicConditionEnum.Resolve && targetCard.IsMeetCondition)
             {
-                await CursedCardActivateEffect(new List<S_Card> { targetCard });
+                await CursedCardActivateEffect(targetCard);
             }
+
+            S_PlayerCard.Instance.CheckCardMeetConditionAfterEffect(targetCard);
         }
     }
-    public async Task ApplyDelusionAsync(S_Card card) // ¸Á»óÀÌ ÀÖ´Ù¸é ¸Á»óÀ» °Å´Â ¸Ş¼­µå
+    public async Task ApplyDelusionAsync(S_Card card) // ë§ìƒì´ ìˆë‹¤ë©´ ë§ìƒì„ ê±°ëŠ” ë©”ì„œë“œ
     {
         if (pStat.IsDelusion)
         {
-            // ¸Á»ó ÃÊ±âÈ­
+            // ë§ìƒ ì´ˆê¸°í™”
             pStat.IsDelusion = false;
 
-            // ÀúÁÖ Ã³¸®
+            // ì €ì£¼ ì²˜ë¦¬
             await CurseCard(card, null);
 
-            // ¸Á»ó ÇØÁ¦ÇÏ´Â È¿°ú
-            GenerateEffectLog("¸Á»ó ÇØÁ¦µÊ!");
+            // ë§ìƒ í•´ì œí•˜ëŠ” íš¨ê³¼
+            GenerateEffectLog("ë§ìƒ í•´ì œë¨!");
             S_StatInfoSystem.Instance.ChangeSpecialAbility();
-            S_PlayerInfoSystem.Instance.ChangeSpecialAbilityVFX();
             await Task.Delay(Mathf.RoundToInt(GetEffectLifeTime() * 1000));
         }
     }
-    public async Task AppliedFirstAsync() // ¿ì¼± »ç¿ë ½Ã È£Ãâ
+    public async Task AppliedFirstAsync() // ìš°ì„  ì‚¬ìš© ì‹œ í˜¸ì¶œ
     {
         pStat.IsFirst = S_FirstEffectEnum.None;
 
-        // ¿ì¼± ÇØÁ¦ÇÏ´Â È¿°ú
-        GenerateEffectLog("¿ì¼± »ç¿ëµÊ!");
+        // ìš°ì„  í•´ì œí•˜ëŠ” íš¨ê³¼
+        GenerateEffectLog("ìš°ì„  ì‚¬ìš©ë¨!");
         S_StatInfoSystem.Instance.ChangeSpecialAbility();
-        S_PlayerInfoSystem.Instance.ChangeSpecialAbilityVFX();
         await Task.Delay(Mathf.RoundToInt(GetEffectLifeTime() * 1000));
     }
-    public async Task AppliedExpansionAsync() // Àü°³ »ç¿ë ½Ã È£Ãâ
+    public async Task AppliedExpansionAsync() // ì „ê°œ ì‚¬ìš© ì‹œ í˜¸ì¶œ
     {
         pStat.IsExpansion = false;
 
-        // Àü°³ ÇØÁ¦ÇÏ´Â È¿°ú
-        GenerateEffectLog("Àü°³ »ç¿ëµÊ!");
+        // ì „ê°œ í•´ì œí•˜ëŠ” íš¨ê³¼
+        GenerateEffectLog("ì „ê°œ ì‚¬ìš©ë¨!");
         S_StatInfoSystem.Instance.ChangeSpecialAbility();
-        S_PlayerInfoSystem.Instance.ChangeSpecialAbilityVFX();
         await Task.Delay(Mathf.RoundToInt(GetEffectLifeTime() * 1000));
     }
-    async Task ActivateBasicEffect(S_Card card, S_Card reverbedCard = null) // ±âº» È¿°ú ¹ßµ¿
+    async Task ActivateBasicEffect(S_Card card, S_Card reverbedCard = null) // ê¸°ë³¸ íš¨ê³¼ ë°œë™
     {
-        List<S_Card> hittedCard = new List<S_Card> { card };
-
         if (card.IsCursed) 
         {
             if (IsMeetAdditiveCondition(card))
             {
-                await CursedCardActivateEffect(hittedCard);
+                await CursedCardActivateEffect(card);
             }
             return;
         }
 
-        if (reverbedCard != null) hittedCard.Add(reverbedCard);
-
         switch (card.BasicEffect)
         {
             case S_CardBasicEffectEnum.None: break;
-            case S_CardBasicEffectEnum.Increase_Strength: await AddOrSubtractBattleStats(hittedCard, S_BattleStatEnum.Strength, 3); break;
-            case S_CardBasicEffectEnum.Increase_Mind: await AddOrSubtractBattleStats(hittedCard, S_BattleStatEnum.Mind, 3); break;
-            case S_CardBasicEffectEnum.Increase_Luck: await AddOrSubtractBattleStats(hittedCard, S_BattleStatEnum.Luck, 3); break;
-            case S_CardBasicEffectEnum.Increase_AllStat: await AddOrSubtractBattleStats(hittedCard, S_BattleStatEnum.AllStat, 2); break;
-            case S_CardBasicEffectEnum.Break_Zenith:
+            case S_CardBasicEffectEnum.Growth_Strength: await AddOrSubtractBattleStats(card, S_BattleStatEnum.Strength, 3); break;
+            case S_CardBasicEffectEnum.Growth_Mind: await AddOrSubtractBattleStats(card, S_BattleStatEnum.Mind, 3); break;
+            case S_CardBasicEffectEnum.Growth_Luck: await AddOrSubtractBattleStats(card, S_BattleStatEnum.Luck, 3); break;
+            case S_CardBasicEffectEnum.Growth_AllStat: await AddOrSubtractBattleStats(card, S_BattleStatEnum.AllStat, 2); break;
+            case S_CardBasicEffectEnum.Break_MostStat:
                 S_BattleStatEnum highestStat = S_EffectChecker.Instance.GetHighestStats(out int val);
                 int amount = (int)System.Math.Round(val * 0.5f, System.MidpointRounding.AwayFromZero);
-                await AddOrSubtractBattleStats(hittedCard, highestStat, amount);
+                await AddOrSubtractBattleStats(card, highestStat, amount);
                 break;
-            case S_CardBasicEffectEnum.Break_Genesis:
+            case S_CardBasicEffectEnum.Break_RandomStat:
                 List<S_BattleStatEnum> randomStats = new List<S_BattleStatEnum>() { S_BattleStatEnum.Strength, S_BattleStatEnum.Mind, S_BattleStatEnum.Luck };
                 S_BattleStatEnum randomStat = randomStats[Random.Range(0, randomStats.Count)];
                 int amount2 = 0;
                 if (randomStat == S_BattleStatEnum.Strength) amount2 = pStat.CurrentStrength;
                 else if (randomStat == S_BattleStatEnum.Mind) amount2 = pStat.CurrentMind;
                 else if (randomStat == S_BattleStatEnum.Luck) amount2 = pStat.CurrentLuck;
-                await AddOrSubtractBattleStats(hittedCard, randomStat, amount2);
+                await AddOrSubtractBattleStats(card, randomStat, amount2);
                 break;
-            case S_CardBasicEffectEnum.Manipulation: await AddOrSubtractStackSum(hittedCard, -2); break;
-            case S_CardBasicEffectEnum.Manipulation_Cheat: await AddOrSubtractStackSum(hittedCard, -card.Number); break;
-            case S_CardBasicEffectEnum.Manipulation_Judge:
+            case S_CardBasicEffectEnum.Manipulation: await AddOrSubtractStackSum(card, -2); break;
+            case S_CardBasicEffectEnum.Manipulation_CardNumber: await AddOrSubtractStackSum(card, -card.Number); break;
+            case S_CardBasicEffectEnum.Manipulation_CleanHit:
                 int judgeValue = pStat.CurrentLimit - pStat.StackSum;
-                await AddOrSubtractStackSum(hittedCard, judgeValue);
+                await AddOrSubtractStackSum(card, judgeValue);
                 break;
-            case S_CardBasicEffectEnum.Resistance: await AddOrSubtractLimit(hittedCard, 1); break;
-            case S_CardBasicEffectEnum.Resistance_Indomitable: await AddOrSubtractLimit(hittedCard, card.Number); break;
-            case S_CardBasicEffectEnum.Harm_Strength: await HarmCreature(hittedCard, S_BattleStatEnum.Strength, pStat.CurrentStrength); break;
-            case S_CardBasicEffectEnum.Harm_Mind: await HarmCreature(hittedCard, S_BattleStatEnum.Mind, pStat.CurrentMind); break;
-            case S_CardBasicEffectEnum.Harm_Luck: await HarmCreature(hittedCard, S_BattleStatEnum.Luck, pStat.CurrentLuck); break;
-            case S_CardBasicEffectEnum.Harm_StrengthAndMind: await HarmCreature(hittedCard, S_BattleStatEnum.Strength_Mind, pStat.CurrentStrength * pStat.CurrentMind); break;
-            case S_CardBasicEffectEnum.Harm_StrengthAndLuck: await HarmCreature(hittedCard, S_BattleStatEnum.Strength_Luck, pStat.CurrentStrength * pStat.CurrentLuck); break;
-            case S_CardBasicEffectEnum.Harm_MindAndLuck: await HarmCreature(hittedCard, S_BattleStatEnum.Mind_Luck, pStat.CurrentMind * pStat.CurrentLuck); break;
-            case S_CardBasicEffectEnum.Harm_Carnage: await HarmCreature(hittedCard, S_BattleStatEnum.AllStat, pStat.CurrentStrength * pStat.CurrentMind * pStat.CurrentLuck); break;
-            case S_CardBasicEffectEnum.Tempering: await AddOrSubtractDetermination(hittedCard, 1); break;
-            case S_CardBasicEffectEnum.Plunder: await AddOrSubtractGold(hittedCard, 2); break;
-            case S_CardBasicEffectEnum.Plunder_Raid: await AddOrSubtractGold(hittedCard, pStat.CurrentGold); break;
-            case S_CardBasicEffectEnum.Creation:
-                await CreationCard(hittedCard);
+            case S_CardBasicEffectEnum.Resistance: await AddOrSubtractLimit(card, 1); break;
+            case S_CardBasicEffectEnum.Resistance_CardNumber: await AddOrSubtractLimit(card, card.Number); break;
+            case S_CardBasicEffectEnum.Harm_Strength: await HarmFoe(card, S_BattleStatEnum.Strength, pStat.CurrentStrength); break;
+            case S_CardBasicEffectEnum.Harm_Mind: await HarmFoe(card, S_BattleStatEnum.Mind, pStat.CurrentMind); break;
+            case S_CardBasicEffectEnum.Harm_Luck: await HarmFoe(card, S_BattleStatEnum.Luck, pStat.CurrentLuck); break;
+            case S_CardBasicEffectEnum.Harm_StrengthAndMind: await HarmFoe(card, S_BattleStatEnum.Strength_Mind, pStat.CurrentStrength * pStat.CurrentMind); break;
+            case S_CardBasicEffectEnum.Harm_StrengthAndLuck: await HarmFoe(card, S_BattleStatEnum.Strength_Luck, pStat.CurrentStrength * pStat.CurrentLuck); break;
+            case S_CardBasicEffectEnum.Harm_MindAndLuck: await HarmFoe(card, S_BattleStatEnum.Mind_Luck, pStat.CurrentMind * pStat.CurrentLuck); break;
+            case S_CardBasicEffectEnum.Harm_Carnage: await HarmFoe(card, S_BattleStatEnum.AllStat, pStat.CurrentStrength * pStat.CurrentMind * pStat.CurrentLuck); break;
+            case S_CardBasicEffectEnum.Tempering: await AddOrSubtractDetermination(card, 1); break;
+            case S_CardBasicEffectEnum.Plunder: await AddOrSubtractGold(card, 2); break;
+            case S_CardBasicEffectEnum.Plunder_Break: await AddOrSubtractGold(card, pStat.CurrentGold); break;
+            case S_CardBasicEffectEnum.Creation_Random:
+                await CreationCard(card);
                 break;
             case S_CardBasicEffectEnum.Creation_SameSuit:
-                await CreationCard(hittedCard, -1, card.Suit);
+                await CreationCard(card, -1, card.Suit);
                 break;
             case S_CardBasicEffectEnum.Creation_SameNumber:
-                await CreationCard(hittedCard, card.Number);
+                await CreationCard(card, card.Number);
                 break;
             case S_CardBasicEffectEnum.Creation_PlethoraNumber:
                 int[] ints = new int[] { 8, 9, 10 };
                 int plethoraNum = ints[Random.Range(0, ints.Length)];
-                await CreationCard(hittedCard, plethoraNum);
+                await CreationCard(card, plethoraNum);
                 break;
-            case S_CardBasicEffectEnum.AreaExpansion: await GetExpansion(hittedCard); break;
+            case S_CardBasicEffectEnum.Expansion: await GetExpansion(card); break;
             case S_CardBasicEffectEnum.First_SameSuit: 
                 switch (card.Suit)
                 {
-                    case S_CardSuitEnum.Spade: await GetFirst(hittedCard, S_FirstEffectEnum.Spade); break;
-                    case S_CardSuitEnum.Heart: await GetFirst(hittedCard, S_FirstEffectEnum.Heart); break;
-                    case S_CardSuitEnum.Diamond: await GetFirst(hittedCard, S_FirstEffectEnum.Diamond); break;
-                    case S_CardSuitEnum.Clover: await GetFirst(hittedCard, S_FirstEffectEnum.Clover); break;
+                    case S_CardSuitEnum.Spade: await GetFirst(card, S_FirstEffectEnum.Spade); break;
+                    case S_CardSuitEnum.Heart: await GetFirst(card, S_FirstEffectEnum.Heart); break;
+                    case S_CardSuitEnum.Diamond: await GetFirst(card, S_FirstEffectEnum.Diamond); break;
+                    case S_CardSuitEnum.Clover: await GetFirst(card, S_FirstEffectEnum.Clover); break;
                 }
                 break;
-            case S_CardBasicEffectEnum.First_LeastSuit: await GetFirst(hittedCard, S_FirstEffectEnum.LeastSuit); break;
+            case S_CardBasicEffectEnum.First_LeastSuit: await GetFirst(card, S_FirstEffectEnum.LeastSuit); break;
             case S_CardBasicEffectEnum.First_SameNumber:
                 switch (card.Number)
                 {
-                    case 1: await GetFirst(hittedCard, S_FirstEffectEnum.One); break;
-                    case 2: await GetFirst(hittedCard, S_FirstEffectEnum.Two); break;
-                    case 3: await GetFirst(hittedCard, S_FirstEffectEnum.Three); break;
-                    case 4: await GetFirst(hittedCard, S_FirstEffectEnum.Four); break;
-                    case 5: await GetFirst(hittedCard, S_FirstEffectEnum.Five); break;
-                    case 6: await GetFirst(hittedCard, S_FirstEffectEnum.Six); break;
-                    case 7: await GetFirst(hittedCard, S_FirstEffectEnum.Seven); break;
-                    case 8: await GetFirst(hittedCard, S_FirstEffectEnum.Eight); break;
-                    case 9: await GetFirst(hittedCard, S_FirstEffectEnum.Nine); break;
-                    case 10: await GetFirst(hittedCard, S_FirstEffectEnum.Ten); break;
+                    case 1: await GetFirst(card, S_FirstEffectEnum.One); break;
+                    case 2: await GetFirst(card, S_FirstEffectEnum.Two); break;
+                    case 3: await GetFirst(card, S_FirstEffectEnum.Three); break;
+                    case 4: await GetFirst(card, S_FirstEffectEnum.Four); break;
+                    case 5: await GetFirst(card, S_FirstEffectEnum.Five); break;
+                    case 6: await GetFirst(card, S_FirstEffectEnum.Six); break;
+                    case 7: await GetFirst(card, S_FirstEffectEnum.Seven); break;
+                    case 8: await GetFirst(card, S_FirstEffectEnum.Eight); break;
+                    case 9: await GetFirst(card, S_FirstEffectEnum.Nine); break;
+                    case 10: await GetFirst(card, S_FirstEffectEnum.Ten); break;
                 }
                 break;
-            case S_CardBasicEffectEnum.First_CleanHitNumber: await GetFirst(hittedCard, S_FirstEffectEnum.CleanHitNumber); break;
-            case S_CardBasicEffectEnum.Undertow: await ActivateUndertow(hittedCard); break;
+            case S_CardBasicEffectEnum.First_CleanHitNumber: await GetFirst(card, S_FirstEffectEnum.CleanHitNumber); break;
+            case S_CardBasicEffectEnum.Undertow: await ActivateUndertow(card); break;
             case S_CardBasicEffectEnum.Guidance_LeastSuit:
                 S_EffectChecker.Instance.GetLeastSuitCardsInDeck(out S_CardSuitEnum leastSuit);
                 List<S_Card> lsCards = S_EffectChecker.Instance.GetRandomCardsInImmediateDeck(999, leastSuit, -1);
                 if (lsCards.Count > 0)
                 {
-                    await GuidanceCard(hittedCard, lsCards);
+                    await GuidanceCard(card, lsCards);
                 }
                 break;
             case S_CardBasicEffectEnum.Guidance_LeastNumber:
@@ -294,41 +265,37 @@ public class S_EffectActivator : MonoBehaviour
                 List<S_Card> lnCards = S_EffectChecker.Instance.GetRandomCardsInImmediateDeck(999, S_CardSuitEnum.None, leastNum);
                 if (lnCards.Count > 0)
                 {
-                    await GuidanceCard(hittedCard, lnCards);
+                    await GuidanceCard(card, lnCards);
                 }
                 break;
             default: break;
         }
     }
-    async Task ActivateDebuff(S_Card card, S_Card reverbedCard = null) // µğ¹öÇÁ ¹ßµ¿
+    async Task ActivateDebuff(S_Card card, S_Card reverbedCard = null) // ë””ë²„í”„ ë°œë™
     {
-        List<S_Card> hittedCard = new List<S_Card> { card };
-
         if (card.IsCursed)
         {
             if (IsMeetAdditiveCondition(card))
             {
-                await CursedCardActivateEffect(hittedCard);
+                await CursedCardActivateEffect(card);
             }
             return;
         }
 
-        if (reverbedCard != null) hittedCard.Add(reverbedCard);
-
-        switch (card.DebuffCondition)
+        switch (card.Debuff)
         {
             case S_CardDebuffConditionEnum.None: break;
-            case S_CardDebuffConditionEnum.Breakdown: await ExclusionRandomCards(1, S_CardSuitEnum.None, -1, hittedCard); break;
-            case S_CardDebuffConditionEnum.Paranoia: await GetDelusion(hittedCard); break;
+            case S_CardDebuffConditionEnum.Breakdown: await ExclusionRandomCards(1, S_CardSuitEnum.None, -1, card); break;
+            case S_CardDebuffConditionEnum.Delusion: await GetDelusion(card); break;
             case S_CardDebuffConditionEnum.Spell: 
-                await CurseRandomCards(1, S_CardSuitEnum.None, -1, true, false, hittedCard);
-                await CurseRandomCards(1, S_CardSuitEnum.None, -1, false, true, hittedCard);
+                await CurseRandomCards(1, S_CardSuitEnum.None, -1, true, false, card);
+                await CurseRandomCards(1, S_CardSuitEnum.None, -1, false, true, card);
                 break;
-            case S_CardDebuffConditionEnum.Rebel: await AddOrSubtractLimit(hittedCard, -1); break;
+            case S_CardDebuffConditionEnum.Rebel: await AddOrSubtractLimit(card, -1); break;
             default: break;
         }
     }
-    async Task ActivateAdditiveEffect(S_Card card, S_Card reverbedCard = null) // Ãß°¡ È¿°ú ¹ßµ¿
+    async Task ActivateAdditiveEffect(S_Card card, S_Card reverbedCard = null) // ì¶”ê°€ íš¨ê³¼ ë°œë™
     {
         List<S_Card> hittedCard = new List<S_Card> { card };
 
@@ -336,7 +303,7 @@ public class S_EffectActivator : MonoBehaviour
         {
             if (IsMeetAdditiveCondition(card))
             {
-                await CursedCardActivateEffect(hittedCard);
+                await CursedCardActivateEffect(card);
             }
             return;
         }
@@ -411,7 +378,7 @@ public class S_EffectActivator : MonoBehaviour
                 }
                 break;
             case S_CardAdditiveEffectEnum.Reflux_Overdrive:
-                if (pStat.GetCurrentHealth() == 1) // Ã¼·ÂÀÌ 1ÀÏ ¶§ ¹ßµ¿
+                if (pStat.GetCurrentHealth() == 1) // ì²´ë ¥ì´ 1ì¼ ë•Œ ë°œë™
                 {
                     for (int i = 0; i < 2; i++)
                     {
@@ -423,8 +390,8 @@ public class S_EffectActivator : MonoBehaviour
         }
     }
     #endregion
-    #region Ãß°¡ Á¶°Ç °è»ê
-    public bool IsMeetAdditiveCondition(S_Card targetCard, S_Card hitCard = null) // Ãß°¡ Á¶°Ç °è»ê
+    #region ì¶”ê°€ ì¡°ê±´ ê³„ì‚°
+    public bool IsMeetAdditiveCondition(S_Card targetCard, S_Card hitCard = null) // ì¶”ê°€ ì¡°ê±´ ê³„ì‚°
     {
         bool meetCondition = false;
 
@@ -523,151 +490,149 @@ public class S_EffectActivator : MonoBehaviour
         return meetCondition;
     }
     #endregion
-    #region Ä«µå ±âº» È¿°ú(ÇÑ°è, ¼ıÀÚÇÕ, Èû, Á¤½Å·Â, Çà¿î, ÀÇÁö, °ñµå) (È¿°úÀÇ ¹ßµ¿ ¼ø¼­ : ½ÇÁ¦ °è»ê -> Ä«µå ¹Ù¿î½º -> ·Î±× »ı¼º -> ÇÃ·¹ÀÌ¾î ÂÊ VFX)
-    async Task AddOrSubtractStackSum(List<S_Card> triggerCards, int value)
+    #region ì¹´ë“œ ê¸°ë³¸ íš¨ê³¼(í•œê³„, ìˆ«ìí•©, í˜, ì •ì‹ ë ¥, í–‰ìš´, ì˜ì§€, ê³¨ë“œ) (íš¨ê³¼ì˜ ë°œë™ ìˆœì„œ : ì‹¤ì œ ê³„ì‚° -> ì¹´ë“œ ë°”ìš´ìŠ¤ -> ë¡œê·¸ ìƒì„± -> í”Œë ˆì´ì–´ ìª½ VFX)
+    async Task AddOrSubtractStackSum(S_Card triggerCards, int value)
     {
-        // value¸¦ ¼ıÀÚ ÇÕ¿¡ ´õÇÏ±â
+        // valueë¥¼ ìˆ«ì í•©ì— ë”í•˜ê¸°
         pStat.AddOrSubtractStackSum(value);
 
-        // ¹Ù¿î½Ì Ä«µå
-        if (triggerCards != null && triggerCards.Count > 0)
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
         {
-            S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
         }
 
-        // ¾ç¼öÀÏ ¶§
+        // ì–‘ìˆ˜ì¼ ë•Œ
         if (value > 0)
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"¼ıÀÚ ÇÕ +{value}");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"ìˆ«ì í•© +{value}");
 
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_StackSum);
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_StackSum, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
         else
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"¼ıÀÚ ÇÕ {value}");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"ìˆ«ì í•© {value}");
 
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_StackSum);
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_StackSum, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
 
-        // ¹ö½ºÆ®¿Í Å¬¸°È÷Æ® Ãß°¡ Ã¼Å©
+        // ë²„ìŠ¤íŠ¸ì™€ í´ë¦°íˆíŠ¸ ì¶”ê°€ ì²´í¬
         pStat.CheckBurstAndCleanHit();
 
-        // ¹ö½ºÆ®¿Í Å¬¸°È÷Æ®¿¡ µû¸¥ È¿°ú ÄÑ±â
+        // ë²„ìŠ¤íŠ¸ì™€ í´ë¦°íˆíŠ¸ì— ë”°ë¥¸ íš¨ê³¼ ì¼œê¸°
         S_StatInfoSystem.Instance.ChangeSpecialAbility();
-        S_PlayerInfoSystem.Instance.ChangeSpecialAbilityVFX();
 
-        // ¹ö½ºÆ® ¹× Å¬¸°È÷Æ® È®ÀÎ
+        // ë²„ìŠ¤íŠ¸ ë° í´ë¦°íˆíŠ¸ í™•ì¸
         if (pStat.IsBurst)
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"¹ö½ºÆ®!");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"ë²„ìŠ¤íŠ¸!");
 
-            await Task.Delay(Mathf.RoundToInt(GetEffectLifeTime() * 1000));
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Burst, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
         else if (pStat.IsCleanHit)
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"Å¬¸°È÷Æ®!");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"í´ë¦°íˆíŠ¸!");
 
-            await Task.Delay(Mathf.RoundToInt(GetEffectLifeTime() * 1000));
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.CleanHit, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
     }
-    async Task AddOrSubtractLimit(List<S_Card> triggerCards, int value)
+    async Task AddOrSubtractLimit(S_Card triggerCards, int value)
     {
-        // value¸¦ ÇÑ°è¿¡ ´õÇÏ±â
+        // valueë¥¼ í•œê³„ì— ë”í•˜ê¸°
         pStat.AddOrSubtractLimit(value);
 
-        // ¹Ù¿î½Ì Ä«µå
-        if (triggerCards != null && triggerCards.Count > 0)
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
         {
-            S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
         }
 
-        // ¾ç¼öÀÏ ¶§
+        // ì–‘ìˆ˜ì¼ ë•Œ
         if (value > 0)
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"ÇÑ°è +{value}");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"í•œê³„ +{value}");
 
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Limit);
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Limit, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
         else
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"ÇÑ°è {value}");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"í•œê³„ {value}");
 
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Limit);
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Limit, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
 
-        // ¹ö½ºÆ®¿Í Å¬¸°È÷Æ® Ãß°¡ Ã¼Å©
+        // ë²„ìŠ¤íŠ¸ì™€ í´ë¦°íˆíŠ¸ ì¶”ê°€ ì²´í¬
         pStat.CheckBurstAndCleanHit();
 
-        // ¹ö½ºÆ®¿Í Å¬¸°È÷Æ®¿¡ µû¸¥ È¿°ú ÄÑ±â
+        // ë²„ìŠ¤íŠ¸ì™€ í´ë¦°íˆíŠ¸ì— ë”°ë¥¸ íš¨ê³¼ ì¼œê¸°
         S_StatInfoSystem.Instance.ChangeSpecialAbility();
-        S_PlayerInfoSystem.Instance.ChangeSpecialAbilityVFX();
 
-        // ¹ö½ºÆ® ¹× Å¬¸°È÷Æ® È®ÀÎ
+        // ë²„ìŠ¤íŠ¸ ë° í´ë¦°íˆíŠ¸ í™•ì¸
         if (pStat.IsBurst)
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"¹ö½ºÆ®!");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"ë²„ìŠ¤íŠ¸!");
 
-            await Task.Delay(Mathf.RoundToInt(GetEffectLifeTime() * 1000));
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Burst, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
         else if (pStat.IsCleanHit)
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"Å¬¸°È÷Æ®!");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"í´ë¦°íˆíŠ¸!");
 
-            await Task.Delay(Mathf.RoundToInt(GetEffectLifeTime() * 1000));
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.CleanHit, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
     }
-    async Task AddOrSubtractBattleStats(List<S_Card> triggerCards, S_BattleStatEnum stat, int value)
+    async Task AddOrSubtractBattleStats(S_Card triggerCards, S_BattleStatEnum stat, int value)
     {
-        // ¹Ù¿î½Ì Ä«µå
-        if (triggerCards != null && triggerCards.Count > 0)
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
         {
-            S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
         }
 
-        // ´É·ÂÄ¡ Áõ°¡
+        // ëŠ¥ë ¥ì¹˜ ì¦ê°€
         if (value > 0)
         {
             switch (stat)
             {
                 case S_BattleStatEnum.Strength:
                     pStat.AddStrength(value);
-                    GenerateEffectLog($"Èû +{value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Strength);
+                    GenerateEffectLog($"í˜ +{value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Strength, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     break;
                 case S_BattleStatEnum.Mind:
                     pStat.AddMind(value);
-                    GenerateEffectLog($"Á¤½Å·Â +{value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Mind);
+                    GenerateEffectLog($"ì •ì‹ ë ¥ +{value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Mind, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     break;
                 case S_BattleStatEnum.Luck:
                     pStat.AddLuck(value);
-                    GenerateEffectLog($"Çà¿î +{value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Luck);
+                    GenerateEffectLog($"í–‰ìš´ +{value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Luck, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     break;
                 case S_BattleStatEnum.AllStat:
                     pStat.AddStrength(value);
-                    GenerateEffectLog($"Èû +{value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Strength);
+                    GenerateEffectLog($"í˜ +{value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Strength, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
 
                     pStat.AddMind(value);
-                    GenerateEffectLog($"Á¤½Å·Â +{value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Mind);
+                    GenerateEffectLog($"ì •ì‹ ë ¥ +{value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Mind, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
 
                     pStat.AddLuck(value);
-                    GenerateEffectLog($"Çà¿î +{value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Luck);
+                    GenerateEffectLog($"í–‰ìš´ +{value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Luck, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     break;
                 case S_BattleStatEnum.Random:
                     List<S_BattleStatEnum> stats = new() { S_BattleStatEnum.Strength, S_BattleStatEnum.Mind, S_BattleStatEnum.Luck };
@@ -675,20 +640,20 @@ public class S_EffectActivator : MonoBehaviour
                     if (s == S_BattleStatEnum.Strength)
                     {
                         pStat.AddStrength(value);
-                        GenerateEffectLog($"Èû +{value}");
-                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Strength);
+                        GenerateEffectLog($"í˜ +{value}");
+                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Strength, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     }
                     else if (s == S_BattleStatEnum.Mind)
                     {
                         pStat.AddMind(value);
-                        GenerateEffectLog($"Á¤½Å·Â +{value}");
-                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Mind);
+                        GenerateEffectLog($"ì •ì‹ ë ¥ +{value}");
+                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Mind, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     }
                     else if (s == S_BattleStatEnum.Luck)
                     {
                         pStat.AddLuck(value);
-                        GenerateEffectLog($"Çà¿î +{value}");
-                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Luck);
+                        GenerateEffectLog($"í–‰ìš´ +{value}");
+                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Luck, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     }
                     break;
             }
@@ -699,31 +664,31 @@ public class S_EffectActivator : MonoBehaviour
             {
                 case S_BattleStatEnum.Strength:
                     pStat.AddStrength(value);
-                    GenerateEffectLog($"Èû {value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Strength);
+                    GenerateEffectLog($"í˜ {value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Strength, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     break;
                 case S_BattleStatEnum.Mind:
                     pStat.AddMind(value);
-                    GenerateEffectLog($"Á¤½Å·Â {value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Mind);
+                    GenerateEffectLog($"ì •ì‹ ë ¥ {value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Mind, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     break;
                 case S_BattleStatEnum.Luck:
                     pStat.AddLuck(value);
-                    GenerateEffectLog($"Çà¿î {value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Luck);
+                    GenerateEffectLog($"í–‰ìš´ {value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Luck, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     break;
                 case S_BattleStatEnum.AllStat:
                     pStat.AddStrength(value);
-                    GenerateEffectLog($"Èû {value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Strength);
+                    GenerateEffectLog($"í˜ {value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Strength, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
 
                     pStat.AddMind(value);
-                    GenerateEffectLog($"Á¤½Å·Â {value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Mind);
+                    GenerateEffectLog($"ì •ì‹ ë ¥ {value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Mind, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
 
                     pStat.AddLuck(value);
-                    GenerateEffectLog($"Çà¿î {value}");
-                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Luck);
+                    GenerateEffectLog($"í–‰ìš´ {value}");
+                    await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Luck, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     break;
                 case S_BattleStatEnum.Random:
                     List<S_BattleStatEnum> stats = new() { S_BattleStatEnum.Strength, S_BattleStatEnum.Mind, S_BattleStatEnum.Luck };
@@ -731,28 +696,28 @@ public class S_EffectActivator : MonoBehaviour
                     if (s == S_BattleStatEnum.Strength)
                     {
                         pStat.AddStrength(value);
-                        GenerateEffectLog($"Èû {value}");
-                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Strength);
+                        GenerateEffectLog($"í˜ {value}");
+                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Strength, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     }
                     else if (s == S_BattleStatEnum.Mind)
                     {
                         pStat.AddMind(value);
-                        GenerateEffectLog($"Á¤½Å·Â {value}");
-                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Mind);
+                        GenerateEffectLog($"ì •ì‹ ë ¥ {value}");
+                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Mind, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     }
                     else if (s == S_BattleStatEnum.Luck)
                     {
                         pStat.AddLuck(value);
-                        GenerateEffectLog($"Çà¿î {value}");
-                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Luck);
+                        GenerateEffectLog($"í–‰ìš´ {value}");
+                        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Luck, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
                     }
                     break;
             }
         }
     }
-    async Task HarmCreature(List<S_Card> triggerCards, S_BattleStatEnum stat, int value)
+    async Task HarmFoe(S_Card triggerCards, S_BattleStatEnum stat, int value)
     {
-        // ÇÇÇØÁÖ±â
+        // í”¼í•´ì£¼ê¸°
         if (pStat.IsBurst)
         {
             value = (value + 1) / 2;
@@ -763,27 +728,27 @@ public class S_EffectActivator : MonoBehaviour
         }
         S_FoeInfoSystem.Instance.DamagedByHarm(value);
 
-        // ¹Ù¿î½Ì Ä«µå
-        if (triggerCards != null && triggerCards.Count > 0)
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
         {
-            S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
         }
 
-        // ·Î±× »ı¼º
+        // ë¡œê·¸ ìƒì„±
         if (pStat.IsBurst)
         {
-            GenerateEffectLog($"{value}ÀÇ °¨¼ÒµÈ ÇÇÇØ(¹ö½ºÆ®)");
+            GenerateEffectLog($"{value}ì˜ ê°ì†Œëœ í”¼í•´(ë²„ìŠ¤íŠ¸)");
         }
         else if (pStat.IsCleanHit)
         {
-            GenerateEffectLog($"{value}ÀÇ Áõ°¡µÈ ÇÇÇØ(Å¬¸°È÷Æ®)");
+            GenerateEffectLog($"{value}ì˜ ì¦ê°€ëœ í”¼í•´(í´ë¦°íˆíŠ¸)");
         }
         else
         {
-            GenerateEffectLog($"{value}ÀÇ ÇÇÇØ");
+            GenerateEffectLog($"{value}ì˜ í”¼í•´");
         }
 
-        // µ¥¹ÌÁö¿¡ µû¶ó Ä«¸Ş¶ó ½¦ÀÌÅ·(ÇÏ½º½ºÅæ)
+        // ë°ë¯¸ì§€ì— ë”°ë¼ ì¹´ë©”ë¼ ì‰ì´í‚¹(í•˜ìŠ¤ìŠ¤í†¤)
         if (value >= S_FoeInfoSystem.Instance.CurrentFoe.MaxHealth)
         {
             ShakeCamera(1.2f);
@@ -801,194 +766,196 @@ public class S_EffectActivator : MonoBehaviour
             ShakeCamera(0.3f);
         }
 
-        // ÇÇÇØ VFX
+        // í”¼í•´ VFX
         switch(stat)
         {
-            case S_BattleStatEnum.Strength: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength); break;
-            case S_BattleStatEnum.Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind); break;
-            case S_BattleStatEnum.Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Luck); break;
-            case S_BattleStatEnum.Strength_Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Mind); break;
-            case S_BattleStatEnum.Strength_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Luck); break;
-            case S_BattleStatEnum.Mind_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind_Luck); break;
-            case S_BattleStatEnum.AllStat: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Carnage); break;
+            case S_BattleStatEnum.Strength: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength, sprite_Foe); break;
+            case S_BattleStatEnum.Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind, sprite_Foe); break;
+            case S_BattleStatEnum.Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Luck, sprite_Foe); break;
+            case S_BattleStatEnum.Strength_Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Mind, sprite_Foe); break;
+            case S_BattleStatEnum.Strength_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Luck, sprite_Foe); break;
+            case S_BattleStatEnum.Mind_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind_Luck, sprite_Foe); break;
+            case S_BattleStatEnum.AllStat: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Carnage, sprite_Foe); break;
         }
     }
-    async Task AddOrSubtractHealth(List<S_Card> triggerCards, int value)
+    async Task AddOrSubtractHealth(S_Card triggerCards, int value)
     {
-        // Ã¼·Â Ãß°¡
+        // ì²´ë ¥ ì¶”ê°€
         pStat.AddOrSubtractHealth(value);
 
-        // ¹Ù¿î½Ì Ä«µå
-        if (triggerCards != null && triggerCards.Count > 0)
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
         {
-            S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
         }
 
-        // ¾ç¼öÀÏ ¶§
+        // ì–‘ìˆ˜ì¼ ë•Œ
         if (value > 0)
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"Ã¼·Â +{value}");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"ì²´ë ¥ +{value}");
 
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Health);
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Health, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
         else
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"Ã¼·Â {value}");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"ì²´ë ¥ {value}");
 
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Health);
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Health, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
     }
-    async Task AddOrSubtractDetermination(List<S_Card> triggerCards, int value)
+    async Task AddOrSubtractDetermination(S_Card triggerCards, int value)
     {
-        // ÀÇÁö Ãß°¡
+        // ì˜ì§€ ì¶”ê°€
         pStat.AddOrSubtractDetermination(value);
 
-        // ¹Ù¿î½Ì Ä«µå
-        if (triggerCards != null && triggerCards.Count > 0)
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
         {
-            S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
         }
 
-        // ¾ç¼öÀÏ ¶§
+        // ì–‘ìˆ˜ì¼ ë•Œ
         if (value > 0)
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"ÀÇÁö +{value}");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"ì˜ì§€ +{value}");
 
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Determination);
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Determination, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
         else
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"ÀÇÁö {value}");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"ì˜ì§€ {value}");
 
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Determination);
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Determination, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
     }
-    async Task AddOrSubtractGold(List<S_Card> triggerCards, int value)
+    async Task AddOrSubtractGold(S_Card triggerCards, int value)
     {
-        // °ñµå Ãß°¡
+        // ê³¨ë“œ ì¶”ê°€
         pStat.AddOrSubtractGold(value);
 
-        // ¹Ù¿î½Ì Ä«µå
-        if (triggerCards != null && triggerCards.Count > 0)
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
         {
-            S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
         }
 
-        // ¾ç¼öÀÏ ¶§
+        // ì–‘ìˆ˜ì¼ ë•Œ
         if (value > 0)
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"°ñµå +{value}");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"ê³¨ë“œ +{value}");
 
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Gold);
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Gold, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
         else
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"°ñµå {value}");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"ê³¨ë“œ {value}");
 
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Gold);
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Gold, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
     }
-    async Task CreationCard(List<S_Card> triggerCards, int number = -1, S_CardSuitEnum suit = S_CardSuitEnum.Random)
+    async Task CreationCard(S_Card triggerCards, int number = -1, S_CardSuitEnum suit = S_CardSuitEnum.Random)
     {
-        // Ä«µå Ã¢Á¶
+        // ì¹´ë“œ ì°½ì¡°
         S_Card creationCard = S_CardManager.Instance.GenerateRandomCard(number, suit);
 
-        // Ä«µå ³»±â
+        // ëƒ‰í˜ˆë¡œ ë°”ê¾¸ê¸°
+        creationCard.IsIllusion = true;
+        creationCard.AdditiveEffect = S_CardAdditiveEffectEnum.ColdBlood;
+
+        // ì¹´ë“œ ë‚´ê¸°
         _ = S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(creationCard, S_CardOrderTypeEnum.IllusionHit);
 
-        // ¹Ù¿î½Ì Ä«µå
-        if (triggerCards != null && triggerCards.Count > 0)
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
         {
-            S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
         }
 
-        // ·Î±× »ı¼º
-        GenerateEffectLog($"Ä«µå »ı¼ºÇÔ!");
+        // ë¡œê·¸ ìƒì„±
+        GenerateEffectLog($"ì¹´ë“œ ìƒì„±í•¨!");
 
-        // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Creation);
+        // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Creation, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
     }
-    async Task GetExpansion(List<S_Card> triggerCards)
+    async Task GetExpansion(S_Card triggerCards)
     {
-        // Àü°³ È¹µæ
+        // ì „ê°œ íšë“
         pStat.IsExpansion = true;
 
-        // ¹Ù¿î½Ì Ä«µå
-        if (triggerCards != null && triggerCards.Count > 0)
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
         {
-            S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
         }
 
-        // ·Î±× »ı¼º
-        GenerateEffectLog($"È÷Æ® ½Ã Ãß°¡ º¸±â!");
+        // ë¡œê·¸ ìƒì„±
+        GenerateEffectLog($"íˆíŠ¸ ì‹œ ì¶”ê°€ ë³´ê¸°!");
 
-        // È¿°ú ¹× ´ë±â
+        // íš¨ê³¼ ë° ëŒ€ê¸°
         S_StatInfoSystem.Instance.ChangeSpecialAbility();
-        S_PlayerInfoSystem.Instance.ChangeSpecialAbilityVFX();
-        await Task.Delay(Mathf.RoundToInt(GetEffectLifeTime() * 1000));
+        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Expansion, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
     }
-    async Task GetFirst(List<S_Card> triggerCards, S_FirstEffectEnum effect)
+    async Task GetFirst(S_Card triggerCards, S_FirstEffectEnum effect)
     {
-        // ¿ì¼± È¹µæ
+        // ìš°ì„  íšë“
         pStat.IsFirst = effect;
 
-        // ¹Ù¿î½Ì Ä«µå
-        if (triggerCards != null && triggerCards.Count > 0)
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
         {
-            S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
         }
 
-        // ·Î±× »ı¼º
+        // ë¡œê·¸ ìƒì„±
         switch (effect)
         {
-            case S_FirstEffectEnum.Spade: GenerateEffectLog($"½ºÆäÀÌµå ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Heart: GenerateEffectLog($"ÇÏÆ® ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Diamond: GenerateEffectLog($"µğ¾Æ¸óµå ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Clover: GenerateEffectLog($"Å¬·Î¹ö ¿ì¼±!"); break;
-            case S_FirstEffectEnum.LeastSuit: GenerateEffectLog($"°¡Àå ÀûÀº ¹®¾ç ¿ì¼±!"); break;
-            case S_FirstEffectEnum.One: GenerateEffectLog($"¼ıÀÚ 1 ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Two: GenerateEffectLog($"¼ıÀÚ 2 ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Three: GenerateEffectLog($"¼ıÀÚ 3 ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Four: GenerateEffectLog($"¼ıÀÚ 4 ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Five: GenerateEffectLog($"¼ıÀÚ 5 ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Six: GenerateEffectLog($"¼ıÀÚ 6 ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Seven: GenerateEffectLog($"¼ıÀÚ 7 ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Eight: GenerateEffectLog($"¼ıÀÚ 8 ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Nine: GenerateEffectLog($"¼ıÀÚ 9 ¿ì¼±!"); break;
-            case S_FirstEffectEnum.Ten: GenerateEffectLog($"¼ıÀÚ 10 ¿ì¼±!"); break;
-            case S_FirstEffectEnum.CleanHitNumber: GenerateEffectLog($"Å¬¸°È÷Æ®µÇ´Â ¼ıÀÚ ¿ì¼±!"); break;
+            case S_FirstEffectEnum.Spade: GenerateEffectLog($"ìŠ¤í˜ì´ë“œ ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Heart: GenerateEffectLog($"í•˜íŠ¸ ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Diamond: GenerateEffectLog($"ë””ì•„ëª¬ë“œ ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Clover: GenerateEffectLog($"í´ë¡œë²„ ìš°ì„ !"); break;
+            case S_FirstEffectEnum.LeastSuit: GenerateEffectLog($"ê°€ì¥ ì ì€ ë¬¸ì–‘ ìš°ì„ !"); break;
+            case S_FirstEffectEnum.One: GenerateEffectLog($"ìˆ«ì 1 ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Two: GenerateEffectLog($"ìˆ«ì 2 ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Three: GenerateEffectLog($"ìˆ«ì 3 ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Four: GenerateEffectLog($"ìˆ«ì 4 ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Five: GenerateEffectLog($"ìˆ«ì 5 ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Six: GenerateEffectLog($"ìˆ«ì 6 ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Seven: GenerateEffectLog($"ìˆ«ì 7 ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Eight: GenerateEffectLog($"ìˆ«ì 8 ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Nine: GenerateEffectLog($"ìˆ«ì 9 ìš°ì„ !"); break;
+            case S_FirstEffectEnum.Ten: GenerateEffectLog($"ìˆ«ì 10 ìš°ì„ !"); break;
+            case S_FirstEffectEnum.CleanHitNumber: GenerateEffectLog($"í´ë¦°íˆíŠ¸ë˜ëŠ” ìˆ«ì ìš°ì„ !"); break;
         }
 
-        // È¿°ú ¹× ´ë±â
+        // íš¨ê³¼ ë° ëŒ€ê¸°
         S_StatInfoSystem.Instance.ChangeSpecialAbility();
-        S_PlayerInfoSystem.Instance.ChangeSpecialAbilityVFX();
-        await Task.Delay(Mathf.RoundToInt(GetEffectLifeTime() * 1000));
+        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.First, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
     }
-    async Task ActivateUndertow(List<S_Card> triggerCards)
+    async Task ActivateUndertow(S_Card triggerCards)
     {
         List<S_Card> stacks = pCard.GetPreStackCards();
         List<S_Card> picked = new();
 
-        if (stacks.Count > 2) // 2Àå ÀÌ»óÀÌ¶ó¸é ¹«ÀÛÀ§ 2Àå »Ì±â
+        if (stacks.Count > 2) // 2ì¥ ì´ìƒì´ë¼ë©´ ë¬´ì‘ìœ„ 2ì¥ ë½‘ê¸°
         {
             picked = stacks
                 .OrderBy(x => UnityEngine.Random.value)
                 .Take(2)
                 .ToList();
         }
-        else // 2Àå ÀÌÇÏ¶ó¸é ±×³É ¸ğµç ½ºÅÃ Ä«µå ¹ßµ¿
+        else // 2ì¥ ì´í•˜ë¼ë©´ ê·¸ëƒ¥ ëª¨ë“  ìŠ¤íƒ ì¹´ë“œ ë°œë™
         {
             picked = stacks;
         }
@@ -997,54 +964,50 @@ public class S_EffectActivator : MonoBehaviour
         {
             foreach (S_Card card in picked)
             {
-                List<S_Card> triggers = new();
-                triggers = triggerCards;
-                triggers.Add(card);
-
-                // ¹Ù¿î½Ì Ä«µå
-                if (triggers != null && triggers.Count > 0)
+                // ë°”ìš´ì‹± ì¹´ë“œ
+                if (triggerCards != null)
                 {
-                    S_StackInfoSystem.Instance.BouncingStackCards(triggers);
+                    S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
                 }
 
-                // ·Î±× »ı¼º
-                GenerateEffectLog($"¹«ÀÛÀ§ Ä«µåÀÇ È¿°ú ¹ßµ¿!");
+                // ë¡œê·¸ ìƒì„±
+                GenerateEffectLog($"ë¬´ì‘ìœ„ ì¹´ë“œì˜ íš¨ê³¼ ë°œë™!");
 
-                // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-                await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Undertow);
+                // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+                await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Undertow, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
 
-                // È¿°ú ¹ßµ¿
+                // íš¨ê³¼ ë°œë™
                 await ActivateBasicEffect(card);
                 await ActivateDebuff(card);
                 await ActivateAdditiveEffect(card);
             }
         }
     }
-    async Task GuidanceCard(List<S_Card> triggerCards, List<S_Card> guidanceCards)
+    async Task GuidanceCard(S_Card triggerCards, List<S_Card> guidanceCards)
     {
         foreach (S_Card card in guidanceCards)
         {
-            // Ä«µå ³»±â
+            // ì¹´ë“œ ë‚´ê¸°
             _ = S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(card, S_CardOrderTypeEnum.BasicHit);
 
-            // ¹Ù¿î½Ì Ä«µå
-            if (triggerCards != null && triggerCards.Count > 0)
+            // ë°”ìš´ì‹± ì¹´ë“œ
+            if (triggerCards != null)
             {
-                S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+                S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
             }
 
-            // ·Î±× »ı¼º
-            GenerateEffectLog($"µ¦¿¡¼­ È÷Æ®ÇÔ!");
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog($"ë±ì—ì„œ íˆíŠ¸í•¨!");
 
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Guidance);
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+            await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Guidance, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
         }
     }
     #endregion
-    #region µğ¹öÇÁ È¿°ú
-    async Task CurseCard(S_Card cursedCard, List<S_Card> triggerCards = null)
+    #region ë””ë²„í”„ íš¨ê³¼
+    async Task CurseCard(S_Card cursedCard, S_Card triggerCards = null)
     {
-        // ÀúÁÖ³»¸®±â(¸é¿ªÀÌ¶ó¸é ¾ÈÇÔ)
+        // ì €ì£¼ë‚´ë¦¬ê¸°(ë©´ì—­ì´ë¼ë©´ ì•ˆí•¨)
         if (cursedCard.AdditiveEffect != S_CardAdditiveEffectEnum.Immunity)
         {
             cursedCard.IsCursed = true;
@@ -1054,53 +1017,54 @@ public class S_EffectActivator : MonoBehaviour
             cursedCard.IsCursed = false;
         }
 
-        if (cursedCard.IsInDeck) // µ¦¿¡ ÀÖ´Â Ä«µå¸¦ ÀúÁÖÇÑ °æ¿ì UICard·Î º¸¿©ÁÖ±â
+        if (cursedCard.IsInDeck) // ë±ì— ìˆëŠ” ì¹´ë“œë¥¼ ì €ì£¼í•œ ê²½ìš° UICardë¡œ ë³´ì—¬ì£¼ê¸°
         {
-            // Ä«µåÀÇ ÀúÁÖ ÀÌÆåÆ® ÄÑ±â
+            // ì¹´ë“œì˜ ì €ì£¼ ì´í™íŠ¸ ì¼œê¸°
             S_DeckInfoSystem.Instance.UpdateDeckCardsState();
 
-            // UICard·Î µ¦¿¡ ÀÖ´Â ÀúÁÖ¹ŞÀº Ä«µå º¸¿©ÁÖ±â
+            // UICardë¡œ ë±ì— ìˆëŠ” ì €ì£¼ë°›ì€ ì¹´ë“œ ë³´ì—¬ì£¼ê¸°
             S_UICardEffecter.Instance.CurseDeckCardVFX(cursedCard);
 
-            // ¹Ù¿î½Ì Ä«µå
-            if (triggerCards != null && triggerCards.Count > 0)
+            // ë°”ìš´ì‹± ì¹´ë“œ
+            if (triggerCards != null)
             {
-                S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+                S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
             }
         }
-        else // ½ºÅÃ¿¡ ÀÖ´Â Ä«µå¸¦ ÀúÁÖÇÑ °æ¿ì 
+        else // ìŠ¤íƒì— ìˆëŠ” ì¹´ë“œë¥¼ ì €ì£¼í•œ ê²½ìš° 
         {
-            // Ä«µåÀÇ ÀúÁÖ ÀÌÆåÆ® ÄÑ±â
+            // ì¹´ë“œì˜ ì €ì£¼ ì´í™íŠ¸ ì¼œê¸°
             S_StackInfoSystem.Instance.UpdateStackCardsState();
 
-            // ÀúÁÖÇÑ Ä«µå ¹× Æ®¸®°Å Ä«µå ¹Ù¿î½Ì VFX
-            List<S_Card> cards = new() { cursedCard };
-            if (triggerCards != null && triggerCards.Count > 0)
+            // ì €ì£¼í•œ ì¹´ë“œ ë° íŠ¸ë¦¬ê±° ì¹´ë“œ ë°”ìš´ì‹± VFX
+            if (triggerCards != null)
             {
-                cards.AddRange(triggerCards);
+                S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
             }
-            S_StackInfoSystem.Instance.BouncingStackCards(cards);
+
+            S_StackInfoSystem.Instance.BouncingStackCard(cursedCard);
         }
 
-        // ¸é¿ª Ä«µå¸¦ ÀúÁÖÇÏ·ÁÇßÀ¸¸é º°µµÀÇ ·Î±×¿Í ÀÌ¹ÌÁö VFX 
+        // ë©´ì—­ ì¹´ë“œë¥¼ ì €ì£¼í•˜ë ¤í–ˆìœ¼ë©´ ë³„ë„ì˜ ë¡œê·¸ì™€ ì´ë¯¸ì§€ VFX 
         if (cursedCard.IsCursed)
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog("ÀúÁÖ¹ŞÀ½!");
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog("ì €ì£¼ë°›ìŒ!");
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
             await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Cursed);
         }
         else
         {
-            // ·Î±× »ı¼º
-            GenerateEffectLog("ÀúÁÖ ÀúÇ×ÇÔ!!(¸é¿ªÄ«µå)");
-            // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
+            // ë¡œê·¸ ìƒì„±
+            GenerateEffectLog("ì €ì£¼ ì €í•­í•¨!!(ë©´ì—­ì¹´ë“œ)");
+            // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
             await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.ResistanceCurse);
         }
     }
-    async Task CurseRandomCards(int count, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1, bool inDeck = true, bool inStack = false, List<S_Card> triggerCards = null) // Á¶°ÇÀÌ ÀÖÀ¸¸é Á¶°Ç´ë·Î ·£´ı ÀúÁÖ, ¾Æ´Ï¸é ±×³É ·£´ı ÀúÁÖ
+    async Task CurseRandomCards(int count, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1, bool inDeck = true, bool inStack = false, S_Card triggerCards = null) // ì¡°ê±´ì´ ìˆìœ¼ë©´ ì¡°ê±´ëŒ€ë¡œ ëœë¤ ì €ì£¼, ì•„ë‹ˆë©´ ê·¸ëƒ¥ ëœë¤ ì €ì£¼
     {
         List<S_Card> cursedCards = new();
+
         if (inDeck)
         {
             cursedCards.AddRange(S_EffectChecker.Instance.GetRandomCardsInImmediateDeck(count, suit, num));
@@ -1118,7 +1082,7 @@ public class S_EffectActivator : MonoBehaviour
             }
         }
     }
-    async Task ExclusionRandomCards(int count, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1, List<S_Card> triggerCards = null) // ÀüÃ¼ ·£´ı Á¦¿Ü
+    async Task ExclusionRandomCards(int count, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1, S_Card triggerCards = null) // ì „ì²´ ëœë¤ ì œì™¸
     {
         List<S_Card> exclusionCards = S_EffectChecker.Instance.GetRandomCardsInImmediateDeck(count, suit, num);
 
@@ -1126,129 +1090,131 @@ public class S_EffectActivator : MonoBehaviour
         {
             foreach (S_Card exclusionCard in exclusionCards)
             {
-                // Ä«µå Á¦¿ÜÇÏ±â
+                // ì¹´ë“œ ì œì™¸í•˜ê¸°
                 _ = S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(exclusionCard, S_CardOrderTypeEnum.Exclusion);
 
-                // ¹Ù¿î½Ì Ä«µå
-                if (triggerCards != null && triggerCards.Count > 0)
+                // ë°”ìš´ì‹± ì¹´ë“œ
+                if (triggerCards != null)
                 {
-                    S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+                    S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
                 }
 
-                // ·Î±× »ı¼º
-                GenerateEffectLog($"Ä«µå Á¦¿ÜÇÔ!");
+                // ë¡œê·¸ ìƒì„±
+                GenerateEffectLog($"ì¹´ë“œ ì œì™¸í•¨!");
 
-                // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-                await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Exclusion);
+                // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+                await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Exclusion, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
             }
         }
     }
-    async Task GetDelusion(List<S_Card> triggerCards) // ¸Á»ó
+    async Task GetDelusion(S_Card triggerCards) // ë§ìƒ
     {
-        // Àü°³ È¹µæ
+        // ì „ê°œ íšë“
         pStat.IsDelusion = true;
 
-        // ¹Ù¿î½Ì VFX
-        S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
-
-        // ·Î±× »ı¼º
-        GenerateEffectLog($"¸Á»ó¿¡ °É¸²!");
-
-        // È¿°ú ¹× ´ë±â
-        S_StatInfoSystem.Instance.ChangeSpecialAbility();
-        S_PlayerInfoSystem.Instance.ChangeSpecialAbilityVFX();
-        await Task.Delay(Mathf.RoundToInt(GetEffectLifeTime() * 1000));
-    }
-    async Task CursedCardActivateEffect(List<S_Card> triggerCards) // ÀúÁÖ¹ŞÀº Ä«µå°¡ È¿°ú¸¦ ¹ßµ¿ÇÏ·ÁÇÒ ¶§
-    {
-        // ¹Ù¿î½Ì Ä«µå
-        if (triggerCards != null && triggerCards.Count > 0)
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
         {
-            S_StackInfoSystem.Instance.BouncingStackCards(triggerCards);
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
         }
 
-        // ·Î±× »ı¼º
-        GenerateEffectLog("ÀúÁÖ¹ŞÀº Ä«µå!");
+        // ë¡œê·¸ ìƒì„±
+        GenerateEffectLog($"ë§ìƒì— ê±¸ë¦¼!");
 
-        // ÇÃ·¹ÀÌ¾î ÀÌ¹ÌÁö VFX
-        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Cursed);
+        // íš¨ê³¼ ë° ëŒ€ê¸°
+        S_StatInfoSystem.Instance.ChangeSpecialAbility();
+        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Delusion, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
+    }
+    async Task CursedCardActivateEffect(S_Card triggerCards) // ì €ì£¼ë°›ì€ ì¹´ë“œê°€ íš¨ê³¼ë¥¼ ë°œë™í•˜ë ¤í•  ë•Œ
+    {
+        // ë°”ìš´ì‹± ì¹´ë“œ
+        if (triggerCards != null)
+        {
+            S_StackInfoSystem.Instance.BouncingStackCard(triggerCards);
+        }
+
+        // ë¡œê·¸ ìƒì„±
+        GenerateEffectLog("ì €ì£¼ë°›ì€ ì¹´ë“œ!");
+
+        // í”Œë ˆì´ì–´ ì´ë¯¸ì§€ VFX
+        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Cursed, S_StackInfoSystem.Instance.GetCardObject(triggerCards));
     }
     #endregion
-    #region ´É·Â È¿°ú
-    public async Task AddBattleStats(S_Skill skill, List<S_Card> triggerCards, S_BattleStatEnum stat, int value)
+    #region ëŠ¥ë ¥ íš¨ê³¼
+    public async Task AddBattleStats(S_Skill skill, S_Card triggerCards, S_BattleStatEnum stat, int value)
     {
         S_SkillInfoSystem.Instance.BouncingSkillObjectVFX(skill);
 
         await AddOrSubtractBattleStats(triggerCards, stat, value);
     }
-    public async Task HarmCreature(S_Skill skill, List<S_Card> triggerCards, S_BattleStatEnum stat, int value)
+    public async Task HarmFoe(S_Skill skill, S_Card triggerCards, S_BattleStatEnum stat, int value)
     {
         S_SkillInfoSystem.Instance.BouncingSkillObjectVFX(skill);
 
-        await HarmCreature(triggerCards, stat, value);
+        await HarmFoe(triggerCards, stat, value);
     }
-    public async Task CreationCard(S_Skill skill, List<S_Card> triggerCards, int number = -1, S_CardSuitEnum suit = S_CardSuitEnum.Random)
+    public async Task CreationCard(S_Skill skill, S_Card triggerCards, int number = -1, S_CardSuitEnum suit = S_CardSuitEnum.Random)
     {
         S_SkillInfoSystem.Instance.BouncingSkillObjectVFX(skill);
 
         await CreationCard(triggerCards, number, suit);
     }
-    public async Task GetExpansion(S_Skill skill, List<S_Card> triggerCards)
+    public async Task GetExpansion(S_Skill skill, S_Card triggerCards)
     {
         S_SkillInfoSystem.Instance.BouncingSkillObjectVFX(skill);
 
         await GetExpansion(triggerCards);
     }
-    public async Task GetFirst(S_Skill skill, List<S_Card> triggerCards, S_FirstEffectEnum effect)
+    public async Task GetFirst(S_Skill skill, S_Card triggerCards, S_FirstEffectEnum effect)
     {
         S_SkillInfoSystem.Instance.BouncingSkillObjectVFX(skill);
 
         await GetFirst(triggerCards, effect);
     }
-    public async Task ActivateUndertow(S_Skill skill, List<S_Card> triggerCards)
+    public async Task ActivateUndertow(S_Skill skill, S_Card triggerCards)
     {
         S_SkillInfoSystem.Instance.BouncingSkillObjectVFX(skill);
 
         await ActivateUndertow(triggerCards);
     }
     #endregion
-    #region Àû È¿°ú
-    public async Task CurseRandomCards(S_Foe foe, int count, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1, bool inDeck = true, bool inStack = false, List<S_Card> triggerCards = null) // ÀúÁÖ
+    #region ì  íš¨ê³¼
+    public async Task CurseRandomCards(S_Foe foe, int count, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1, bool inDeck = true, bool inStack = false, S_Card triggerCards = null) // ì €ì£¼
     {
-        S_FoeInfoSystem.Instance.FoeImageBouncingVFX();
+        S_FoeInfoSystem.Instance.FoeSpriteBouncingVFX();
 
         await CurseRandomCards(count, suit, num, inDeck, inStack, triggerCards);
     }
-    public async Task ExclusionRandomCard(S_Foe foe, int count, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1, List<S_Card> triggerCards = null) // Á¦¿Ü
+    public async Task ExclusionRandomCard(S_Foe foe, int count, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1, S_Card triggerCards = null) // ì œì™¸
     {
-        S_FoeInfoSystem.Instance.FoeImageBouncingVFX();
+        S_FoeInfoSystem.Instance.FoeSpriteBouncingVFX();
 
         await ExclusionRandomCards(count, suit, num, triggerCards);
     }
-    public async Task GetDelusion(S_Foe foe, List<S_Card> triggerCards) // ¸Á»ó
+    public async Task GetDelusion(S_Foe foe, S_Card triggerCards) // ë§ìƒ
     {
-        S_FoeInfoSystem.Instance.FoeImageBouncingVFX();
+        S_FoeInfoSystem.Instance.FoeSpriteBouncingVFX();
 
         await GetDelusion(triggerCards);
     }
-    public async Task AddOrSubtractHealth(S_Foe foe, List<S_Card> triggerCards, int value)
+    public async Task AddOrSubtractHealth(S_Foe foe, S_Card triggerCards, int value)
     {
-        S_FoeInfoSystem.Instance.FoeImageBouncingVFX();
+        S_FoeInfoSystem.Instance.FoeSpriteBouncingVFX();
 
         await AddOrSubtractHealth(triggerCards, value);
     }
-    public async Task AddOrSubtractDetermination(S_Foe foe, List<S_Card> triggerCards, int value)
+    public async Task AddOrSubtractDetermination(S_Foe foe, S_Card triggerCards, int value)
     {
-        S_FoeInfoSystem.Instance.FoeImageBouncingVFX();
+        S_FoeInfoSystem.Instance.FoeSpriteBouncingVFX();
 
         await AddOrSubtractDetermination(triggerCards, value);
     }
-    public async Task AddOrSubtractGold(S_Foe foe, List<S_Card> triggerCards, int value)
+    public async Task AddOrSubtractGold(S_Foe foe, S_Card triggerCards, int value)
     {
         await AddOrSubtractGold(triggerCards, value);
     }
     #endregion
-    #region VFX º¸Á¶
+    #region VFX ë³´ì¡°
     public float GetEffectLifeTime()
     {
         return EFFECT_LIFE_TIME * EFFECT_SPEED;
@@ -1261,23 +1227,53 @@ public class S_EffectActivator : MonoBehaviour
     {
         return HIT_AND_SORT_STACK_TIME * EFFECT_SPEED;
     }
-    public void GenerateEffectLog(string text) // ÀÌÆåÆ® ·Î±× »ı¼º ¸Ş¼­µå
+    public void GenerateEffectLog(string text) // ì´í™íŠ¸ ë¡œê·¸ ìƒì„± ë©”ì„œë“œ
     {
-        // È¿°ú ·Î±× »ı¼º
+        // íš¨ê³¼ ë¡œê·¸ ìƒì„±
         GameObject go = Instantiate(prefab_EffectLog, transform);
-        go.GetComponent<RectTransform>().anchoredPosition = new Vector2(Random.Range(-logStartPosX, logStartPosX), Random.Range(-logStartPosY, logStartPosY) - logStartPosYOffset);
-        go.GetComponent<S_EffectLog>().SetEffectText(text);
+        RectTransform rect = go.GetComponent<RectTransform>();
+        S_EffectLog effectLog = go.GetComponent<S_EffectLog>();
 
-        // È¿°ú ·Î±× VFX
-        go.GetComponent<S_EffectLog>().text_EffectContent.DOFade(0f, 0f);
+        // ì´ˆê¸° ìœ„ì¹˜ ì„¤ì •
+        Vector2 startPos = new Vector2(
+            Random.Range(-logStartPosX, logStartPosX),
+            Random.Range(-logStartPosY, logStartPosY) - logStartPosYOffset
+        );
+        rect.anchoredPosition = startPos;
+
+        // í…ìŠ¤íŠ¸ ì„¤ì • + íˆ¬ëª…í•˜ê²Œ ì‹œì‘
+        effectLog.SetEffectText(text);
+        effectLog.text_EffectContent.DOFade(0f, 0f);
+
+        // ë¬´ì‘ìœ„ ëª©í‘œ ìœ„ì¹˜ (í˜„ì¬ ìœ„ì¹˜ ê¸°ì¤€, ì¢Œìš° ë¬´ì‘ìœ„, ì•„ë˜ìª½ìœ¼ë¡œ ë‚™í•˜)
+        Vector2 endPos = startPos + new Vector2(
+            Random.Range(-logStartPosX, logStartPosX),
+            -Random.Range(logMoveAmount * 0.5f, logMoveAmount * 1.5f)
+        );
+
+        // ì¤‘ê°„ ìœ„ì¹˜: í¬ë¬¼ì„  ìƒë‹¨ (ì¤‘ê°„ x, yëŠ” ë” ìœ„)
+        Vector2 midPos = startPos + new Vector2(
+            (endPos.x - startPos.x) * 0.5f,
+            logMoveAmount
+        );
+
+        // ê³¡ì„  ì—°ì¶œìš© ì‹œê°„
+        float totalTime = GetEffectLogLifeTime();
+        float riseTime = totalTime * 0.45f;
+        float fallTime = totalTime * 0.55f;
 
         Sequence seq = DOTween.Sequence();
 
-        seq.Append(go.GetComponent<RectTransform>().DOAnchorPosY(logMoveAmount, GetEffectLogLifeTime()))
-            .Join(go.GetComponent<S_EffectLog>().text_EffectContent.DOFade(1f, GetEffectLogLifeTime() / 3))
-            .AppendInterval(GetEffectLogLifeTime() / 3)
-            .Join(go.GetComponent<S_EffectLog>().text_EffectContent.DOFade(0f, GetEffectLogLifeTime() / 3))
-            .OnComplete(() => Destroy(go));
+        // 1. ìœ„ë¡œ ëœ¨ê¸°
+        seq.Append(rect.DOAnchorPos(midPos, riseTime).SetEase(Ease.OutQuad))
+            .Join(effectLog.text_EffectContent.DOFade(1f, riseTime));
+
+        // 2. í¬ë¬¼ì„  ê¶¤ì  ëì ìœ¼ë¡œ ì´ë™ ë° í˜ì´ë“œ ì•„ì›ƒ
+        seq.Append(rect.DOAnchorPos(endPos, fallTime).SetEase(Ease.InQuad))
+            .Join(effectLog.text_EffectContent.DOFade(0f, fallTime));
+
+        // 3. ëë‚˜ë©´ íŒŒê´´
+        seq.OnComplete(() => Destroy(go));
     }
     void ShakeCamera(float power)
     {

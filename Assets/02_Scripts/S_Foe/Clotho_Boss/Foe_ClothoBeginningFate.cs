@@ -6,21 +6,17 @@ public class Foe_ClothoBeginningFate : S_Foe
     public Foe_ClothoBeginningFate() : base
     (
         "Foe_ClothoBeginningFate",
-        "½ÃÀÛÇÏ´Â ¿î¸íÀÇ Å¬·ÎÅä",
-        "ÇÑ ÅÏ¿¡ Ä«µå¸¦ 4Àå ÀÌÇÏ¸¸ È÷Æ®Çß´Ù¸é ÇÃ·¹ÀÌ¾î¸¦ °ø°İ ½Ã Áï½Ã Ã³Ä¡ÇÕ´Ï´Ù.",
+        "ì‹œì‘í•˜ëŠ” ìš´ëª…ì˜ í´ë¡œí† ",
+        "í•œ í„´ì— ì¹´ë“œë¥¼ 4ì¥ ì´í•˜ë§Œ íˆíŠ¸í–ˆë‹¤ë©´ í”Œë ˆì´ì–´ë¥¼ ê³µê²© ì‹œ ì¦‰ì‹œ ì²˜ì¹˜í•©ë‹ˆë‹¤.",
         S_FoeTypeEnum.Clotho_Boss,
         S_FoeAbilityConditionEnum.DeathAttack,
         S_FoePassiveEnum.NeedActivatedCount
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount < 4;
-        return CanActivateEffect;
-    }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
         ActivatedCount = S_PlayerCard.Instance.GetPreStackCards().Where(x => x.IsCurrentTurnHit).Count();
+        IsMeetCondition = ActivatedCount <= 4;
     }
     public override void StartNewTurn(int currentTrial)
     {
@@ -28,7 +24,7 @@ public class Foe_ClothoBeginningFate : S_Foe
     }
     public override string GetDescription()
     {
-        return $"{AbilityDescription}\nÀÌ¹ø ÅÏ¿¡ È÷Æ®ÇÑ Ä«µå °³¼ö : {ActivatedCount}";
+        return $"{AbilityDescription}\nì´ë²ˆ í„´ì— íˆíŠ¸í•œ ì¹´ë“œ ê°œìˆ˜ : {ActivatedCount}";
     }
     public override S_Foe Clone()
     {

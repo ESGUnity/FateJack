@@ -5,38 +5,38 @@ using UnityEngine;
 
 public class S_PlayerCard : MonoBehaviour
 {
-    [Header("ÄÄÆ÷³ÍÆ®")]
+    [Header("ì»´í¬ë„ŒíŠ¸")]
     S_PlayerSkill pSkill;
     S_PlayerStat pStat;
 
-    [Header("Ä«µå °ü·Ã")]
-    List<S_Card> originPlayerDeck = new(); // ½Ã·Ã ÁøÇà Áß¿£ Àı´ë ¹Ù²îÁö ¾Ê´Â ºÒº¯ µ¦
+    [Header("ì¹´ë“œ ê´€ë ¨")]
+    List<S_Card> originPlayerDeck = new(); // ì‹œë ¨ ì§„í–‰ ì¤‘ì—” ì ˆëŒ€ ë°”ë€Œì§€ ì•ŠëŠ” ë¶ˆë³€ ë±
 
-    // pre´Â Ä«µå È¿°ú °è»ê ½Ã Ä«µå°¡ ³»Áø ¼ø°£ÀÇ Á¶°ÇÀ» °Ë»çÇÏ±â À§ÇÑ °Í.
-    // immediate´Â Ä«µå¿À´õÅ¥¿¡ µé¾î°¥ ¶§ Áï½Ã °è»êµÇ´Â ¸®½ºÆ®. Áï Ä«µå¿¡ ÀÖ´Â °ÍÀ» ÀÎµµÇÏ°Å³ª Á¦¿ÜÇÒ ¶§ ÇÊ¿äÇÑ °Í.
-    List<S_Card> preDeckCards = new(); // µ¦¿¡ ÀÖ´Â Ä«µå
-    List<S_Card> immediateDeckCards = new(); // µ¦¿¡ ÀÖ´Â Ä«µå
+    // preëŠ” ì¹´ë“œ íš¨ê³¼ ê³„ì‚° ì‹œ ì¹´ë“œê°€ ë‚´ì§„ ìˆœê°„ì˜ ì¡°ê±´ì„ ê²€ì‚¬í•˜ê¸° ìœ„í•œ ê²ƒ.
+    // immediateëŠ” ì¹´ë“œì˜¤ë”íì— ë“¤ì–´ê°ˆ ë•Œ ì¦‰ì‹œ ê³„ì‚°ë˜ëŠ” ë¦¬ìŠ¤íŠ¸. ì¦‰ ì¹´ë“œì— ìˆëŠ” ê²ƒì„ ì¸ë„í•˜ê±°ë‚˜ ì œì™¸í•  ë•Œ í•„ìš”í•œ ê²ƒ.
+    List<S_Card> preDeckCards = new(); // ë±ì— ìˆëŠ” ì¹´ë“œ
+    List<S_Card> immediateDeckCards = new(); // ë±ì— ìˆëŠ” ì¹´ë“œ
 
-    List<S_Card> preStackCards = new(); // ½ºÅÃ¿¡ ÀÖ´Â Ä«µå
-    List<S_Card> immediateStackCards = new(); // ½ºÅÃ¿¡ ÀÖ´Â Ä«µå
+    List<S_Card> preStackCards = new(); // ìŠ¤íƒì— ìˆëŠ” ì¹´ë“œ
+    List<S_Card> immediateStackCards = new(); // ìŠ¤íƒì— ìˆëŠ” ì¹´ë“œ
 
-    List<S_Card> preExclusionDeckCards = new(); // Á¦¿ÜµÈ Ä«µå
-    List<S_Card> immediateExclusionDeckCards = new(); // Á¦¿ÜµÈ Ä«µå
+    List<S_Card> preExclusionDeckCards = new(); // ì œì™¸ëœ ì¹´ë“œ
+    List<S_Card> immediateExclusionDeckCards = new(); // ì œì™¸ëœ ì¹´ë“œ
 
-    List<S_Card> preExclusionTotalCards = new(); // È¯»ó Ä«µå ÇÕÃÄ¼­ Á¦¿ÜµÈ Ä«µå
-    List<S_Card> immediateExclusionTotalCards = new(); // È¯»ó Ä«µå ÇÕÃÄ¼­ Á¦¿ÜµÈ Ä«µå
+    List<S_Card> preExclusionTotalCards = new(); // í™˜ìƒ ì¹´ë“œ í•©ì³ì„œ ì œì™¸ëœ ì¹´ë“œ
+    List<S_Card> immediateExclusionTotalCards = new(); // í™˜ìƒ ì¹´ë“œ í•©ì³ì„œ ì œì™¸ëœ ì¹´ë“œ
 
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static S_PlayerCard instance;
     public static S_PlayerCard Instance { get { return instance; } }
 
     void Awake()
     {
-        // ÄÄÆ÷³ÍÆ® ÇÒ´ç
+        // ì»´í¬ë„ŒíŠ¸ í• ë‹¹
         pSkill = GetComponent<S_PlayerSkill>();
         pStat = GetComponent<S_PlayerStat>();
 
-        // ½Ì±ÛÅÏ
+        // ì‹±ê¸€í„´
         if (instance == null)
         {
             instance = this;
@@ -47,8 +47,8 @@ public class S_PlayerCard : MonoBehaviour
         }
     }
 
-#region Ä«µå »Ì±â ¹× µ¦ °ü¸® ºÎºĞ
-    public void InitDeckByStartGame() // ½ÃÀÛ ½Ã Ä«µå Ãß°¡
+    #region ì¹´ë“œ ë½‘ê¸° ë° ë± ê´€ë¦¬ ë¶€ë¶„
+    public void InitDeckByStartGame() // ì‹œì‘ ì‹œ ì¹´ë“œ ì¶”ê°€
     {
         foreach (S_Card card in S_CardManager.Instance.GenerateCardByStartGame())
         {
@@ -59,17 +59,17 @@ public class S_PlayerCard : MonoBehaviour
             AddCard(card);
         }
     }
-    public void AddCard(S_Card card) // µ¦¿¡ Ä«µå Ãß°¡
+    public void AddCard(S_Card card) // ë±ì— ì¹´ë“œ ì¶”ê°€
     {
         originPlayerDeck.Add(card);
         S_DeckInfoSystem.Instance.AddDeck(card);
     }
-    public void RemoveCard(S_Card card) // µ¦¿¡¼­ Ä«µå Á¦°Å
+    public void RemoveCard(S_Card card) // ë±ì—ì„œ ì¹´ë“œ ì œê±°
     {
         originPlayerDeck.Remove(card);
         S_DeckInfoSystem.Instance.RemoveDeck(card);
     }
-    public List<S_Card> DrawRandomCard(int drawCount)
+    public List<S_Card> DrawRandomCard(int drawCount) // íˆíŠ¸ ì‹œ í˜¸ì¶œ. ì „ê°œì—ë„
     {
         List<S_Card> remainDeck = GetPreDeckCards();
         List<S_Card> pickedCards = new();
@@ -79,8 +79,8 @@ public class S_PlayerCard : MonoBehaviour
         {
             while (selected.Count < drawCount)
             {
-                // ¿ì¼± Ã¼Å©
-                switch (S_PlayerStat.Instance.IsFirst)
+                // ìš°ì„  ì²´í¬
+                switch (pStat.IsFirst)
                 {
                     case S_FirstEffectEnum.None: break;
                     case S_FirstEffectEnum.Spade: pickedCards = remainDeck.Where(x => x.Suit == S_CardSuitEnum.Spade).ToList(); break;
@@ -92,12 +92,12 @@ public class S_PlayerCard : MonoBehaviour
                             .OrderBy(x => x.Count())
                             .ToList();
 
-                        // µ¿·ü ´ëºñ ·ÎÁ÷
+                        // ë™ë¥  ëŒ€ë¹„ ë¡œì§
                         int minCount = grouped.First().Count();
                         var leastSuitGroups = grouped.Where(g => g.Count() == minCount).ToList();
                         var chosenGroup = leastSuitGroups[UnityEngine.Random.Range(0, leastSuitGroups.Count)];
 
-                        // Á¦ÀÏ ÀûÀº ¹®¾ç Ä«µåµé ¹İÈ¯
+                        // ì œì¼ ì ì€ ë¬¸ì–‘ ì¹´ë“œë“¤ ë°˜í™˜
                         pickedCards = chosenGroup.ToList();
                         break;
                     case S_FirstEffectEnum.One: pickedCards = remainDeck.Where(x => x.Number == 1).ToList(); break;
@@ -127,7 +127,7 @@ public class S_PlayerCard : MonoBehaviour
                         break;
                 }
 
-                // cards°¡ ºñ¾ú´Ù¸é, Áï ¿ì¼±À¸·Î »ÌÀ» Ä«µå°¡ ¾ø´Ù¸é
+                // cardsê°€ ë¹„ì—ˆë‹¤ë©´, ì¦‰ ìš°ì„ ìœ¼ë¡œ ë½‘ì„ ì¹´ë“œê°€ ì—†ë‹¤ë©´
                 if (pickedCards.Count <= 0)
                 {
                     pickedCards = remainDeck.ToList();
@@ -147,14 +147,88 @@ public class S_PlayerCard : MonoBehaviour
             return remainDeck;
         }
     }
-    public void InitCardsByStartTrial() // ½ÃÀÛ ½Ã preDeckÀÌ¶û immediateDeck Ã¤¿ì±â
+    public List<S_Card> GetValidCardsByFirst() // ìš°ì„  ëŒ€ìƒ ì¹´ë“œê°€ ì—†ìœ¼ë©´ ë¹ˆ ë¦¬ìŠ¤íŠ¸ ë°˜í™˜í•¨. ì¡°ì‹¬
+    {
+        List<S_Card> deckCards = GetPreDeckCards();
+        List<S_Card> pickedCards = new();
+        if (deckCards.Count <= 0) return pickedCards;
+
+        S_FirstEffectEnum first = pStat.IsFirst;
+
+        if (first == S_FirstEffectEnum.None)
+        {
+            return deckCards;
+        }
+        else
+        {
+            switch (first)
+            {
+                case S_FirstEffectEnum.Spade: pickedCards = deckCards.Where(x => x.Suit == S_CardSuitEnum.Spade).ToList(); break;
+                case S_FirstEffectEnum.Heart: pickedCards = deckCards.Where(x => x.Suit == S_CardSuitEnum.Heart).ToList(); break;
+                case S_FirstEffectEnum.Diamond: pickedCards = deckCards.Where(x => x.Suit == S_CardSuitEnum.Diamond).ToList(); break;
+                case S_FirstEffectEnum.Clover: pickedCards = deckCards.Where(x => x.Suit == S_CardSuitEnum.Clover).ToList(); break;
+                case S_FirstEffectEnum.LeastSuit:
+                    var grouped = deckCards.GroupBy(c => c.Suit)
+                        .OrderBy(x => x.Count())
+                        .ToList();
+
+                    // ë™ë¥  ëŒ€ë¹„ ë¡œì§
+                    int minCount = grouped.First().Count();
+                    var leastSuitGroups = grouped.Where(g => g.Count() == minCount).ToList();
+
+                    // ëª¨ë“  ë™ë¥  ë¬¸ì–‘ì˜ ì¹´ë“œë“¤ì„ í•©ì³ì„œ ë°˜í™˜
+                    pickedCards = leastSuitGroups.SelectMany(g => g).ToList();
+                    break;
+                case S_FirstEffectEnum.One: pickedCards = deckCards.Where(x => x.Number == 1).ToList(); break;
+                case S_FirstEffectEnum.Two: pickedCards = deckCards.Where(x => x.Number == 2).ToList(); break;
+                case S_FirstEffectEnum.Three: pickedCards = deckCards.Where(x => x.Number == 3).ToList(); break;
+                case S_FirstEffectEnum.Four: pickedCards = deckCards.Where(x => x.Number == 4).ToList(); break;
+                case S_FirstEffectEnum.Five: pickedCards = deckCards.Where(x => x.Number == 5).ToList(); break;
+                case S_FirstEffectEnum.Six: pickedCards = deckCards.Where(x => x.Number == 6).ToList(); break;
+                case S_FirstEffectEnum.Seven: pickedCards = deckCards.Where(x => x.Number == 7).ToList(); break;
+                case S_FirstEffectEnum.Eight: pickedCards = deckCards.Where(x => x.Number == 8).ToList(); break;
+                case S_FirstEffectEnum.Nine: pickedCards = deckCards.Where(x => x.Number == 9).ToList(); break;
+                case S_FirstEffectEnum.Ten: pickedCards = deckCards.Where(x => x.Number == 10).ToList(); break;
+                case S_FirstEffectEnum.CleanHitNumber:
+                    int diff = S_PlayerStat.Instance.CurrentLimit - S_PlayerStat.Instance.StackSum;
+                    if (diff <= 0)
+                    {
+                        int num = 0;
+                        pickedCards = deckCards.Where(x => x.Number == num).ToList();
+                        while (pickedCards.Count <= 0)
+                        {
+                            num++;
+                            pickedCards = deckCards.Where(x => x.Number == num).ToList();
+                        }
+                    }
+                    else if (diff > 0 && diff <= 10)
+                    {
+                        pickedCards = deckCards.Where(x => x.Number == diff).ToList();
+                    }
+                    else if (diff > 10)
+                    {
+                        int num = 10;
+                        pickedCards = deckCards.Where(x => x.Number == num).ToList();
+                        while (pickedCards.Count <= 0)
+                        {
+                            num--;
+                            pickedCards = deckCards.Where(x => x.Number == num).ToList();
+                        }
+                    }
+                    break;
+            }
+
+            return pickedCards;
+        }
+    }
+    public void InitCardsByStartTrial() // ì‹œì‘ ì‹œ preDeckì´ë‘ immediateDeck ì±„ìš°ê¸°
     {
         preDeckCards = GetOriginPlayerDeckCards();
         immediateDeckCards = GetOriginPlayerDeckCards();
     }
-#endregion
-#region È÷Æ® ¹× ½ºÅÃ °è»ê ºÎºĞ
-    public void HitCardByDeckPre(S_Card hitCard) // µ¦¿¡¼­ È÷Æ®. ½ºÅÃ°ú µ¦ ¾÷µ¥ÀÌÆ®
+    #endregion
+    #region íˆíŠ¸ ë° ìŠ¤íƒ ê³„ì‚° ë¶€ë¶„
+    public void HitCardByDeckPre(S_Card hitCard) // ë±ì—ì„œ íˆíŠ¸. ìŠ¤íƒê³¼ ë± ì—…ë°ì´íŠ¸
     {
         preDeckCards.Remove(hitCard);
         preStackCards.Add(hitCard);
@@ -163,7 +237,7 @@ public class S_PlayerCard : MonoBehaviour
         hitCard.IsCurrentTurnHit = true;
         hitCard.IsIllusion = false;
     }
-    public void HitCardByDeckImmediate(S_Card hitCard) // µ¦¿¡¼­ È÷Æ®. ½ºÅÃ°ú µ¦ ¾÷µ¥ÀÌÆ®
+    public void HitCardByDeckImmediate(S_Card hitCard) // ë±ì—ì„œ íˆíŠ¸. ìŠ¤íƒê³¼ ë± ì—…ë°ì´íŠ¸
     {
         immediateDeckCards.Remove(hitCard);
         immediateStackCards.Add(hitCard);
@@ -172,7 +246,7 @@ public class S_PlayerCard : MonoBehaviour
         hitCard.IsCurrentTurnHit = true;
         hitCard.IsIllusion = false;
     }
-    public void HitCardByIllusionPre(S_Card hitCard) // »õ·Ó°Ô »ı¼ºÇÏ¿© È÷Æ®. ½ºÅÃ°ú µ¦ ¾÷µ¥ÀÌÆ®
+    public void HitCardByIllusionPre(S_Card hitCard) // ìƒˆë¡­ê²Œ ìƒì„±í•˜ì—¬ íˆíŠ¸. ìŠ¤íƒê³¼ ë± ì—…ë°ì´íŠ¸
     {
         preStackCards.Add(hitCard);
 
@@ -180,7 +254,7 @@ public class S_PlayerCard : MonoBehaviour
         hitCard.IsCurrentTurnHit = true;
         hitCard.IsIllusion = true;
     }
-    public void HitCardByIllusionImmediate(S_Card hitCard) // »õ·Ó°Ô »ı¼ºÇÏ¿© È÷Æ®. ½ºÅÃ°ú µ¦ ¾÷µ¥ÀÌÆ®
+    public void HitCardByIllusionImmediate(S_Card hitCard) // ìƒˆë¡­ê²Œ ìƒì„±í•˜ì—¬ íˆíŠ¸. ìŠ¤íƒê³¼ ë± ì—…ë°ì´íŠ¸
     {
         immediateStackCards.Add(hitCard);
 
@@ -188,7 +262,7 @@ public class S_PlayerCard : MonoBehaviour
         hitCard.IsCurrentTurnHit = true;
         hitCard.IsIllusion = true;
     }
-    public void ExclusionCardByExclusionPre(S_Card exclusionCard) // Á¦¿Ü¿¡ ÀÇÇÑ µ¦ Ä«µå Á¦¿Ü
+    public void ExclusionCardByExclusionPre(S_Card exclusionCard) // ì œì™¸ì— ì˜í•œ ë± ì¹´ë“œ ì œì™¸
     {
         preDeckCards.Remove(exclusionCard);
         preExclusionTotalCards.Add(exclusionCard);
@@ -198,7 +272,7 @@ public class S_PlayerCard : MonoBehaviour
         exclusionCard.IsCurrentTurnHit = true;
         exclusionCard.IsIllusion = false;
     }
-    public void ExclusionCardByExclusionImmediate(S_Card exclusionCard) // Á¦¿Ü¿¡ ÀÇÇÑ µ¦ Ä«µå Á¦¿Ü
+    public void ExclusionCardByExclusionImmediate(S_Card exclusionCard) // ì œì™¸ì— ì˜í•œ ë± ì¹´ë“œ ì œì™¸
     {
         immediateDeckCards.Remove(exclusionCard);
         immediateExclusionTotalCards.Add(exclusionCard);
@@ -208,9 +282,9 @@ public class S_PlayerCard : MonoBehaviour
         exclusionCard.IsCurrentTurnHit = true;
         exclusionCard.IsIllusion = false;
     }
-    public void ResetCardsByTwist(out List<S_Card> stacks, out List<S_Card> exclusions) // ºñÆ²±â¿¡ ÀÇÇÑ Ä«µå Á¦¿Ü ¹× Á¦¿ÜµÈ Ä«µå µ¹¾Æ¿À±â
+    public void ResetCardsByTwist(out List<S_Card> stacks, out List<S_Card> exclusions) // ë¹„í‹€ê¸°ì— ì˜í•œ ì¹´ë“œ ì œì™¸ ë° ì œì™¸ëœ ì¹´ë“œ ëŒì•„ì˜¤ê¸°
     {
-        // ³½ Ä«µå Á¦¿ÜÇÏ±â
+        // ë‚¸ ì¹´ë“œ ì œì™¸í•˜ê¸°
         stacks = GetPreStackCards().Where(x => x.IsCurrentTurnHit).ToList();
         foreach (S_Card card in stacks)
         {
@@ -233,7 +307,7 @@ public class S_PlayerCard : MonoBehaviour
             card.IsCurrentTurnHit = false;
         }
 
-        // Á¦¿ÜµÈ Ä«µå´Â µ¦À¸·Î µÇµ¹¾Æ¿À±â
+        // ì œì™¸ëœ ì¹´ë“œëŠ” ë±ìœ¼ë¡œ ë˜ëŒì•„ì˜¤ê¸°
         exclusions = preExclusionDeckCards.ToList().Where(x => x.IsCurrentTurnHit).ToList();
         foreach (S_Card card in exclusions)
         {
@@ -257,7 +331,7 @@ public class S_PlayerCard : MonoBehaviour
             card.IsCurrentTurnHit = false;
         }
 
-        // µ¦, ½ºÅÃ ÀÎÆ÷ ¾÷µ¥ÀÌÆ®
+        // ë±, ìŠ¤íƒ ì¸í¬ ì—…ë°ì´íŠ¸
         S_DeckInfoSystem.Instance.UpdateDeckCardsState();
         S_StackInfoSystem.Instance.UpdateStackCardsState();
     }
@@ -272,20 +346,20 @@ public class S_PlayerCard : MonoBehaviour
             card.IsCurrentTurnHit = false;
         }
 
-        // µ¦, ½ºÅÃ ÀÎÆ÷ ¾÷µ¥ÀÌÆ®
+        // ë±, ìŠ¤íƒ ì¸í¬ ì—…ë°ì´íŠ¸
         S_DeckInfoSystem.Instance.UpdateDeckCardsState();
         S_StackInfoSystem.Instance.UpdateStackCardsState();
     }
     public void ResetCardsByEndTrial()
     {
-        // µ¦ Ä«µå Á¤»óÈ­
+        // ë± ì¹´ë“œ ì •ìƒí™”
         foreach (S_Card card in originPlayerDeck)
         {
             card.IsInDeck = true;
             card.IsCurrentTurnHit = false;
             card.IsIllusion = false;
             card.IsCursed = false;
-            card.CanActivateEffect = false;
+            card.IsMeetCondition = false;
         }
 
         preStackCards.Clear();
@@ -294,12 +368,13 @@ public class S_PlayerCard : MonoBehaviour
         immediateExclusionDeckCards.Clear();
         preExclusionTotalCards.Clear();
         immediateExclusionTotalCards.Clear();
+        InitCardsByStartTrial();
 
-        // µ¦ ÀÎÆ÷ ¾÷µ¥ÀÌÆ®
+        // ë± ì¸í¬ ì—…ë°ì´íŠ¸
         S_DeckInfoSystem.Instance.UpdateDeckCardsState();
     }
     #endregion
-    #region º¸Á¶ ¸Ş¼­µå
+    #region ë³´ì¡° ë©”ì„œë“œ
     public List<S_Card> GetOriginPlayerDeckCards()
     {
         return originPlayerDeck.ToList();
@@ -328,16 +403,48 @@ public class S_PlayerCard : MonoBehaviour
     {
         return immediateExclusionTotalCards.ToList();
     }
+
     public void CheckCardMeetCondition(S_Card hitCard)
     {
-        // Ä«µå¸¦ ³»´Â ¼ø°£ Ä«µåÀÇ Á¶°Ç Ã¼Å©
+        // ì¹´ë“œë¥¼ ë‚´ëŠ” ìˆœê°„ ì¹´ë“œì˜ ì¡°ê±´ ì²´í¬
         foreach (S_Card card in GetPreStackCards())
         {
             if (card.BasicCondition != S_CardBasicConditionEnum.Unleash)
             {
-                card.CanActivateEffect = S_EffectActivator.Instance.IsMeetAdditiveCondition(card, hitCard);
+                card.IsMeetCondition = S_EffectActivator.Instance.IsMeetAdditiveCondition(card, hitCard);
+            }
+            else
+            {
+                card.IsMeetCondition = false;
             }
         }
+
+        // ë°©ê¸ˆ ë‚¸ ì¹´ë“œê°€ ë°œí˜„ì´ë¼ë©´ ë³„ë„ë¡œ ì²´í¬í•˜ê¸°
+        if (hitCard.BasicCondition == S_CardBasicConditionEnum.Unleash)
+        {
+            if (S_EffectActivator.Instance.IsMeetAdditiveCondition(hitCard))
+            {
+                hitCard.IsMeetCondition = true;
+            }
+            else
+            {
+                hitCard.IsMeetCondition = false;
+            }
+        }
+
+        S_StackInfoSystem.Instance.UpdateStackCardsState();
+    }
+    public void CheckCardMeetConditionAfterEffect(S_Card targetCard)
+    {
+        // ì¹´ë“œë“¤ì˜ ì´ˆë¡ë¶ˆ ì²´í¬(ë°œí˜„, ì¼ë¶€ ë©”ì•„ë¦¬ë“¤ì€ êº¼ì§)
+        targetCard.IsMeetCondition = S_EffectActivator.Instance.IsMeetAdditiveCondition(targetCard);
+
+        if (targetCard.BasicCondition == S_CardBasicConditionEnum.Unleash)
+        {
+            targetCard.IsMeetCondition = false;
+        }
+
+        S_StackInfoSystem.Instance.UpdateStackCardsState();
     }
     #endregion
 }

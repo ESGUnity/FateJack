@@ -6,41 +6,41 @@ using UnityEngine;
 
 public class S_ResultInfoSystem : MonoBehaviour
 {
-    // ÇÁ¸®ÆÕ
+    [Header("í”„ë¦¬íŒ¹")]
     [SerializeField] GameObject resultItem;
 
-    // ÄÄÆ÷³ÍÆ®
+    [Header("ì»´í¬ë„ŒíŠ¸")]
     GameObject panel_ResultInfoBase;
     GameObject layoutGroup_ResultListBase;
     TMP_Text text_FinalGoldReward;
     GameObject panel_ResultOKBtnBase;
 
-    // ÆĞ³Î µîÀå °ü·Ã
+    [Header("UI")]
     Vector2 resultHidePos = new Vector2(0, 650);
     Vector2 resultOriginPos = new Vector2(0, -210);
     Vector2 okBtnHidePos = new Vector2(0, -100);
-    Vector2 okBtnOriginPos = new Vector2(0, 55);
+    Vector2 okBtnOriginPos = new Vector2(0, 85);
 
-    // ¿¬Ãâ
+    [Header("ì—°ì¶œ")]
     const float RESULT_VFX_TIME = 0.3f;
 
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static S_ResultInfoSystem instance;
     public static S_ResultInfoSystem Instance { get { return instance; } }
 
     void Awake()
     {
-        // ÀÚ½Ä ¿ÀºêÁ§Æ®ÀÇ ÄÄÆ÷³ÍÆ® °¡Á®¿À±â
+        // ìì‹ ì˜¤ë¸Œì íŠ¸ì˜ ì»´í¬ë„ŒíŠ¸ ê°€ì ¸ì˜¤ê¸°
         Transform[] transforms = GetComponentsInChildren<Transform>(true);
         TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
 
-        // ÄÄÆ÷³ÍÆ® ÇÒ´ç
+        // ì»´í¬ë„ŒíŠ¸ í• ë‹¹
         panel_ResultInfoBase = Array.Find(transforms, c => c.gameObject.name.Equals("Panel_ResultInfoBase")).gameObject;
         layoutGroup_ResultListBase = Array.Find(transforms, c => c.gameObject.name.Equals("LayoutGroup_ResultListBase")).gameObject;
         text_FinalGoldReward = Array.Find(texts, c => c.gameObject.name.Equals("Text_FinalGoldReward"));
         panel_ResultOKBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Panel_OKBtnBase")).gameObject;
 
-        // ½Ì±ÛÅÏ
+        // ì‹±ê¸€í„´
         if (instance == null)
         {
             instance = this;
@@ -58,37 +58,37 @@ public class S_ResultInfoSystem : MonoBehaviour
         panel_ResultInfoBase.GetComponent<RectTransform>().anchoredPosition = resultHidePos;
         panel_ResultOKBtnBase.GetComponent<RectTransform>().anchoredPosition = okBtnHidePos;
     }
-    public void AppearResult() // ÆĞ³Î µîÀå
+    public void AppearResult() // íŒ¨ë„ ë“±ì¥
     {
-        // ÆĞ³Î À§Ä¡ ÃÊ±âÈ­
+        // íŒ¨ë„ ìœ„ì¹˜ ì´ˆê¸°í™”
         panel_ResultInfoBase.GetComponent<RectTransform>().anchoredPosition = resultHidePos;
         panel_ResultInfoBase.SetActive(true);
 
-        // ÆĞ³Î µîÀå µÎÆ®À©
-        panel_ResultInfoBase.GetComponent<RectTransform>().DOKill(); // µÎÆ®À© Àü Æ®À© ÃÊ±âÈ­
+        // íŒ¨ë„ ë“±ì¥ ë‘íŠ¸ìœˆ
+        panel_ResultInfoBase.GetComponent<RectTransform>().DOKill(); // ë‘íŠ¸ìœˆ ì „ íŠ¸ìœˆ ì´ˆê¸°í™”
         panel_ResultInfoBase.GetComponent<RectTransform>().DOAnchorPos(resultOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
     }
-    public void DisappearResult() // ÆĞ³Î ÅğÀå
+    public void DisappearResult() // íŒ¨ë„ í‡´ì¥
     {
-        // ÆĞ³Î ÅğÀå µÎÆ®À©
-        panel_ResultInfoBase.GetComponent<RectTransform>().DOKill(); // µÎÆ®À© Àü Æ®À© ÃÊ±âÈ­
+        // íŒ¨ë„ í‡´ì¥ ë‘íŠ¸ìœˆ
+        panel_ResultInfoBase.GetComponent<RectTransform>().DOKill(); // ë‘íŠ¸ìœˆ ì „ íŠ¸ìœˆ ì´ˆê¸°í™”
         panel_ResultInfoBase.GetComponent<RectTransform>().DOAnchorPos(resultHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
             .OnComplete(() => panel_ResultInfoBase.SetActive(false));
     }
-    public void AppearResultOKBtn() // ÆĞ³Î µîÀå
+    public void AppearResultOKBtn() // íŒ¨ë„ ë“±ì¥
     {
-        // ÆĞ³Î À§Ä¡ ÃÊ±âÈ­
+        // íŒ¨ë„ ìœ„ì¹˜ ì´ˆê¸°í™”
         panel_ResultOKBtnBase.GetComponent<RectTransform>().anchoredPosition = okBtnHidePos;
         panel_ResultOKBtnBase.SetActive(true);
 
-        // ÆĞ³Î µîÀå µÎÆ®À©
-        panel_ResultOKBtnBase.GetComponent<RectTransform>().DOKill(); // µÎÆ®À© Àü Æ®À© ÃÊ±âÈ­
+        // íŒ¨ë„ ë“±ì¥ ë‘íŠ¸ìœˆ
+        panel_ResultOKBtnBase.GetComponent<RectTransform>().DOKill(); // ë‘íŠ¸ìœˆ ì „ íŠ¸ìœˆ ì´ˆê¸°í™”
         panel_ResultOKBtnBase.GetComponent<RectTransform>().DOAnchorPos(okBtnOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
     }
-    public void DisappearResultOKBtn() // ÆĞ³Î µé¾î°¡±â
+    public void DisappearResultOKBtn() // íŒ¨ë„ ë“¤ì–´ê°€ê¸°
     {
-        // ÆĞ³Î ÅğÀå µÎÆ®À©
-        panel_ResultOKBtnBase.GetComponent<RectTransform>().DOKill(); // µÎÆ®À© Àü Æ®À© ÃÊ±âÈ­
+        // íŒ¨ë„ í‡´ì¥ ë‘íŠ¸ìœˆ
+        panel_ResultOKBtnBase.GetComponent<RectTransform>().DOKill(); // ë‘íŠ¸ìœˆ ì „ íŠ¸ìœˆ ì´ˆê¸°í™”
         panel_ResultOKBtnBase.GetComponent<RectTransform>().DOAnchorPos(okBtnHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
             .OnComplete(() => panel_ResultOKBtnBase.SetActive(false));
     }
@@ -105,24 +105,38 @@ public class S_ResultInfoSystem : MonoBehaviour
     {
         int gold = 0;
         GameObject go1 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
-        go1.GetComponent<S_ResultBase>().SetResultBase("ÇÇÁ¶¹° Ã³Ä¡ °ñµå", "5");
+        go1.GetComponent<S_ResultBase>().SetResultBase("ìŠ¹ë¦¬ ê³¨ë“œ", "5");
         go1.transform.localScale = Vector3.zero;
         gold += 5;
         ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);
         await go1.transform.DOScale(Vector3.one, RESULT_VFX_TIME).SetEase(Ease.OutBounce).AsyncWaitForCompletion();
 
-        if (S_GameFlowManager.Instance.CurrentTrial % 3 == 0)
+        if (S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Clotho_Elite ||
+             S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Lachesis_Elite ||
+             S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Atropos_Elite)
         {
             GameObject go2 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
-            go2.GetComponent<S_ResultBase>().SetResultBase("°­·ÂÇÑ ÇÇÁ¶¹° Ã³Ä¡ Ãß°¡ °ñµå", "5");
+            go2.GetComponent<S_ResultBase>().SetResultBase("ì—˜ë¦¬íŠ¸ ì  ì¶”ê°€ ê³¨ë“œ", "5");
             go2.transform.localScale = Vector3.zero;
-            gold += 5;
+            gold += 3;
+            ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);
+            await go2.transform.DOScale(Vector3.one, RESULT_VFX_TIME).SetEase(Ease.OutBounce).AsyncWaitForCompletion();
+        }
+
+        if (S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Clotho_Boss ||
+             S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Lachesis_Boss ||
+             S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Atropos_Boss)
+        {
+            GameObject go2 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
+            go2.GetComponent<S_ResultBase>().SetResultBase("ë³´ìŠ¤ ì¶”ê°€ ê³¨ë“œ", "5");
+            go2.transform.localScale = Vector3.zero;
+            gold += 10;
             ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);
             await go2.transform.DOScale(Vector3.one, RESULT_VFX_TIME).SetEase(Ease.OutBounce).AsyncWaitForCompletion();
         }
 
         GameObject go3 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
-        go3.GetComponent<S_ResultBase>().SetResultBase("³²Àº Ã¼·Â 1´ç °ñµå", health.ToString());
+        go3.GetComponent<S_ResultBase>().SetResultBase("ë‚¨ì€ ì²´ë ¥ 1ë‹¹ ê³¨ë“œ", health.ToString());
         go3.transform.localScale = Vector3.zero;
         gold += health;
         ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);
@@ -131,7 +145,7 @@ public class S_ResultInfoSystem : MonoBehaviour
         if (determination > 0)
         {
             GameObject go4 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
-            go4.GetComponent<S_ResultBase>().SetResultBase("³²Àº ÀÇÁö 1´ç °ñµå", determination.ToString());
+            go4.GetComponent<S_ResultBase>().SetResultBase("ë‚¨ì€ ì˜ì§€ 1ë‹¹ ê³¨ë“œ", determination.ToString());
             go4.transform.localScale = Vector3.zero;
             gold += determination;
             ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);
@@ -141,7 +155,7 @@ public class S_ResultInfoSystem : MonoBehaviour
         if (omen > 0)
         {
             GameObject go5 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
-            go5.GetComponent<S_ResultBase>().SetResultBase("ÈäÁ¶ Ä«µå¿¡ ÀÇÇÑ °ñµå", determination.ToString());
+            go5.GetComponent<S_ResultBase>().SetResultBase("í‰ì¡° ì¹´ë“œì— ì˜í•œ ê³¨ë“œ", (omen * 2).ToString());
             go5.transform.localScale = Vector3.zero;
             gold += omen * 2;
             ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);
@@ -151,7 +165,7 @@ public class S_ResultInfoSystem : MonoBehaviour
         if (robbery > 0)
         {
             GameObject go6 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
-            go6.GetComponent<S_ResultBase>().SetResultBase("°­µµ Ä«µå¿¡ ÀÇÇÑ °ñµå", determination.ToString());
+            go6.GetComponent<S_ResultBase>().SetResultBase("ê°•ë„ ì¹´ë“œì— ì˜í•œ ê³¨ë“œ", (robbery * 2).ToString());
             go6.transform.localScale = Vector3.zero;
             gold += robbery * 2;
             ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);
@@ -161,7 +175,7 @@ public class S_ResultInfoSystem : MonoBehaviour
         if (greed > 0)
         {
             GameObject go7 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
-            go7.GetComponent<S_ResultBase>().SetResultBase("Å½¿å Ä«µå¿¡ ÀÇÇÑ °ñµå", determination.ToString());
+            go7.GetComponent<S_ResultBase>().SetResultBase("íƒìš• ì¹´ë“œì— ì˜í•œ ê³¨ë“œ", (greed * 2).ToString());
             go7.transform.localScale = Vector3.zero;
             gold += greed * 2;
             ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);

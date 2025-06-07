@@ -1,5 +1,4 @@
 using DG.Tweening;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -8,83 +7,130 @@ using UnityEngine.UI;
 
 public class S_UICard : MonoBehaviour
 {
-    // ƒ´µÂ ¡§∫∏
+    [Header("Ï£ºÏöî Ï†ïÎ≥¥")]
     [HideInInspector] public S_Card CardInfo;
 
-    // ƒ´µÂ «•Ω√ ∞¸∑√
-    [SerializeField] protected Image image_CardBase;
-    [SerializeField] protected TMP_Text text_CardNumber;
-    [SerializeField] protected Image image_CardSuit;
-    [SerializeField] protected Image image_CardEffect;
-    [SerializeField] protected Image image_CursedEffect;
-    [SerializeField] protected Image image_CardFrame;
-
-    Vector2 addCardPos = new Vector2(0, -800);
-    Vector2 exclusionCardPos = new Vector2(0, 300);
+    [Header("Ïó∞Ï∂ú")]
+    [HideInInspector] public PRS OriginPRS;
+    Vector2 hideCardPos = new Vector2(0, -800);
+    Vector2 originCardPos = new Vector2(0, 300);
     const float APPEAR_TIME = 0.5f;
+    const float SCALE_AMOUNT = 1.2f;
+
+    [Header("Ïî¨ Ïò§Î∏åÏ†ùÌä∏")]
+    [SerializeField] protected Image image_CardBase;
+    [SerializeField] protected Image image_CardSuit;
+    [SerializeField] protected TMP_Text text_CardNumber;
+
+    [SerializeField] protected Image image_BasicCondition;
+    [SerializeField] protected Image image_BasicEffect;
+    [SerializeField] protected Image image_AdditiveCondition;
+    [SerializeField] protected Image image_Debuff;
+    [SerializeField] protected Image image_AdditiveEffect;
+
+    [SerializeField] protected Image image_CursedEffect;
+
+    [SerializeField] protected Image image_CardFrame;
 
     void Awake()
     {
         image_CardBase.raycastTarget = false;
-        text_CardNumber.raycastTarget = false;
         image_CardSuit.raycastTarget = false;
-        image_CardEffect.raycastTarget = false;
+        text_CardNumber.raycastTarget = false;
+
+        image_BasicCondition.raycastTarget = false;
+        image_BasicEffect.raycastTarget = false;
+        image_AdditiveCondition.raycastTarget = false;
+        image_Debuff.raycastTarget = false;
+        image_AdditiveEffect.raycastTarget = false;
+
         image_CursedEffect.raycastTarget = false;
+
         image_CardFrame.raycastTarget = false;
+
+        OriginPRS.Rot = transform.eulerAngles;
+        OriginPRS.Scale = transform.localScale;
     }
+
     public void SetCardInfo(S_Card card)
     {
-        // ƒ´µÂ ¡§∫∏ º≥¡§
+        // Ïπ¥Îìú Ï†ïÎ≥¥ ÏÑ§Ï†ï
         CardInfo = card;
 
         if (CardInfo == null) return;
 
-        // ƒ´µÂ ∫£¿ÃΩ∫ º≥¡§
+        // Ïπ¥Îìú Î≤†Ïù¥Ïä§ ÏÑ§Ï†ï
         string cardBaseAddress = "";
-        switch (card.CardEffect.Grade)
-        {
-            case S_CardEffectGradeEnum.Normal:
-                cardBaseAddress = "Sprite_NormalCardBase";
-                break;
-            case S_CardEffectGradeEnum.Superior:
-                cardBaseAddress = "Sprite_SuperiorCardBase";
-                break;
-            case S_CardEffectGradeEnum.Rare:
-                cardBaseAddress = "Sprite_RareCardBase";
-                break;
-            case S_CardEffectGradeEnum.Mythic:
-                cardBaseAddress = "Sprite_MythicCardBase";
-                break;
-        }
+        if (card.IsIllusion) cardBaseAddress = "Sprite_IllusionCardBase";
+        else cardBaseAddress = "Sprite_OriginCardBase";
         var cardBaseOpHandle = Addressables.LoadAssetAsync<Sprite>(cardBaseAddress);
         cardBaseOpHandle.Completed += OnCardBaseLoadComplete;
 
-        // ƒ´µÂ º˝¿⁄ º≥¡§
-        text_CardNumber.text = card.Number.ToString();
-
-        // ƒ´µÂ πÆæÁ º≥¡§
-        string cardSuitAddress = "";
-        switch (card.Suit)
-        {
-            case S_CardSuitEnum.Spade:
-                cardSuitAddress = "Sprite_SpadeSuit";
-                break;
-            case S_CardSuitEnum.Heart:
-                cardSuitAddress = "Sprite_HeartSuit";
-                break;
-            case S_CardSuitEnum.Diamond:
-                cardSuitAddress = "Sprite_DiamondSuit";
-                break;
-            case S_CardSuitEnum.Clover:
-                cardSuitAddress = "Sprite_CloverSuit";
-                break;
-        }
-        var cardSuitOpHandle = Addressables.LoadAssetAsync<Sprite>(cardSuitAddress);
+        // Ïπ¥Îìú Î¨∏Ïñë ÏÑ§Ï†ï
+        var cardSuitOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_Card_{card.Suit}Suit");
         cardSuitOpHandle.Completed += OnCardSuitLoadComplete;
 
-        // ƒ´µÂ »ø∞˙ º≥¡§
-        var cardEffectOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_{card.CardEffect.Key}");
-        cardEffectOpHandle.Completed += OnCardEffectLoadComplete;
+        // Ïπ¥Îìú Ïà´Ïûê ÏÑ§Ï†ï
+        text_CardNumber.text = card.Number.ToString();
+
+        // Ïπ¥Îìú Ìö®Í≥º ÏÑ§Ï†ï
+        if (card.BasicCondition == S_CardBasicConditionEnum.None)
+        {
+            image_BasicCondition.gameObject.SetActive(false);
+        }
+        else
+        {
+            image_BasicCondition.gameObject.SetActive(true);
+            var basicConditionOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_BasicCondition_{card.BasicCondition}");
+            basicConditionOpHandle.Completed += OnBasicConditionLoadComplete;
+        }
+
+        if (card.BasicEffect == S_CardBasicEffectEnum.None)
+        {
+            image_BasicEffect.gameObject.SetActive(false);
+        }
+        else
+        {
+            image_BasicEffect.gameObject.SetActive(true);
+            var basicEffectOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_BasicEffect_{card.BasicEffect}");
+            basicEffectOpHandle.Completed += OnBasicEffectLoadComplete;
+        }
+
+        if (card.AdditiveCondition == S_CardAdditiveConditionEnum.None)
+        {
+            image_AdditiveCondition.gameObject.SetActive(false);
+        }
+        else
+        {
+            image_AdditiveCondition.gameObject.SetActive(true);
+            var additiveConditionOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_AdditiveCondition_{card.AdditiveCondition}");
+            additiveConditionOpHandle.Completed += OnAdditiveConditionLoadComplete;
+        }
+
+        if (card.Debuff == S_CardDebuffConditionEnum.None)
+        {
+            image_Debuff.gameObject.SetActive(false);
+        }
+        else
+        {
+            image_Debuff.gameObject.SetActive(true);
+            var debuffOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_Debuff_{card.Debuff}");
+            debuffOpHandle.Completed += OnDebuffLoadComplete;
+        }
+
+        if (card.AdditiveEffect == S_CardAdditiveEffectEnum.None)
+        {
+            image_AdditiveEffect.gameObject.SetActive(false);
+        }
+        else
+        {
+            image_AdditiveEffect.gameObject.SetActive(true);
+            var additiveEffectOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_AdditiveEffect_{card.AdditiveEffect}");
+            additiveEffectOpHandle.Completed += OnAdditiveEffectLoadComplete;
+        }
+
+        // Ï†ÄÏ£º Ï≤¥ÌÅ¨
+        SetCursedEffect(card.IsCursed);
     }
     void OnCardBaseLoadComplete(AsyncOperationHandle<Sprite> opHandle)
     {
@@ -100,99 +146,165 @@ public class S_UICard : MonoBehaviour
             image_CardSuit.sprite = opHandle.Result;
         }
     }
-    void OnCardEffectLoadComplete(AsyncOperationHandle<Sprite> opHandle)
+    void OnBasicConditionLoadComplete(AsyncOperationHandle<Sprite> opHandle)
     {
         if (opHandle.Status == AsyncOperationStatus.Succeeded)
         {
-            image_CardEffect.sprite = opHandle.Result;
+            image_BasicCondition.sprite = opHandle.Result;
+        }
+    }
+    void OnBasicEffectLoadComplete(AsyncOperationHandle<Sprite> opHandle)
+    {
+        if (opHandle.Status == AsyncOperationStatus.Succeeded)
+        {
+            image_BasicEffect.sprite = opHandle.Result;
+        }
+    }
+    void OnAdditiveConditionLoadComplete(AsyncOperationHandle<Sprite> opHandle)
+    {
+        if (opHandle.Status == AsyncOperationStatus.Succeeded)
+        {
+            image_AdditiveCondition.sprite = opHandle.Result;
+        }
+    }
+    void OnDebuffLoadComplete(AsyncOperationHandle<Sprite> opHandle)
+    {
+        if (opHandle.Status == AsyncOperationStatus.Succeeded)
+        {
+            image_Debuff.sprite = opHandle.Result;
+        }
+    }
+    void OnAdditiveEffectLoadComplete(AsyncOperationHandle<Sprite> opHandle)
+    {
+        if (opHandle.Status == AsyncOperationStatus.Succeeded)
+        {
+            image_AdditiveEffect.sprite = opHandle.Result;
         }
     }
 
-    public void GetCardVFX()
+    public void ChangeCardVFXByStore(S_Card card)
     {
-        // ƒ´µÂ ≈©±‚∏¶ ¿€∞‘
-        transform.localScale = Vector3.zero;  // √≥¿Ωø° Ω∫ƒ…¿œ 0
+        // Ïπ¥Îìú ÌÅ¨Í∏∞Î•º ÏûëÍ≤å
+        transform.localScale = Vector3.zero;  // Ï≤òÏùåÏóê Ïä§ÏºÄÏùº 0
 
-        // ∫“≈ı∏Ìµµ √≥∏Æ
-        image_CardBase.DOFade(0f, 0f);
-        text_CardNumber.DOFade(0f, 0f);
-        image_CardSuit.DOFade(0f, 0f);
-        image_CardEffect.DOFade(0f, 0f);
+        // Î∂àÌà¨Î™ÖÎèÑ Ï≤òÎ¶¨
+        SetAlphaValue(0, 0);
 
-        // ƒ´µÂ ¿ßƒ° º≥¡§
+        // Ïπ¥Îìú ÏúÑÏπò ÏÑ§Ï†ï
         Vector2 generateCardPos = new Vector2(Random.Range(-600f, 600f), Random.Range(-300f, 300f));
+        generateCardPos = Vector2.zero;
         GetComponent<RectTransform>().anchoredPosition = generateCardPos;
 
         // VFX
         RectTransform rt = GetComponent<RectTransform>();
         Vector2 start = rt.anchoredPosition;
-        Vector2 end = addCardPos;
+        Vector2 end = this.hideCardPos;
 
-        // ∞Óº±¿« »÷æÓ¡¸ ¡§µµ (y∑Œ¥¬ ¿ß∑Œ ∂ÁøÏ∞Ì, x∑Œ¥¬ ¡¬/øÏ π´¿€¿ß »÷æÓ¡¸)
+        // Í≥°ÏÑ†Ïùò ÌúòÏñ¥Ïßê Ï†ïÎèÑ (yÎ°úÎäî ÏúÑÎ°ú ÎùÑÏö∞Í≥†, xÎ°úÎäî Ï¢å/Ïö∞ Î¨¥ÏûëÏúÑ ÌúòÏñ¥Ïßê)
         float curveHeight = 250f;
-        float curveHorizontal = Random.Range(-350f, 350f); // øﬁ¬  ∂«¥¬ ø¿∏•¬ ¿∏∑Œ »÷∞‘
+        float curveHorizontal = Random.Range(-350f, 350f); // ÏôºÏ™Ω ÎòêÎäî Ïò§Î•∏Ï™ΩÏúºÎ°ú ÌúòÍ≤å
 
-        // ¡ﬂ∞£ ¡ˆ¡° (»÷æÓ¡¸ ¡¶æÓ)
+        // Ï§ëÍ∞Ñ ÏßÄÏ†ê (ÌúòÏñ¥Ïßê Ï†úÏñ¥)
         Vector2 control = new Vector2(
             Mathf.Lerp(start.x, end.x, 0.5f) + curveHorizontal,
             Mathf.Lerp(start.y, end.y, 0.5f) + curveHeight
         );
 
-        // ∞Ê∑Œ ±∏º∫ (Ω√¿€¡°¿∫ ª˝∑´ ∞°¥…)
+        // Í≤ΩÎ°ú Íµ¨ÏÑ± (ÏãúÏûëÏ†êÏùÄ ÏÉùÎûµ Í∞ÄÎä•)
         Vector3[] path = new Vector3[] { control, end };
 
         Sequence seq = DOTween.Sequence();
-        seq.Append(transform.DOScale(Vector3.one, APPEAR_TIME).SetEase(Ease.OutQuart))
-            .Join(image_CardBase.DOFade(1f, APPEAR_TIME).SetEase(Ease.OutQuart))
-            .Join(text_CardNumber.DOFade(1f, APPEAR_TIME).SetEase(Ease.OutQuart))
-            .Join(image_CardSuit.DOFade(1f, APPEAR_TIME).SetEase(Ease.OutQuart))
-            .Join(image_CardEffect.DOFade(1f, APPEAR_TIME).SetEase(Ease.OutQuart))
-            .AppendInterval(0.8f)
-            .Append(rt.DOLocalPath(path, APPEAR_TIME, PathType.CatmullRom, PathMode.Ignore).SetEase(Ease.OutQuart))
+
+        // Ïπ¥Îìú Îì±Ïû• Î∂ÄÎ∂Ñ
+        seq.AppendCallback(() => SetAlphaValue(1f, APPEAR_TIME));
+        seq.Append(transform.DOScale(Vector3.one, APPEAR_TIME).SetEase(Ease.OutQuart));
+        seq.AppendInterval(0.5f);
+
+        // Ïπ¥Îìú Î≥ÄÌïòÎäî Î∂ÄÎ∂Ñ
+        seq.Append(transform.DOScale(OriginPRS.Scale * SCALE_AMOUNT, APPEAR_TIME / 3).SetEase(Ease.OutQuart))
+            .Join(transform.DORotate(OriginPRS.Rot + new Vector3(0, 20, 0), APPEAR_TIME / 3)).SetEase(Ease.OutQuart);
+        seq.AppendCallback(() => SetCardInfo(card));
+        seq.Append(transform.DOScale(OriginPRS.Scale, APPEAR_TIME / 3).SetEase(Ease.OutQuart))
+            .Join(transform.DORotate(OriginPRS.Rot, APPEAR_TIME / 3)).SetEase(Ease.OutQuart);
+
+        seq.AppendInterval(0.8f);
+        seq.Append(rt.DOLocalPath(path, APPEAR_TIME, PathType.CatmullRom, PathMode.Ignore).SetEase(Ease.OutQuart))
             .Join(transform.DOScale(Vector3.zero, APPEAR_TIME).SetEase(Ease.OutQuart))
             .OnComplete(() => Destroy(gameObject));
     }
-    public async Task ExclusionCardVFX()
-    {
-        // ƒ´µÂ ≈©±‚∏¶ ¿€∞‘
-        transform.localScale = Vector3.zero;  // √≥¿Ωø° Ω∫ƒ…¿œ 0
-        GetComponent<RectTransform>().DOAnchorPos(addCardPos, 0f); // ƒ´µÂ ¿ßƒ°µµ πÿ¿∏∑Œ
 
-        // ∫“≈ı∏Ìµµ √≥∏Æ
-        SetAlphaValue(0, 0);
-
-        // ƒ´µÂ ¿ßƒ° º≥¡§
-        Vector2 generateCardPos = new Vector2(Random.Range(-600f, 600f), Random.Range(-300f, 300f));
-        GetComponent<RectTransform>().anchoredPosition = generateCardPos;
-
-        Sequence seq = DOTween.Sequence();
-        seq.Append(GetComponent<RectTransform>().DOAnchorPos(generateCardPos, 1.6f))
-            .Join(transform.DOScale(Vector3.one, 0.8f).SetEase(Ease.OutQuart))
-            .Join(image_CardBase.DOFade(0.8f, 0.8f).SetEase(Ease.OutQuart))
-            .Join(text_CardNumber.DOFade(0.8f, 0.8f).SetEase(Ease.OutQuart))
-            .Join(image_CardSuit.DOFade(0.8f, 0.8f).SetEase(Ease.OutQuart))
-            .Join(image_CardEffect.DOFade(0.8f, 0.8f).SetEase(Ease.OutQuart))
-            .Append(GetComponent<RectTransform>().DOAnchorPos(exclusionCardPos, 1f))
-            .AppendInterval(0.2f)
-            .Join(image_CardBase.DOFade(0f, 0.8f).SetEase(Ease.OutQuart))
-            .Join(text_CardNumber.DOFade(0f, 0.8f).SetEase(Ease.OutQuart))
-            .Join(image_CardSuit.DOFade(0f, 0.8f).SetEase(Ease.OutQuart))
-            .Join(image_CardEffect.DOFade(0f, 0.8f).SetEase(Ease.OutQuart))
-            .OnComplete(() => Destroy(gameObject));
-
-        await Task.Delay(1200);
-    }
-    public void SetAlphaValue(float value, float duration)
+    public virtual void SetAlphaValue(float value, float duration)
     {
         Sequence seq = DOTween.Sequence();
+        image_CardBase.DOKill();
+        image_CardSuit.DOKill();
+        text_CardNumber.DOKill();
+        image_BasicCondition.DOKill();
+        image_BasicEffect.DOKill();
+        image_AdditiveCondition.DOKill();
+        image_Debuff.DOKill();
+        image_AdditiveEffect.DOKill();
+        image_CursedEffect.DOKill();
+        image_CardFrame.DOKill();
 
         seq.Append(image_CardBase.DOFade(value, duration).SetEase(Ease.OutQuart))
-            .Join(text_CardNumber.DOFade(value, duration).SetEase(Ease.OutQuart))
             .Join(image_CardSuit.DOFade(value, duration).SetEase(Ease.OutQuart))
-            .Join(image_CardEffect.DOFade(value, duration).SetEase(Ease.OutQuart));
+            .Join(text_CardNumber.DOFade(value, duration).SetEase(Ease.OutQuart))
+            .Join(image_BasicCondition.DOFade(value, duration).SetEase(Ease.OutQuart))
+            .Join(image_BasicEffect.DOFade(value, duration).SetEase(Ease.OutQuart))
+            .Join(image_AdditiveCondition.DOFade(value, duration).SetEase(Ease.OutQuart))
+            .Join(image_Debuff.DOFade(value, duration).SetEase(Ease.OutQuart))
+            .Join(image_AdditiveEffect.DOFade(value, duration).SetEase(Ease.OutQuart))
+            .Join(image_CursedEffect.DOFade(value, duration).SetEase(Ease.OutQuart))
+            .Join(image_CardFrame.DOFade(value, duration).SetEase(Ease.OutQuart));
+
     }
     public void SetCursedEffect(bool isCursed)
     {
         image_CursedEffect.gameObject.SetActive(isCursed);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//public async Task ExclusionCardVFX()
+//{
+//    // Ïπ¥Îìú ÌÅ¨Í∏∞Î•º ÏûëÍ≤å
+//    transform.localScale = Vector3.zero;  // Ï≤òÏùåÏóê Ïä§ÏºÄÏùº 0
+//    GetComponent<RectTransform>().DOAnchorPos(addCardPos, 0f); // Ïπ¥Îìú ÏúÑÏπòÎèÑ Î∞ëÏúºÎ°ú
+
+//    // Î∂àÌà¨Î™ÖÎèÑ Ï≤òÎ¶¨
+//    SetAlphaValue(0, 0);
+
+//    // Ïπ¥Îìú ÏúÑÏπò ÏÑ§Ï†ï
+//    Vector2 generateCardPos = new Vector2(Random.Range(-600f, 600f), Random.Range(-300f, 300f));
+//    GetComponent<RectTransform>().anchoredPosition = generateCardPos;
+
+//    Sequence seq = DOTween.Sequence();
+//    seq.Append(GetComponent<RectTransform>().DOAnchorPos(generateCardPos, 1.6f))
+//        .Join(transform.DOScale(Vector3.one, 0.8f).SetEase(Ease.OutQuart))
+//        .Join(image_CardBase.DOFade(0.8f, 0.8f).SetEase(Ease.OutQuart))
+//        .Join(text_CardNumber.DOFade(0.8f, 0.8f).SetEase(Ease.OutQuart))
+//        .Join(image_CardSuit.DOFade(0.8f, 0.8f).SetEase(Ease.OutQuart))
+//        .Join(image_CardEffect.DOFade(0.8f, 0.8f).SetEase(Ease.OutQuart))
+//        .Append(GetComponent<RectTransform>().DOAnchorPos(exclusionCardPos, 1f))
+//        .AppendInterval(0.2f)
+//        .Join(image_CardBase.DOFade(0f, 0.8f).SetEase(Ease.OutQuart))
+//        .Join(text_CardNumber.DOFade(0f, 0.8f).SetEase(Ease.OutQuart))
+//        .Join(image_CardSuit.DOFade(0f, 0.8f).SetEase(Ease.OutQuart))
+//        .Join(image_CardEffect.DOFade(0f, 0.8f).SetEase(Ease.OutQuart))
+//        .OnComplete(() => Destroy(gameObject));
+
+//    await Task.Delay(1200);
+//}

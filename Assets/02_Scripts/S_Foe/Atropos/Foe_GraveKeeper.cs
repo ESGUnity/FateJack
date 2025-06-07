@@ -8,22 +8,16 @@ public class Foe_GraveKeeper : S_Foe
     public Foe_GraveKeeper() : base
     (
         "Foe_GraveKeeper",
-        "¹¦Áö±â",
-        "Ä«µå¸¦ 3Àå È÷Æ®ÇÒ ¶§¸¶´Ù µ¦¿¡¼­ ¹«ÀÛÀ§ Ä«µå 1ÀåÀ» Á¦¿ÜÇÕ´Ï´Ù.",
+        "ë¬˜ì§€ê¸°",
+        "ì¹´ë“œë¥¼ 3ìž¥ ížˆíŠ¸í•  ë•Œë§ˆë‹¤ ë±ì—ì„œ ë¬´ìž‘ìœ„ ì¹´ë“œ 1ìž¥ì„ ì œì™¸í•©ë‹ˆë‹¤.",
         S_FoeTypeEnum.Atropos,
         S_FoeAbilityConditionEnum.Reverb,
         S_FoePassiveEnum.NeedActivatedCount
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount >= 3;
-
-        return CanActivateEffect;
-    }
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
             if (S_PlayerCard.Instance.GetPreDeckCards().Count > 0)
             {
@@ -31,26 +25,34 @@ public class Foe_GraveKeeper : S_Foe
             }
 
             ActivatedCount = 0;
+            IsMeetCondition = false;
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        if (isTwist)
+        int count = S_PlayerCard.Instance.GetPreStackCards().Count % 3;
+
+        if (S_PlayerCard.Instance.GetPreStackCards().Count == 0)
         {
-            ActivatedCount--;
-            if (ActivatedCount <= 0)
-            {
-                ActivatedCount = 3;
-            }
+            ActivatedCount = 0;
         }
         else
         {
-            ActivatedCount++;
+            if (count == 0)
+            {
+                ActivatedCount = 3;
+            }
+            else
+            {
+                ActivatedCount = count;
+            }
         }
+
+        IsMeetCondition = ActivatedCount >= 3;
     }
     public override string GetDescription()
     {
-        return $"{AbilityDescription}\n{ActivatedCount}Àå Â°";
+        return $"{AbilityDescription}\nížˆíŠ¸í•œ ì¹´ë“œ : {ActivatedCount}ìž¥ ì§¸";
     }
     public override S_Foe Clone()
     {

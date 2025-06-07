@@ -7,25 +7,20 @@ public class Foe_Devourer : S_Foe
     public Foe_Devourer() : base
     (
         "Foe_Devourer",
-        "Å½½ÄÀÚ",
-        "½Ã·Ã ½ÃÀÛ ½Ã ¹«ÀÛÀ§ Ä«µå 4ÀåÀ» Á¦¿ÜÇÕ´Ï´Ù.",
+        "íƒì‹ì",
+        "ì‹œë ¨ ì‹œì‘ ì‹œ ë¬´ì‘ìœ„ ì¹´ë“œ 4ì¥ì„ ì œì™¸í•©ë‹ˆë‹¤.",
         S_FoeTypeEnum.Lachesis,
         S_FoeAbilityConditionEnum.StartTrial,
         S_FoePassiveEnum.None
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = false;
-        return CanActivateEffect;
-    }
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
         await eA.ExclusionRandomCard(this, 4);
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetCondition(S_Card card = null)
     {
-
+        IsMeetCondition = false;
     }
     public override string GetDescription()
     {

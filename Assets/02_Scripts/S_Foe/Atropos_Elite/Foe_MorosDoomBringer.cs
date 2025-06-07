@@ -7,46 +7,48 @@ public class Foe_MorosDoomBringer : S_Foe
     public Foe_MorosDoomBringer() : base
     (
         "Foe_MorosDoomBringer",
-        "ÆÄ¸êÀ» ºÎ¸£´Â ¸ð·Î½º",
-        "Ä«µå¸¦ 3Àå È÷Æ®ÇÒ ¶§¸¶´Ù °ñµå¸¦ 4 ÀÒ½À´Ï´Ù.",
+        "íŒŒë©¸ì„ ë¶€ë¥´ëŠ” ëª¨ë¡œìŠ¤",
+        "ì¹´ë“œë¥¼ 3ìž¥ ížˆíŠ¸í•  ë•Œë§ˆë‹¤ ê³¨ë“œë¥¼ 4 ìžƒìŠµë‹ˆë‹¤.",
         S_FoeTypeEnum.Atropos_Elite,
         S_FoeAbilityConditionEnum.Reverb,
         S_FoePassiveEnum.NeedActivatedCount
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount >= 3;
-
-        return CanActivateEffect;
-    }
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
             await eA.AddOrSubtractGold(this, null, -4);
 
             ActivatedCount = 0;
+            IsMeetCondition = false;
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        if (isTwist)
+        int count = S_PlayerCard.Instance.GetPreStackCards().Count % 3;
+
+        if (S_PlayerCard.Instance.GetPreStackCards().Count == 0)
         {
-            ActivatedCount--;
-            if (ActivatedCount <= 0)
-            {
-                ActivatedCount = 3;
-            }
+            ActivatedCount = 0;
         }
         else
         {
-            ActivatedCount++;
+            if (count == 0)
+            {
+                ActivatedCount = 3;
+            }
+            else
+            {
+                ActivatedCount = count;
+            }
         }
+
+        IsMeetCondition = ActivatedCount >= 3;
     }
     public override string GetDescription()
     {
-        return $"{AbilityDescription}\n{ActivatedCount}Àå Â°";
+        return $"{AbilityDescription}\nížˆíŠ¸í•œ ì¹´ë“œ : {ActivatedCount}ìž¥ ì§¸";
     }
     public override S_Foe Clone()
     {

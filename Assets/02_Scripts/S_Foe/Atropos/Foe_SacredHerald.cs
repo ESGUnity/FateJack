@@ -7,18 +7,13 @@ public class Foe_SacredHerald : S_Foe
     public Foe_SacredHerald() : base
     (
         "Foe_SacredHerald",
-        "½Å¼ºÇÑ »çÀÚ",
-        "½Ã·Ã ½ÃÀÛ ½Ã °ñµå°¡ 10 ÀÌ»óÀÌ¶ó¸é Ã¼·ÂÀ» 1 ÀÒ½À´Ï´Ù.",
+        "ì‹ ì„±í•œ ì‚¬ìž",
+        "ì‹œë ¨ ì‹œìž‘ ì‹œ ê³¨ë“œê°€ 10 ì´ìƒì´ë¼ë©´ ì²´ë ¥ì„ 1 ìžƒìŠµë‹ˆë‹¤.",
         S_FoeTypeEnum.Atropos,
         S_FoeAbilityConditionEnum.StartTrial,
         S_FoePassiveEnum.None
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = false;
-        return CanActivateEffect;
-    }
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
         if (S_PlayerStat.Instance.CurrentGold >= 10)
@@ -26,9 +21,9 @@ public class Foe_SacredHerald : S_Foe
             await eA.AddOrSubtractHealth(this, null, -1);
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetCondition(S_Card card = null)
     {
-
+        IsMeetCondition = false;
     }
     public override string GetDescription()
     {

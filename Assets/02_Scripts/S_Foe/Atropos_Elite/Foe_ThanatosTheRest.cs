@@ -5,25 +5,22 @@ public class Foe_ThanatosTheRest : S_Foe
     public Foe_ThanatosTheRest() : base
     (
         "Foe_ThanatosTheRest",
-        "¾È½ÄÀÇ Å¸³ªÅä½º",
-        "½ºÅÃ¿¡ ¹®¾çÀÌ 2°³ ÀÌÇÏ¶ó¸é ÇÃ·¹ÀÌ¾î °ø°İ ½Ã Áï½Ã Ã³Ä¡ÇÕ´Ï´Ù.",
+        "ì•ˆì‹ì˜ íƒ€ë‚˜í† ìŠ¤",
+        "ìŠ¤íƒì— ë¬¸ì–‘ì´ 2ê°œ ì´í•˜ë¼ë©´ í”Œë ˆì´ì–´ ê³µê²© ì‹œ ì¦‰ì‹œ ì²˜ì¹˜í•©ë‹ˆë‹¤.",
         S_FoeTypeEnum.Atropos_Elite,
         S_FoeAbilityConditionEnum.DeathAttack,
         S_FoePassiveEnum.NeedActivatedCount
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount <= 2;
-        return CanActivateEffect;
-    }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
         ActivatedCount = S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(1);
+
+        IsMeetCondition = ActivatedCount <= 2;
     }
     public override string GetDescription()
     {
-        return $"{AbilityDescription}\n½ºÅÃ¿¡ Á¸ÀçÇÏ´Â ¹®¾ç °³¼ö : {ActivatedCount}";
+        return $"{AbilityDescription}\nìŠ¤íƒì— ìˆëŠ” ë¬¸ì–‘ ê°œìˆ˜ : {ActivatedCount}";
     }
     public override S_Foe Clone()
     {

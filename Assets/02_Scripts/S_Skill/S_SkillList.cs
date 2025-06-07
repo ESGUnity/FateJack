@@ -4,28 +4,28 @@ using UnityEngine;
 
 public class S_SkillList : MonoBehaviour
 {
-    // ¸ğµç Àü¸®Ç° ¸®½ºÆ®
+    // ëª¨ë“  ì „ë¦¬í’ˆ ë¦¬ìŠ¤íŠ¸
     List<S_Skill> skills = new List<S_Skill>()
     {
         new Skill_ReadyToBattle(), 
         new Skill_UnstableFusion(),
         new Skill_RoarCry(),
         new Skill_FocusBreath(), 
-        new Skill_PowerBuild(),
-        new Skill_Overwhelm(),
-        new Skill_Cull(),
-        new Skill_SavageStrike(),
-        new Skill_Abracadabra(),
-        new Skill_Pummel(),
-        new Skill_QuadBlade(),
+        new Skill_PowerBuild(), 
+        new Skill_Overwhelm(), 
+        new Skill_Cull(), 
+        new Skill_SavageStrike(), 
+        new Skill_Abracadabra(), 
+        new Skill_Pummel(), 
+        new Skill_QuadBlade(), 
     };
 
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static S_SkillList instance;
     public static S_SkillList Instance { get { return instance; } }
     void Awake()
     {
-        // ½Ì±ÛÅÏ
+        // ì‹±ê¸€í„´
         if (instance == null)
         {
             instance = this;
@@ -36,30 +36,46 @@ public class S_SkillList : MonoBehaviour
         }
     }
 
-    public List<S_Skill> GetInitSkillsByStartGame() // ÃÊ±â Àü¸®Ç° ¼±ÅÃ
+    public List<S_Skill> GetInitSkillsByStartGame() // ì´ˆê¸° ì „ë¦¬í’ˆ ì„ íƒ
     {
-        // ÃßÃâÇÒ Å° ¸ñ·Ï(½ÃÀÛ ´É·Â)
-        HashSet<string> targetKeys = new() { "Skill_FocuesBreath", "Skill_Cull" }; // ÀüÁıÁß È£Èí, µµ·ú
+        // ì¶”ì¶œí•  í‚¤ ëª©ë¡(ì‹œì‘ ëŠ¥ë ¥)
+        HashSet<string> targetKeys = new() { "Skill_Cull" }; // ë„ë¥™
 
-        // Æ¯Á¤ Å°¸¦ °¡Áø ¿ä¼Ò¸¦ ÃßÃâÇÏ¸é¼­ ¿øº» ¸®½ºÆ®¿¡¼­ Á¦°Å
-        List<S_Skill> initSkills = skills.Where(r => targetKeys.Contains(r.Key)).Select(x => x.Clone()).ToList();
+        // íŠ¹ì • í‚¤ë¥¼ ê°€ì§„ ìš”ì†Œë¥¼ ì¶”ì¶œí•˜ë©´ì„œ ì›ë³¸ ë¦¬ìŠ¤íŠ¸ì—ì„œ ì œê±°
+        List<S_Skill> initSkills = skills.Where(r => targetKeys.Contains(r.Key)).ToList();
 
-        return initSkills;
+        List<S_Skill> clones = new();
+        foreach (S_Skill s in initSkills)
+        {
+            S_Skill clone = s.Clone();
+            clone.SubscribeGameFlowManager();
+            clones.Add(clone);
+
+        }
+        return clones;
     }
     public List<S_Skill> PickRandomSkills(int count)
     {
-        // ÇÃ·¹ÀÌ¾î°¡ º¸À¯ÇÏÁö ¾ÊÀº ´É·Â ¸®½ºÆ® ¸¸µé±â
+        // í”Œë ˆì´ì–´ê°€ ë³´ìœ í•˜ì§€ ì•Šì€ ëŠ¥ë ¥ ë¦¬ìŠ¤íŠ¸ ë§Œë“¤ê¸°
         List<S_Skill> pickAvailableSkills = skills.Where(l => !S_PlayerSkill.Instance.OwnedSkills.Any(o => o.Key == l.Key)).ToList();
 
-        // count ¹æ¾î·ÎÁ÷
+        // count ë°©ì–´ë¡œì§
         count = Mathf.Min(count, pickAvailableSkills.Count);
 
-        // ¼ÅÇÃ
+        // ì…”í”Œ
         List<S_Skill> shuffledList = pickAvailableSkills.OrderBy(x => Random.value).ToList();
 
-        // ¹«ÀÛÀ§ ´É·ÂÀ» count¸¸Å­ ¼±ÅÃ
+        // ë¬´ì‘ìœ„ ëŠ¥ë ¥ì„ countë§Œí¼ ì„ íƒ
         List<S_Skill> randomSkills = shuffledList.Take(count).ToList();
 
-        return randomSkills;
+        List<S_Skill> clones = new();
+        foreach (S_Skill s in randomSkills)
+        {
+            S_Skill clone = s.Clone();
+            clone.SubscribeGameFlowManager();
+            clones.Add(clone);
+
+        }
+        return clones;
     }
 }

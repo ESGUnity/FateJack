@@ -1,65 +1,55 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using UnityEngine;
 
 public class Skill_PowerBuild : S_Skill
 {
     public Skill_PowerBuild() : base
     (
         "Skill_PowerBuild",
-        "±Ù·Â ÈÆ·Ã",
-        "½ºÆäÀÌµå Ä«µå¸¦ 3Àå È÷Æ®ÇÒ ¶§¸¶´Ù ÈûÀ» 2 ¾ò°í ´©ÀûµË´Ï´Ù.",
+        "ê·¼ë ¥ í›ˆë ¨",
+        "ìŠ¤íŽ˜ì´ë“œ ì¹´ë“œë¥¼ 3ìž¥ ížˆíŠ¸í•  ë•Œë§ˆë‹¤ íž˜ì„ 2 ì–»ê³  ëˆ„ì ë©ë‹ˆë‹¤.",
         S_SkillConditionEnum.Reverb,
         S_SkillPassiveEnum.NeedActivatedCount,
         true
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount >= 3;
-
-        return CanActivateEffect;
-    }
     public override async Task ActiveSkill(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
-            AccumulateValue += 2;
-            await eA.AddBattleStats(this, new List<S_Card>() { hitCard }, S_BattleStatEnum.Strength, 2);
+            await eA.AddBattleStats(this, hitCard, S_BattleStatEnum.Strength, 2);
 
             ActivatedCount = 0;
+            IsMeetCondition = false;
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        if (S_EffectChecker.Instance.IsSameSuit(card.Suit, S_CardSuitEnum.Spade))
-        {
-            if (isTwist)
-            {
-                ActivatedCount--;
-                if (ActivatedCount <= 0)
-                {
-                    ActivatedCount = 3;
+        int spadeCount = S_EffectChecker.Instance.GetSameSuitCardsInStack(S_CardSuitEnum.Spade).Count;
 
-                    AccumulateValue -= 2;
-                }
-            }
-            else
-            {
-                ActivatedCount++;
-            }
+        if (spadeCount == 0)
+        {
+            ActivatedCount = 0;
+            IsMeetCondition = false;
+            return;
         }
+
+        int mod = spadeCount % 3;
+        ActivatedCount = mod == 0 ? 3 : mod;
+        IsMeetCondition = mod == 0;
+        CurrentAccumulateValue = (spadeCount / 3) * 2 + TrialAccumulateValue;
     }
     public override void StartNewTurn(int currentTrial)
     {
         if (currentTrial == 1)
         {
-            S_PlayerStat.Instance.AddStrength(AccumulateValue); // ´©ÀûÀÌ±â¿¡ ½Ã·Ã ½ÃÀÛ ½Ã ´©Àû·® ´õÇØ³õ±â
+            S_PlayerStat.Instance.AddStrength(CurrentAccumulateValue); // ëˆ„ì ì´ê¸°ì— ì‹œë ¨ ì‹œìž‘ ì‹œ ëˆ„ì ëŸ‰ ë”í•´ë†“ê¸°
         }
     }
     public override string GetDescription()
     {
-        return $"{Description}\n{ActivatedCount}Àå Â°\n´©Àû·® : {AccumulateValue}";
+        return $"{Description}\nìŠ¤íŽ˜ì´ë“œ ì¹´ë“œ : {ActivatedCount}ìž¥ ì§¸\nëˆ„ì  íž˜ : {CurrentAccumulateValue}";
     }
     public override S_Skill Clone()
     {

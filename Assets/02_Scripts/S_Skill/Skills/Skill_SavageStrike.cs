@@ -7,42 +7,34 @@ public class Skill_SavageStrike : S_Skill
     public Skill_SavageStrike() : base
     (
         "Skill_SavageStrike",
-        "¾ß¸¸ÀûÀÎ Å¸°İ",
-        "½ºÅÄµå ½Ã ½ºÅÃÀÇ ½ºÆäÀÌµå Ä«µå ¼ıÀÚ ÇÕ 10 ´ç Èû¸¸Å­ ÇÇÇØ¸¦ Áİ´Ï´Ù.",
+        "ì•¼ë§Œì ì¸ íƒ€ê²©",
+        "ìŠ¤íƒ ë“œ ì‹œ ìŠ¤íƒì˜ ìŠ¤í˜ì´ë“œ ì¹´ë“œ ìˆ«ì í•© 10 ë‹¹ í˜ë§Œí¼ í”¼í•´ë¥¼ ì¤ë‹ˆë‹¤.",
         S_SkillConditionEnum.Stand,
         S_SkillPassiveEnum.NeedActivatedCount,
         false
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount >= 10;
-
-        return CanActivateEffect;
-    }
     public override async Task ActiveSkill(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
-            int count = ActivatedCount % 10;
+            int count = ActivatedCount / 10;
 
             for (int i = 0; i < count; i++)
             {
-                await eA.HarmCreature(this, new List<S_Card>(), S_BattleStatEnum.Strength, S_PlayerStat.Instance.CurrentStrength);
+                await eA.HarmFoe(this, null, S_BattleStatEnum.Strength, S_PlayerStat.Instance.CurrentStrength);
             }
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
         ActivatedCount = S_EffectChecker.Instance.GetSameSuitSumInStack(S_CardSuitEnum.Spade);
-    }
-    public override void StartNewTurn(int currentTrial)
-    {
 
+        IsMeetCondition = ActivatedCount >= 10;
     }
     public override string GetDescription()
     {
-        return $"{Description}\nÇöÀç ÇÕ : {ActivatedCount}";
+        return $"{Description}\nìŠ¤í˜ì´ë“œ ì¹´ë“œ ìˆ«ì í•© : {ActivatedCount}";
     }
     public override S_Skill Clone()
     {

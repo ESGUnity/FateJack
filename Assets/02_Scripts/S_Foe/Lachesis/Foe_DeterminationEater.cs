@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -7,25 +6,21 @@ public class Foe_DeterminationEater : S_Foe
     public Foe_DeterminationEater() : base
     (
         "Foe_DeterminationEater",
-        "ÀÇÁö¸¦ ¸Ô´Â ÀÚ",
-        "½Ã·Ã ½ÃÀÛ ½Ã ÀÇÁö¸¦ 1 ÀÒ½À´Ï´Ù.",
+        "ì˜ì§€ë¥¼ ë¨¹ëŠ” ì",
+        "ì‹œë ¨ ì‹œì‘ ì‹œ ì˜ì§€ë¥¼ 1 ìƒìŠµë‹ˆë‹¤.",
         S_FoeTypeEnum.Lachesis,
         S_FoeAbilityConditionEnum.StartTrial,
         S_FoePassiveEnum.None
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = false;
-        return CanActivateEffect;
-    }
+
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
         await eA.AddOrSubtractDetermination(this, null, -1);
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetCondition(S_Card card = null)
     {
-
+        IsMeetCondition = false;
     }
     public override string GetDescription()
     {

@@ -5,25 +5,21 @@ public class Foe_LachesisFreedomFate : S_Foe
     public Foe_LachesisFreedomFate() : base
     (
         "Foe_LachesisFreedomFate",
-        "ÀÚÀ¯·Î¿î ¿î¸íÀÇ ¶óÄÉ½Ã½º",
-        "½ºÅÃ¿¡ Ä«µå°¡ 13Àå ÀÌ»óÀÌ¶ó¸é ÇÃ·¹ÀÌ¾î¸¦ °ø°Ý ½Ã Áï½Ã Ã³Ä¡ÇÕ´Ï´Ù.",
+        "ìžìœ ë¡œìš´ ìš´ëª…ì˜ ë¼ì¼€ì‹œìŠ¤",
+        "ìŠ¤íƒì— ì¹´ë“œê°€ 13ìž¥ ì´ìƒì´ë¼ë©´ í”Œë ˆì´ì–´ë¥¼ ê³µê²© ì‹œ ì¦‰ì‹œ ì²˜ì¹˜í•©ë‹ˆë‹¤.",
         S_FoeTypeEnum.Lachesis_Boss,
         S_FoeAbilityConditionEnum.DeathAttack,
         S_FoePassiveEnum.NeedActivatedCount
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount >= 13;
-        return CanActivateEffect;
-    }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
         ActivatedCount = S_PlayerCard.Instance.GetPreStackCards().Count;
+        IsMeetCondition = ActivatedCount >= 13;
     }
     public override string GetDescription()
     {
-        return $"{AbilityDescription}\n½ºÅÃ¿¡ ÀÖ´Â Ä«µå °³¼ö : {ActivatedCount}";
+        return $"{AbilityDescription}\nížˆíŠ¸í•œ ì¹´ë“œ : {ActivatedCount}ìž¥";
     }
     public override S_Foe Clone()
     {

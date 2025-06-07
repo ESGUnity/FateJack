@@ -5,24 +5,25 @@ using UnityEngine;
 
 public class S_PlayerSkill : MonoBehaviour
 {
-    // Àü¸®Ç° °ü·Ã
+    // ì „ë¦¬í’ˆ ê´€ë ¨
     [HideInInspector] public List<S_Skill> OwnedSkills = new();
-    public const int MAX_LOOT = 5;
+    public const int MAX_LOOT = 6;
 
-    // ÄÄÆ÷³ÍÆ®
+    // ì»´í¬ë„ŒíŠ¸
     S_PlayerCard playerCard;
     S_PlayerStat playerStat;
 
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static S_PlayerSkill instance;
     public static S_PlayerSkill Instance { get { return instance; } }
+
     void Awake()
     {
-        // ÄÄÆ÷³ÍÆ® ÇÒ´ç
+        // ì»´í¬ë„ŒíŠ¸ í• ë‹¹
         playerCard = GetComponent<S_PlayerCard>();
         playerStat = GetComponent<S_PlayerStat>();
 
-        // ½Ì±ÛÅÏ
+        // ì‹±ê¸€í„´
         if (instance == null)
         {
             instance = this;
@@ -40,22 +41,46 @@ public class S_PlayerSkill : MonoBehaviour
             AddSkill(loot);
         }
     }
-    public void AddSkill(S_Skill loot)
+    public void AddSkill(S_Skill skill)
     {
         if (CanAddSkill())
         {
-            OwnedSkills.Add(loot);
-            S_SkillInfoSystem.Instance.AddSkillObject(loot);
+            OwnedSkills.Add(skill);
+            S_SkillInfoSystem.Instance.AddSkillObject(skill);
+            SetSiblingUISkills();
         }
         else
         {
-            S_InGameUISystem.Instance.CreateLog("´É·ÂÀ» ´õÀÌ»ó È¹µæÇÒ ¼ö ¾ø½À´Ï´Ù.");
+            S_InGameUISystem.Instance.CreateLog("ëŠ¥ë ¥ì„ ë”ì´ìƒ íšë“í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
     }
-    public void RemoveSkill(S_Skill loot)
+    public void RemoveSkill(S_Skill skill)
     {
-        OwnedSkills.Remove(loot);
-        S_SkillInfoSystem.Instance.RemoveSkillObject(loot);
+        OwnedSkills.Remove(skill);
+        S_SkillInfoSystem.Instance.RemoveSkillObject(skill);
+    }
+    public void ChangeSkillIndexToFirst(S_Skill skill)
+    {
+        var s = OwnedSkills[0];
+        int index = OwnedSkills.IndexOf(skill);
+        OwnedSkills[0] = skill;
+        OwnedSkills[index] = s;
+
+        SetSiblingUISkills();
+    }
+    public void SetSiblingUISkills()
+    {
+        for (int i = 0; i < OwnedSkills.Count; i++)
+        {
+            var targetSkill = OwnedSkills[i];
+
+            // ìì‹ë“¤ ì¤‘ì—ì„œ SkillInfoê°€ ì´ Skillì¸ ê±° ì°¾ìŒ
+            var t = S_SkillInfoSystem.Instance.layoutGroup_SkillInfoBase.transform
+                .Cast<Transform>()
+                .FirstOrDefault(tr => tr.GetComponent<S_UISkill>()?.SkillInfo == targetSkill);
+
+            if (t != null) t.SetSiblingIndex(i);
+        }
     }
     public bool CanAddSkill()
     {
@@ -66,35 +91,6 @@ public class S_PlayerSkill : MonoBehaviour
         return OwnedSkills.ToList();
     }
 
-    public void CalcSkillActivatedCountByHit(S_Card card)
-    {
-        foreach (S_Skill s in GetPlayerOwnedSkills())
-        {
-            if (s.Passive == S_SkillPassiveEnum.NeedActivatedCount)
-            {
-                s.ActivateCount(card);
-            }
-        }
-    }
-    public void SubtractSkillActivatedCountByTwist(List<S_Card> cards)
-    {
-        foreach (S_Skill s in GetPlayerOwnedSkills())
-        {
-            foreach (S_Card card in cards)
-            {
-                if (s.Passive == S_SkillPassiveEnum.NeedActivatedCount)
-                {
-                    s.ActivateCount(card, true);
-                }
-            }
-
-            // ¸¸¾à ½ºÅÃ¿¡ Ä«µå°¡ ¾ø´Ù¸é, Áï Ä«µå¸¦ ³»¼­ ActivatedCount°¡ È°¼ºÈ­µÈ°Ô ¾Æ´Ï¶ó¸é ±×³É 0. ÀÌ°Å ¾ÈÇÏ¸é ActivatedCount°¡ ÃÖ´ëÄ¡·Î °¥ ¼ö ÀÖ´Ù.
-            if (S_PlayerCard.Instance.GetPreStackCards().Count <= 0)
-            {
-                s.ActivatedCount = 0;
-            }
-        }
-    }
     public void ResetSkillActivatedCountByEndTrial()
     {
         foreach (S_Skill s in GetPlayerOwnedSkills())
@@ -109,62 +105,73 @@ public class S_PlayerSkill : MonoBehaviour
     {
         foreach (S_Skill s in GetPlayerOwnedSkills())
         {
-            s.IsMeetCondition(card);
+            if (s.Passive == S_SkillPassiveEnum.NeedActivatedCount)
+            {
+                s.CheckMeetConditionByActivatedCount(card);
+            }
+            else
+            {
+                s.CheckMeetConditionByBasic(card);
+            }
         }
+
+        S_SkillInfoSystem.Instance.UpdateSkillObject();
+    }
+    public void CheckSkillMeetConditionAfterEffect(S_Skill skill)
+    {
+        //if (skill.Passive == S_SkillPassiveEnum.NeedActivatedCount)
+        //{
+        //    skill.CheckMeetConditionByActivatedCount();
+        //}
+        //else
+        //{
+        //    skill.CheckMeetConditionByBasic();
+        //}
+        skill.CheckMeetConditionByBasic();
+
+        S_SkillInfoSystem.Instance.UpdateSkillObject();
     }
     public async Task ActivateStartTrialSkillsByStartTrial()
     {
-        // ½Ã·Ã ½ÃÀÛ ½Ã¸¸ È¿°ú ¹ßµ¿
+        // ì‹œë ¨ ì‹œì‘ ì‹œë§Œ íš¨ê³¼ ë°œë™
         foreach (S_Skill s in GetPlayerOwnedSkills())
         {
             if (s.Condition == S_SkillConditionEnum.StartTrial)
             {
                 await s.ActiveSkill(S_EffectActivator.Instance, null);
-                s.IsMeetCondition();
-                S_SkillInfoSystem.Instance.UpdateSkillObject();
+
+                CheckSkillMeetConditionAfterEffect(s);
             }
         }
-
-        // ÃÊ·ÏºÒ Ã¼Å©(ÀÏºÎ ¸Ş¾Æ¸®·ù´Â ²¨Áü)
-        CheckSkillMeetCondition();
-        S_SkillInfoSystem.Instance.UpdateSkillObject();
     }
     public async Task ActivateReverbSkillsByHitCard(S_Card hitCard)
     {
-        // ¸Ş¾Æ¸®¸¸ È¿°ú ¹ßµ¿
+        // ë©”ì•„ë¦¬ë§Œ íš¨ê³¼ ë°œë™
         foreach (S_Skill s in GetPlayerOwnedSkills())
         {
-            if (s.Condition == S_SkillConditionEnum.Reverb && s.CanActivateEffect)
+            if (s.Condition == S_SkillConditionEnum.Reverb && s.IsMeetCondition)
             {
                 await s.ActiveSkill(S_EffectActivator.Instance, hitCard);
-                s.IsMeetCondition();
-                S_SkillInfoSystem.Instance.UpdateSkillObject();
+
+                CheckSkillMeetConditionAfterEffect(s);
             }
         }
 
-        // ÃÊ·ÏºÒ Ã¼Å©(ÀÏºÎ ¸Ş¾Æ¸®·ù´Â ²¨Áü)
-        CheckSkillMeetCondition();
-        S_SkillInfoSystem.Instance.UpdateSkillObject();
-
-        // ´É·Â¿¡ ÀÇÇÑ È÷½ºÅä¸® ÀúÀå
+        // ëŠ¥ë ¥ì— ì˜í•œ íˆìŠ¤í† ë¦¬ ì €ì¥
         S_PlayerStat.Instance.SaveStatHistory(hitCard, S_StatHistoryTriggerEnum.Skill);
     }
     public async Task ActivateStandSkillsByStand()
     {
-        // ½ºÅÄµå¸¸ È¿°ú ¹ßµ¿
+        // ìŠ¤íƒ ë“œë§Œ íš¨ê³¼ ë°œë™
         foreach (S_Skill s in GetPlayerOwnedSkills())
         {
-            if (s.Condition == S_SkillConditionEnum.Stand && s.CanActivateEffect)
+            if (s.Condition == S_SkillConditionEnum.Stand && s.IsMeetCondition)
             {
                 await s.ActiveSkill(S_EffectActivator.Instance, null);
-                s.IsMeetCondition();
-                S_SkillInfoSystem.Instance.UpdateSkillObject();
+
+                CheckSkillMeetConditionAfterEffect(s);
             }
         }
-
-        // ÃÊ·ÏºÒ Ã¼Å©(¹ü¶÷·ù ½ºÅÄµå´Â ºÒ²¨Áü)
-        CheckSkillMeetCondition();
-        S_SkillInfoSystem.Instance.UpdateSkillObject();
     }
 }
 
@@ -187,5 +194,6 @@ public enum S_SkillPassiveEnum
     Clover_Strength,
     Clover_Mind,
     Clover_Luck,
+    AddProductCount,
     NeedActivatedCount,
 }

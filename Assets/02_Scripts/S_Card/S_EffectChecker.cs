@@ -1,30 +1,22 @@
-using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 
 
 public class S_EffectChecker : MonoBehaviour
 {
-    [Header("ÄÄÆ÷³ÍÆ®")]
+    [Header("ì»´í¬ë„ŒíŠ¸")]
     S_PlayerCard pCard;
     S_PlayerStat pStat;
     S_PlayerSkill pSkill;
 
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static S_EffectChecker instance;
     public static S_EffectChecker Instance { get { return instance; } }
 
     void Awake()
     {
-        // ÄÄÆ÷³ÍÆ® ÇÒ´ç
-        pCard = S_PlayerCard.Instance;
-        pStat = S_PlayerStat.Instance;
-        pSkill = S_PlayerSkill.Instance;
-
-        // ½Ì±ÛÅÏ
+        // ì‹±ê¸€í„´
         if (instance == null)
         {
             instance = this;
@@ -34,8 +26,15 @@ public class S_EffectChecker : MonoBehaviour
             Destroy(gameObject);
         }
     }
+    void Start()
+    {
+        // ì»´í¬ë„ŒíŠ¸ í• ë‹¹
+        pCard = S_PlayerCard.Instance;
+        pStat = S_PlayerStat.Instance;
+        pSkill = S_PlayerSkill.Instance;
+    }
 
-    // °°Àº ¹®¾ç, °°Àº ¼ıÀÚÀÎÁö Ã¼Å©ÇÏ´Â ¸Ş¼­µå
+    // ê°™ì€ ë¬¸ì–‘, ê°™ì€ ìˆ«ìì¸ì§€ ì²´í¬í•˜ëŠ” ë©”ì„œë“œ
     public bool IsSameSuit(S_CardSuitEnum suit1, S_CardSuitEnum suit2)
     {
         bool isSameEach = false;
@@ -109,13 +108,13 @@ public class S_EffectChecker : MonoBehaviour
         return num >= 8;
     }
 
-    // ±º´Ü Ã¼Å©
-    public int GetSameSuitSumInStack(S_CardSuitEnum suit) // ½ºÅÃ¿¡¼­ °°Àº ¹®¾çÀÇ ÇÕ 
+    // êµ°ë‹¨ ì²´í¬
+    public int GetSameSuitSumInStack(S_CardSuitEnum suit) // ìŠ¤íƒì—ì„œ ê°™ì€ ë¬¸ì–‘ì˜ í•© 
     {
         return pCard.GetPreStackCards().Where(x => IsSameSuit(x.Suit, suit)).Sum(x => x.Number);
     }
-    // È¥µ· Ã¼Å©(´ÜÇÕ)
-    public int GetSuitCountGreaterThanAmountInStack(int amount) // ½ºÅÃ¿¡¼­ Ä«µå°¡ amount ÀÌ»ó Á¸ÀçÇÏ´Â ¹®¾ç °³¼ö
+    // í˜¼ëˆ ì²´í¬(ë‹¨í•©)
+    public int GetSuitCountGreaterThanAmountInStack(int amount) // ìŠ¤íƒì—ì„œ ì¹´ë“œê°€ amount ì´ìƒ ì¡´ì¬í•˜ëŠ” ë¬¸ì–‘ ê°œìˆ˜
     {
         List<S_Card> cards = pCard.GetPreStackCards();
 
@@ -132,7 +131,7 @@ public class S_EffectChecker : MonoBehaviour
 
         return suitCount;
     }
-    public int GetSuitCountGreaterThanAmountInStackInCurrentTurn(int amount) // ½ºÅÃ¿¡¼­ Ä«µå°¡ amount ÀÌ»ó Á¸ÀçÇÏ´Â ¹®¾ç °³¼ö(´Ü ÇÑ ÅÏ¿¡)
+    public int GetSuitCountGreaterThanAmountInStackInCurrentTurn(int amount) // ìŠ¤íƒì—ì„œ ì¹´ë“œê°€ amount ì´ìƒ ì¡´ì¬í•˜ëŠ” ë¬¸ì–‘ ê°œìˆ˜(ë‹¨ í•œ í„´ì—)
     {
         List<S_Card> cards = pCard.GetPreStackCards();
 
@@ -149,8 +148,8 @@ public class S_EffectChecker : MonoBehaviour
 
         return suitCount;
     }
-    // °ø¼¼ Ã¼Å©
-    public int GetContinueNumMaxLengthInStack() // ½ºÅÃ¿¡¼­ ¿¬¼ÓµÇ´Â ¼ıÀÚ ÃÖ´ë ±æÀÌ
+    // ê³µì„¸ ì²´í¬
+    public int GetContinueNumMaxLengthInStack() // ìŠ¤íƒì—ì„œ ì—°ì†ë˜ëŠ” ìˆ«ì ìµœëŒ€ ê¸¸ì´
     {
         List<S_Card> cards = pCard.GetPreStackCards();
 
@@ -179,7 +178,7 @@ public class S_EffectChecker : MonoBehaviour
 
         return maxLen;
     }
-    public int GetContinueNumMaxLengthInStackInCurrentTurn()  // ½ºÅÃ¿¡¼­ ¿¬¼ÓµÇ´Â ¼ıÀÚ ÃÖ´ë ±æÀÌ(´Ü ÇÑ ÅÏ¿¡)
+    public int GetContinueNumMaxLengthInStackInCurrentTurn()  // ìŠ¤íƒì—ì„œ ì—°ì†ë˜ëŠ” ìˆ«ì ìµœëŒ€ ê¸¸ì´(ë‹¨ í•œ í„´ì—)
     {
         List<S_Card> cards = pCard.GetPreStackCards().Where(x => x.IsCurrentTurnHit).ToList();
 
@@ -208,7 +207,7 @@ public class S_EffectChecker : MonoBehaviour
 
         return maxLen;
     }
-    public int GetContinueNumSameSuitMaxLengthInStack()  // ½ºÅÃ¿¡¼­ °°Àº ¹®¾çÀÌ¸é¼­ ¿¬¼ÓµÇ´Â ¼ıÀÚ ÃÖ´ë ±æÀÌ
+    public int GetContinueNumSameSuitMaxLengthInStack()  // ìŠ¤íƒì—ì„œ ê°™ì€ ë¬¸ì–‘ì´ë©´ì„œ ì—°ì†ë˜ëŠ” ìˆ«ì ìµœëŒ€ ê¸¸ì´
     {
         List<S_Card> cards = pCard.GetPreStackCards();
         if (cards.Count == 0) return 0;
@@ -218,7 +217,7 @@ public class S_EffectChecker : MonoBehaviour
         List<S_CardSuitEnum> list = new List<S_CardSuitEnum> { S_CardSuitEnum.Spade, S_CardSuitEnum.Heart, S_CardSuitEnum.Diamond, S_CardSuitEnum.Clover };
         foreach (var suit in list)
         {
-            // baseSuit¿Í °°Àº ±×·ìÀ¸·Î °£ÁÖµÇ´Â Ä«µåµé ¸ğÀ½
+            // baseSuitì™€ ê°™ì€ ê·¸ë£¹ìœ¼ë¡œ ê°„ì£¼ë˜ëŠ” ì¹´ë“œë“¤ ëª¨ìŒ
             List<int> numbers = new List<int>();
 
             for (int j = 0; j < cards.Count; j++)
@@ -229,7 +228,7 @@ public class S_EffectChecker : MonoBehaviour
                 }
             }
 
-            // Áßº¹ Á¦°Å ¹× Á¤·Ä
+            // ì¤‘ë³µ ì œê±° ë° ì •ë ¬
             var sortedNumbers = numbers.Distinct().OrderBy(n => n).ToList();
             int currentLen = 1;
 
@@ -249,38 +248,57 @@ public class S_EffectChecker : MonoBehaviour
 
         return maxLen;
     }
-    // Á¤¹Ğ Ã¼Å©
-    public List<S_Card> GetSameSuitCardsInStack(S_CardSuitEnum suit) // ½ºÅÃ¿¡¼­ suit¿Í °°Àº ¹®¾çÀÇ Ä«µå
+    // ì •ë°€ ì²´í¬
+    public List<S_Card> GetSameSuitCardsInStack(S_CardSuitEnum suit) // ìŠ¤íƒì—ì„œ suitì™€ ê°™ì€ ë¬¸ì–‘ì˜ ì¹´ë“œ
     {
         return pCard.GetPreStackCards().Where(x => IsSameSuit(x.Suit, suit)).ToList();
     }
-    public List<S_Card> GetSameSuitCardsInStackInCurrentTurn(S_CardSuitEnum suit) // ½ºÅÃ¿¡¼­ suit¿Í °°Àº ¹®¾çÀÇ Ä«µå(´Ü ÇÑ ÅÏ¿¡)
+    public List<S_Card> GetSameSuitCardsInStackInCurrentTurn(S_CardSuitEnum suit) // ìŠ¤íƒì—ì„œ suitì™€ ê°™ì€ ë¬¸ì–‘ì˜ ì¹´ë“œ(ë‹¨ í•œ í„´ì—)
     {
         return pCard.GetPreStackCards().Where(x => x.IsCurrentTurnHit).Where(x => IsSameSuit(x.Suit, suit)).ToList();
     }
-    public List<S_Card> GetSameNumberCardsInStack(int num) // ½ºÅÃ¿¡¼­ num°ú °°Àº ¼ıÀÚÀÇ Ä«µå
+    public List<S_Card> GetSameNumberCardsInStack(int num) // ìŠ¤íƒì—ì„œ numê³¼ ê°™ì€ ìˆ«ìì˜ ì¹´ë“œ
     {
         return pCard.GetPreStackCards().Where(x => IsSameNumber(x.Number, num)).ToList();
     }
-    public List<S_Card> GetSameNumberCardsInStackInCurrentTurn(int num) // ½ºÅÃ¿¡¼­ num°ú °°Àº ¼ıÀÚÀÇ Ä«µå(´Ü ÇÑ ÅÏ¿¡)
+    public List<S_Card> GetSameNumberCardsInStackInCurrentTurn(int num) // ìŠ¤íƒì—ì„œ numê³¼ ê°™ì€ ìˆ«ìì˜ ì¹´ë“œ(ë‹¨ í•œ í„´ì—)
     {
         return pCard.GetPreStackCards().Where(x => x.IsCurrentTurnHit).Where(x => IsSameNumber(x.Number, num)).ToList();
     }
-    public List<S_Card> GetPlethoraNumberCardsInStack() // ½ºÅÃ¿¡¼­ 8 ÀÌ»ó ¼ıÀÚÀÇ Ä«µå
+    public List<S_Card> GetPlethoraNumberCardsInStack() // ìŠ¤íƒì—ì„œ 8 ì´ìƒ ìˆ«ìì˜ ì¹´ë“œ
     {
         return pCard.GetPreStackCards().Where(x => IsPlethoraNumber(x.Number)).ToList();
     }
-    public List<S_Card> GetPlethoraNumberCardsInStackInCurrentTurn() // ½ºÅÃ¿¡¼­ 8 ÀÌ»ó ¼ıÀÚÀÇ Ä«µå(´Ü ÇÑ ÅÏ¿¡)
+    public List<S_Card> GetPlethoraNumberCardsInStackInCurrentTurn() // ìŠ¤íƒì—ì„œ 8 ì´ìƒ ìˆ«ìì˜ ì¹´ë“œ(ë‹¨ í•œ í„´ì—)
     {
         return pCard.GetPreStackCards().Where(x => x.IsCurrentTurnHit).Where(x => IsPlethoraNumber(x.Number)).ToList();
     }
-    // ¹ü¶÷ Ã¼Å©
-    public List<S_Card> GetCardsInStackInCurrentTurn() // ½ºÅÃÀÇ Ä«µå(´Ü ÇÑ ÅÏ¿¡)
+    // ë²”ëŒ ì²´í¬
+    public List<S_Card> GetCardsInStack() // ìŠ¤íƒì—ì„œ suitì™€ ê°™ì€ ë¬¸ì–‘ì˜ ì¹´ë“œ
+    {
+        return pCard.GetPreStackCards().ToList();
+    }
+    public List<S_Card> GetCardsInStackInCurrentTurn() // ìŠ¤íƒì˜ ì¹´ë“œ(ë‹¨ í•œ í„´ì—)
     {
         return pCard.GetPreStackCards().Where(x => x.IsCurrentTurnHit).ToList();
     }
+    public List<S_Card> GetCardsInDeck() // ë±ì—ì„œ suitì™€ ê°™ì€ ë¬¸ì–‘ì˜ ì¹´ë“œ
+    {
+        return pCard.GetPreDeckCards().ToList();
+    }
+    // ì¶”ê°€ íš¨ê³¼ìš©
+    public List<S_Card> GetCursedCardsInDeckAndStack()
+    {
+        List<S_Card> cards = new List<S_Card>();
 
-    public S_BattleStatEnum GetHighestStats(out int value) // °¡Àå ³ôÀº ´É·ÂÄ¡
+        cards.AddRange(pCard.GetPreDeckCards().Where(x => x.IsCursed).ToList());
+        cards.AddRange(pCard.GetPreStackCards().Where(x => x.IsCursed).ToList());
+
+        return cards;
+    }
+
+
+    public S_BattleStatEnum GetHighestStats(out int value) // ê°€ì¥ ë†’ì€ ëŠ¥ë ¥ì¹˜
     {
         var stats = new (S_BattleStatEnum stat, int val)[]
         {
@@ -305,14 +323,14 @@ public class S_EffectChecker : MonoBehaviour
     {
         List<S_Card> decks = pCard.GetPreDeckCards();
 
-        // µ¦ÀÌ ºñ¾îÀÖ´Ù¸é ±âº»°ª°ú ºó ¸®½ºÆ® ¹İÈ¯
+        // ë±ì´ ë¹„ì–´ìˆë‹¤ë©´ ê¸°ë³¸ê°’ê³¼ ë¹ˆ ë¦¬ìŠ¤íŠ¸ ë°˜í™˜
         if (decks.Count == 0)
         {
-            leastSuit = S_CardSuitEnum.Spade; // ±âº»°ª
+            leastSuit = S_CardSuitEnum.Spade; // ê¸°ë³¸ê°’
             return new List<S_Card>();
         }
 
-        // ¹®¾çº° ±×·ìÇÎ ÈÄ °³¼ö ÀûÀº ¼ø Á¤·Ä
+        // ë¬¸ì–‘ë³„ ê·¸ë£¹í•‘ í›„ ê°œìˆ˜ ì ì€ ìˆœ ì •ë ¬
         var grouped = decks
             .GroupBy(x => x.Suit)
             .OrderBy(g => g.Count())
@@ -320,7 +338,7 @@ public class S_EffectChecker : MonoBehaviour
 
         int minCount = grouped.First().Count();
 
-        // ÃÖ¼Ò °³¼ö ±×·ì Áß ¹«ÀÛÀ§ ¼±ÅÃ
+        // ìµœì†Œ ê°œìˆ˜ ê·¸ë£¹ ì¤‘ ë¬´ì‘ìœ„ ì„ íƒ
         var leastSuitGroups = grouped.Where(g => g.Count() == minCount).ToList();
         var chosenGroup = leastSuitGroups[UnityEngine.Random.Range(0, leastSuitGroups.Count)];
 
@@ -331,14 +349,14 @@ public class S_EffectChecker : MonoBehaviour
     {
         List<S_Card> stacks = pCard.GetPreStackCards();
 
-        // µ¦ÀÌ ºñ¾îÀÖ´Ù¸é ±âº»°ª°ú ºó ¸®½ºÆ® ¹İÈ¯
+        // ë±ì´ ë¹„ì–´ìˆë‹¤ë©´ ê¸°ë³¸ê°’ê³¼ ë¹ˆ ë¦¬ìŠ¤íŠ¸ ë°˜í™˜
         if (stacks.Count == 0)
         {
-            leastSuit = S_CardSuitEnum.Spade; // ±âº»°ª
+            leastSuit = S_CardSuitEnum.Spade; // ê¸°ë³¸ê°’
             return new List<S_Card>();
         }
 
-        // ¹®¾çº° ±×·ìÇÎ ÈÄ °³¼ö ÀûÀº ¼ø Á¤·Ä
+        // ë¬¸ì–‘ë³„ ê·¸ë£¹í•‘ í›„ ê°œìˆ˜ ì ì€ ìˆœ ì •ë ¬
         var grouped = stacks
             .GroupBy(x => x.Suit)
             .OrderBy(g => g.Count())
@@ -346,7 +364,7 @@ public class S_EffectChecker : MonoBehaviour
 
         int minCount = grouped.First().Count();
 
-        // ÃÖ¼Ò °³¼ö ±×·ì Áß ¹«ÀÛÀ§ ¼±ÅÃ
+        // ìµœì†Œ ê°œìˆ˜ ê·¸ë£¹ ì¤‘ ë¬´ì‘ìœ„ ì„ íƒ
         var leastSuitGroups = grouped.Where(g => g.Count() == minCount).ToList();
         var chosenGroup = leastSuitGroups[UnityEngine.Random.Range(0, leastSuitGroups.Count)];
 
@@ -357,7 +375,7 @@ public class S_EffectChecker : MonoBehaviour
     {
         List<S_Card> decks = pCard.GetPreDeckCards();
 
-        // µ¦ÀÌ ºñ¾îÀÖ´Ù¸é ±âº»°ª°ú ºó ¸®½ºÆ® ¹İÈ¯
+        // ë±ì´ ë¹„ì–´ìˆë‹¤ë©´ ê¸°ë³¸ê°’ê³¼ ë¹ˆ ë¦¬ìŠ¤íŠ¸ ë°˜í™˜
         if (decks.Count == 0)
         {
             leastNumber = 1;
@@ -437,7 +455,7 @@ public class S_EffectChecker : MonoBehaviour
 
         return cards.Select(x => x.Suit).Distinct().Count();
     }
-    public S_CardSuitEnum GetRandomSuit() // ¹«ÀÛÀ§ ¹®¾ç
+    public S_CardSuitEnum GetRandomSuit() // ë¬´ì‘ìœ„ ë¬¸ì–‘
     {
         List<S_CardSuitEnum> list = new List<S_CardSuitEnum> { S_CardSuitEnum.Spade, S_CardSuitEnum.Heart, S_CardSuitEnum.Diamond, S_CardSuitEnum.Clover };
 
@@ -445,7 +463,7 @@ public class S_EffectChecker : MonoBehaviour
 
         return list[randomIndex];
     }
-    public S_BattleStatEnum GetRandomStat(out int value) // ¹«ÀÛÀ§ ´É·ÂÄ¡
+    public S_BattleStatEnum GetRandomStat(out int value) // ë¬´ì‘ìœ„ ëŠ¥ë ¥ì¹˜
     {
         var stats = new (S_BattleStatEnum stat, int val)[]
         {
@@ -460,9 +478,13 @@ public class S_EffectChecker : MonoBehaviour
         return selected.stat;
     }
 
-    // È¿°ú Áß µ¦¿¡ ÀÖ´Â Ä«µå Á¦¿Ü¿Í È÷Æ®(ÀÎµµ)¿¡ ´ëºñÇÑ µ¦ Ä«µå °¡Á®¿À±â 
-    public List<S_Card> GetRandomCardsInImmediateDeck(int count = 999, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1) // Á¶°Ç ¸¸Á· ¸ğµç Ä«µå´Â count¿¡ 999À» ³ÖÀ¸¸é µÈ´Ù.
+    // íš¨ê³¼ ì¤‘ ë±ì— ìˆëŠ” ì¹´ë“œ ì œì™¸ì™€ íˆíŠ¸(ì¸ë„)ì— ëŒ€ë¹„í•œ ë± ì¹´ë“œ ê°€ì ¸ì˜¤ê¸° 
+    public List<S_Card> GetRandomCardsInImmediateDeck(int count = 999, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1) // ì¡°ê±´ ë§Œì¡± ëª¨ë“  ì¹´ë“œëŠ” countì— 999ì„ ë„£ìœ¼ë©´ ëœë‹¤.
     {
+        if (pCard == null)
+        {
+            Debug.LogError("pCard is null in GetRandomCardsInImmediateDeck");
+        }
         List<S_Card> cards = pCard.GetImmediateDeckCards();
         if (suit != S_CardSuitEnum.None)
         {
@@ -475,7 +497,7 @@ public class S_EffectChecker : MonoBehaviour
 
         return cards.OrderBy(x => Random.value).Take(count).ToList();
     }
-    public List<S_Card> GetRandomCardsInImmediateStack(int count = 999, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1) // Á¶°Ç ¸¸Á· ¸ğµç Ä«µå´Â count¿¡ 999À» ³ÖÀ¸¸é µÈ´Ù.
+    public List<S_Card> GetRandomCardsInImmediateStack(int count = 999, S_CardSuitEnum suit = S_CardSuitEnum.None, int num = -1) // ì¡°ê±´ ë§Œì¡± ëª¨ë“  ì¹´ë“œëŠ” countì— 999ì„ ë„£ìœ¼ë©´ ëœë‹¤.
     {
         List<S_Card> cards = pCard.GetImmediateStackCards();
         if (suit != S_CardSuitEnum.None)

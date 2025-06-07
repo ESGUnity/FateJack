@@ -7,37 +7,29 @@ public class Skill_Abracadabra : S_Skill
     public Skill_Abracadabra() : base
     (
         "Skill_Abracadabra",
-        "¾Æºê¶óÄ«´Ùºê¶ó",
-        "½ºÅÃ¿¡ °¢ ¹®¾çÀÇ Ä«µå°¡ 4Àå ÀÌ»ó ÀÖ´Ù¸é ½ºÅÄµå ½Ã ¸ðµç ´É·ÂÄ¡¸¦ °öÇÑ¸¸Å­ ÇÇÇØ¸¦ ÁÝ´Ï´Ù.",
+        "ì•„ë¸Œë¼ì¹´ë‹¤ë¸Œë¼",
+        "ìŠ¤íƒì— ê° ë¬¸ì–‘ì˜ ì¹´ë“œê°€ 4ìž¥ ì´ìƒ ìžˆë‹¤ë©´ ìŠ¤íƒ ë“œ ì‹œ ëª¨ë“  ëŠ¥ë ¥ì¹˜ë¥¼ ê³±í•œë§Œí¼ í”¼í•´ë¥¼ ì¤ë‹ˆë‹¤.",
         S_SkillConditionEnum.Stand,
         S_SkillPassiveEnum.NeedActivatedCount,
         false
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount >= 4;
-
-        return CanActivateEffect;
-    }
     public override async Task ActiveSkill(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
-            await eA.HarmCreature(this, new List<S_Card>(), S_BattleStatEnum.AllStat, S_PlayerStat.Instance.CurrentStrength * S_PlayerStat.Instance.CurrentMind * S_PlayerStat.Instance.CurrentLuck);
+            await eA.HarmFoe(this, null, S_BattleStatEnum.AllStat, S_PlayerStat.Instance.CurrentStrength * S_PlayerStat.Instance.CurrentMind * S_PlayerStat.Instance.CurrentLuck);
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
         ActivatedCount = S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(4);
-    }
-    public override void StartNewTurn(int currentTrial)
-    {
 
+        IsMeetCondition = ActivatedCount >= 4;
     }
     public override string GetDescription()
     {
-        return $"{Description}\nÃæÁ·ÇÑ ¹®¾ç °³¼ö : {ActivatedCount}";
+        return $"{Description}\nì¶©ì¡±í•œ ë¬¸ì–‘ ê°œìˆ˜ : {ActivatedCount}";
     }
     public override S_Skill Clone()
     {

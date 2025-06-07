@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -7,32 +6,29 @@ public class Foe_HypnosSleepWaker : S_Foe
     public Foe_HypnosSleepWaker() : base
     (
         "Foe_HypnosSleepWaker",
-        "ÀáÀ» ±ú´Â È÷ÇÁ³ë½º",
-        "½ºÅÄµå ½Ã ½ºÅÃ¿¡ ¾ø´Â ¹®¾çÀÌ ÀÖ´Ù¸é µ¦¿¡¼­ ¹«ÀÛÀ§ Ä«µå 6ÀåÀ» ÀúÁÖÇÕ´Ï´Ù.",
+        "ì ì„ ê¹¨ëŠ” íˆí”„ë…¸ìŠ¤",
+        "ìŠ¤íƒ ë“œ ì‹œ ìŠ¤íƒì— ì—†ëŠ” ë¬¸ì–‘ì´ ìˆë‹¤ë©´ ë±ì—ì„œ ë¬´ì‘ìœ„ ì¹´ë“œ 6ì¥ì„ ì €ì£¼í•©ë‹ˆë‹¤.",
         S_FoeTypeEnum.Clotho_Elite,
         S_FoeAbilityConditionEnum.Stand,
         S_FoePassiveEnum.NeedActivatedCount
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount < 4;
-        return CanActivateEffect;
-    }
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
             await eA.CurseRandomCards(this, 6, S_CardSuitEnum.None, -1, true, false);
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
         ActivatedCount = S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(1);
+
+        IsMeetCondition = ActivatedCount < 4;
     }
     public override string GetDescription()
     {
-        return $"{AbilityDescription}\n½ºÅÃ¿¡ Á¸ÀçÇÏ´Â ¹®¾ç °³¼ö : {ActivatedCount}";
+        return $"{AbilityDescription}\nìŠ¤íƒì— ìˆëŠ” ë¬¸ì–‘ ê°œìˆ˜ : {ActivatedCount}";
     }
     public override S_Foe Clone()
     {

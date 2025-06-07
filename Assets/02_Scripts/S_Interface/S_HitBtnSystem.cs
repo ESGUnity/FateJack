@@ -4,14 +4,18 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class S_HitBtnSystem : MonoBehaviour
 {
-    [Header("¾À ¿ÀºêÁ§Æ®")]
+    [Header("ì”¬ ì˜¤ë¸Œì íŠ¸")]
     [SerializeField] SpriteRenderer sprite_BlackBackgroundByTwistBtn;
 
-    [Header("ÄÄÆ÷³ÍÆ®")]
+    [Header("ì»´í¬ë„ŒíŠ¸")]
     GameObject panel_HitBtnBase;
+    GameObject image_BasicHitBtnBase;
+    GameObject image_TwistBtnBase;
+
     GameObject image_HoverHitBtnInfoBase;
     TMP_Text text_CleanHitProb;
     TMP_Text text_BurstProb;
@@ -22,23 +26,26 @@ public class S_HitBtnSystem : MonoBehaviour
     int prevDeckCount;
     int prevStackSum;
 
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static S_HitBtnSystem instance;
     public static S_HitBtnSystem Instance { get { return instance; } }
 
     void Awake()
     {
-        // ÀÚ½Ä ¿ÀºêÁ§Æ®ÀÇ ÄÄÆ÷³ÍÆ® °¡Á®¿À±â
+        // ìì‹ ì˜¤ë¸Œì íŠ¸ì˜ ì»´í¬ë„ŒíŠ¸ ê°€ì ¸ì˜¤ê¸°
         Transform[] transforms = GetComponentsInChildren<Transform>(true);
         TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
 
-        // È÷Æ® ¹öÆ° °ü·Ã ÄÄÆ÷³ÍÆ® ÇÒ´ç
+        // íˆíŠ¸ ë²„íŠ¼ ê´€ë ¨ ì»´í¬ë„ŒíŠ¸ í• ë‹¹
         panel_HitBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Panel_HitBtnBase")).gameObject;
+        image_BasicHitBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_BasicHitBtnBase")).gameObject;
+        image_TwistBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_TwistBtnBase")).gameObject;
+
         image_HoverHitBtnInfoBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_HoverHitBtnInfoBase")).gameObject;
         text_CleanHitProb = Array.Find(texts, c => c.gameObject.name.Equals("Text_CleanHitProb"));
         text_BurstProb = Array.Find(texts, c => c.gameObject.name.Equals("Text_BurstProb"));
 
-        // ½Ì±ÛÅÏ
+        // ì‹±ê¸€í„´
         if (instance == null)
         {
             instance = this;
@@ -50,31 +57,33 @@ public class S_HitBtnSystem : MonoBehaviour
 
         InitPos();
     }
+    S_GameFlowStateEnum prevState;
     void Update()
     {
-        if (prevStackSum != S_PlayerStat.Instance.StackSum && prevDeckCount != S_PlayerCard.Instance.GetPreDeckCards().Count)
+        // ë²„ìŠ¤íŠ¸ ë° í´ë¦°íˆíŠ¸ë¥¼ ì•Œë ¤ì£¼ëŠ” íŒ¨ë„. Hit ì¼ ë•Œë§Œ ì¼œì§€ê³  ì•„ë‹ˆë©´ êº¼ì§. ë˜í•œ Hit ì¼œì§ˆ ë•Œ ë§ˆìš°ìŠ¤ ì˜¬ë ¤ì ¸ìˆìœ¼ë©´ ì¼œì§
+        S_GameFlowStateEnum currentState = S_GameFlowManager.Instance.GameFlowState;
+        if (prevState != currentState)
         {
-            RenewProbText();
+            // 1. ìƒíƒœê°€ Hitê°€ ì•„ë‹ˆë©´ íŒ¨ë„ ë”
+            if (currentState != S_GameFlowStateEnum.Hit)
+            {
+                PointerExitOnHitBtn();
+                PointerExitOnTwistBtn();
+            }
+            // 2. ì´ì „ ìƒíƒœëŠ” Hitê°€ ì•„ë‹ˆì—ˆê³ , í˜„ì¬ ìƒíƒœê°€ Hitë¡œ ë°”ë€ ê²½ìš°
+            else if (prevState != S_GameFlowStateEnum.Hit && currentState == S_GameFlowStateEnum.Hit)
+            {
+                if (IsPointerOverUIObject(image_BasicHitBtnBase))
+                {
+                     PointerEnterOnHitBtn();
+                }
+                if (IsPointerOverUIObject(image_TwistBtnBase))
+                {
+                    PointerExitOnTwistBtn();
+                }
+            }
 
-            prevStackSum = S_PlayerStat.Instance.StackSum;
-            prevDeckCount = S_PlayerCard.Instance.GetPreDeckCards().Count;
-        }
-        else if (prevStackSum != S_PlayerStat.Instance.StackSum)
-        {
-            RenewProbText();
-
-            prevStackSum = S_PlayerStat.Instance.StackSum;
-        }
-        else if (prevDeckCount != S_PlayerCard.Instance.GetPreDeckCards().Count)
-        {
-            RenewProbText();
-
-            prevDeckCount = S_PlayerCard.Instance.GetPreDeckCards().Count;
-        }
-
-        if (S_StackInfoSystem.Instance.GetCurrentTurnHitCardObjects().Count == 0 && isHoverTwist)
-        {
-            PointerExitOnTwistBtn();
+            prevState = currentState;
         }
     }
 
@@ -83,42 +92,45 @@ public class S_HitBtnSystem : MonoBehaviour
         panel_HitBtnBase.GetComponent<RectTransform>().anchoredPosition = btnBaseHidePos;
         panel_HitBtnBase.SetActive(false);
     }
-    public void AppearHitBtn() // ÆĞ³Î µîÀå
+    public void AppearHitBtn() // íŒ¨ë„ ë“±ì¥
     {
         panel_HitBtnBase.SetActive(true);
 
-        // µÎÆ®À©À¸·Î µîÀå ¾Ö´Ï¸ŞÀÌ¼Ç ÁÖ±â
-        panel_HitBtnBase.GetComponent<RectTransform>().DOKill(); // µÎÆ®À© Àü Æ®À© ÃÊ±âÈ­
+        // ë‘íŠ¸ìœˆìœ¼ë¡œ ë“±ì¥ ì• ë‹ˆë©”ì´ì…˜ ì£¼ê¸°
+        panel_HitBtnBase.GetComponent<RectTransform>().DOKill(); // ë‘íŠ¸ìœˆ ì „ íŠ¸ìœˆ ì´ˆê¸°í™”
         panel_HitBtnBase.GetComponent<RectTransform>().DOAnchorPos(btnBaseOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
     }
-    public void DisappearHitBtn() // ÆĞ³Î ÅğÀå
+    public void DisappearHitBtn() // íŒ¨ë„ í‡´ì¥
     {
-        panel_HitBtnBase.GetComponent<RectTransform>().DOKill(); // µÎÆ®À© Àü Æ®À© ÃÊ±âÈ­
+        panel_HitBtnBase.GetComponent<RectTransform>().DOKill(); // ë‘íŠ¸ìœˆ ì „ íŠ¸ìœˆ ì´ˆê¸°í™”
         panel_HitBtnBase.GetComponent<RectTransform>().DOAnchorPos(btnBaseHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
             .OnComplete(() => panel_HitBtnBase.SetActive(false));
     }
 
-
-    // ¹öÆ° ÇÔ¼ö
-    public async void ClickHitBtnAsync() // È÷Æ® ¹öÆ° Å¬¸¯. ÀÇÁö È÷Æ® ¹öÆ°Àº S_DeckInfoSystem¿¡ Á¸Àç
+    #region ë²„íŠ¼ í•¨ìˆ˜
+    // ì˜ì§€ íˆíŠ¸ ë²„íŠ¼ì€ S_DeckInfoSystemì— ì¡´ì¬
+    public async void ClickHitBtnAsync() // íˆíŠ¸, ë‹¤ì´ì–¼ë¡œê·¸ ì‹œì—ë§Œ ì‘ë™
     {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit && !S_PlayerStat.Instance.IsBurst && S_PlayerCard.Instance.GetPreDeckCards().Count > 0 && S_PlayerCard.Instance.GetPreStackCards().Count <= 48)
+        // Dialog ì‹œìŠ¤í…œ ì „ìš©
+        S_DialogInfoSystem.Instance.ClickNextBtn();
+
+        if ((S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit) && !S_PlayerStat.Instance.IsBurst && S_PlayerCard.Instance.GetPreDeckCards().Count > 0)
         {
             if (S_PlayerStat.Instance.IsExpansion)
             {
-                S_UICardEffecter.Instance.ShowExpansionCards();
+                S_UICardEffecter.Instance.StartExpansionCards();
             }
             else
             {
                 S_Card hitCard = S_PlayerCard.Instance.DrawRandomCard(1)[0];
 
-                // Ä«µå ³»±â
+                // ì¹´ë“œ ë‚´ê¸°
                 await S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(hitCard, S_CardOrderTypeEnum.BasicHit);
 
-                // ¿ì¼±ÀÌ ÀÖ¾ú´Ù¸é ÇØÁ¦
+                // ìš°ì„ ì´ ìˆì—ˆë‹¤ë©´ í•´ì œ
                 if (S_PlayerStat.Instance.IsFirst != S_FirstEffectEnum.None) await S_EffectActivator.Instance.AppliedFirstAsync();
 
-                // È÷Æ® Ä«µå ÁøÇà
+                // íˆíŠ¸ ì¹´ë“œ ì§„í–‰
                 if (S_GameFlowManager.Instance.GetCardOrderQueueCount() <= 1)
                 {
                     await S_GameFlowManager.Instance.StartHittingCard();
@@ -131,20 +143,19 @@ public class S_HitBtnSystem : MonoBehaviour
         }
         else if (S_PlayerStat.Instance.IsBurst)
         {
-            S_InGameUISystem.Instance.CreateLog("¹ö½ºÆ® ½Ã¿£ È÷Æ®ÇÒ ¼ö ¾ø½À´Ï´Ù.");
+            S_InGameUISystem.Instance.CreateLog("ë²„ìŠ¤íŠ¸ ì‹œì—” íˆíŠ¸í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
         else if (S_PlayerCard.Instance.GetPreDeckCards().Count <= 0)
         {
-            S_InGameUISystem.Instance.CreateLog("µ¦¿¡ Ä«µå°¡ ¾ø½À´Ï´Ù!");
-        }
-        else if (S_PlayerCard.Instance.GetPreStackCards().Count > 48)
-        {
-            S_InGameUISystem.Instance.CreateLog("´õ ÀÌ»ó ½ºÅÃ¿¡ Ä«µå¸¦ ³¾ ¼ö ¾ø½À´Ï´Ù. ÃÖ´ë Àå¼ö : 48Àå");
+            S_InGameUISystem.Instance.CreateLog("ë±ì— ì¹´ë“œê°€ ì—†ìŠµë‹ˆë‹¤!");
         }
     }
-    public void ClickTwistBtn() // ºñÆ²±â Å¬¸¯
+    public void ClickTwistBtn() // íˆíŠ¸, ë‹¤ì´ì–¼ë¡œê·¸ ì‹œì—ë§Œ ì‘ë™
     {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit && !S_PlayerStat.Instance.IsBurst && S_PlayerStat.Instance.CanUseDetermination() && S_GameFlowManager.Instance.IsCurrentTurnHitted())
+        // Dialog ì‹œìŠ¤í…œ ì „ìš©
+        S_DialogInfoSystem.Instance.ClickNextBtn();
+
+        if ((S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit) && !S_PlayerStat.Instance.IsBurst && S_PlayerStat.Instance.CanUseDetermination() && S_GameFlowManager.Instance.IsCurrentTurnHitted())
         {
             S_GameFlowManager.Instance.StartTwist();
         }
@@ -154,19 +165,22 @@ public class S_HitBtnSystem : MonoBehaviour
         }
         else if (S_PlayerStat.Instance.IsBurst)
         {
-            S_InGameUISystem.Instance.CreateLog("¹ö½ºÆ® ½Ã¿£ ÇÒ ¼ö ¾ø¾î.");
+            S_InGameUISystem.Instance.CreateLog("ë²„ìŠ¤íŠ¸ ì‹œì—” í•  ìˆ˜ ì—†ì–´.");
         }
         else if (!S_PlayerStat.Instance.CanUseDetermination())
         {
-            S_InGameUISystem.Instance.CreateLog("ÀÇÁö°¡ ºÎÁ·ÇÏ´Ù³×~");
+            S_InGameUISystem.Instance.CreateLog("ì˜ì§€ê°€ ë¶€ì¡±í•˜ë‹¤ë„¤~");
         }
         else if (!S_GameFlowManager.Instance.IsCurrentTurnHitted())
         {
-            S_InGameUISystem.Instance.CreateLog("ºñÆ² ¿î¸íÀÌ ¾ø¾î.");
+            S_InGameUISystem.Instance.CreateLog("ë¹„í‹€ ìš´ëª…ì´ ì—†ì–´.");
         }
     }
-    public void ClickStandBtn() // ½ºÅÄµå Å¬¸¯
+    public void ClickStandBtn() // íˆíŠ¸, ë‹¤ì´ì–¼ë¡œê·¸ ì‹œì—ë§Œ ì‘ë™
     {
+        // Dialog ì‹œìŠ¤í…œ ì „ìš©
+        S_DialogInfoSystem.Instance.ClickNextBtn();
+
         if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit)
         {
             S_GameFlowManager.Instance.StartStand();
@@ -176,38 +190,56 @@ public class S_HitBtnSystem : MonoBehaviour
 
         }
     }
-    public async void SelectHitCardByExpansion(S_Card card) // S_ExpansionCard¿¡¼­ È£ÃâÇÏ´Â ¸Ş¼­µå
+    public async void SelectHitCardByExpansion(S_Card card) // S_ExpansionCardì—ì„œ í˜¸ì¶œí•˜ëŠ” ë©”ì„œë“œ
     {
-        // Ä«µå ³»±â
+        // ì¹´ë“œ ë‚´ê¸°
         await S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(card, S_CardOrderTypeEnum.BasicHit);
 
-        // Àü°³ ÇØÁ¦
+        // ì „ê°œ í•´ì œ
         await S_EffectActivator.Instance.AppliedExpansionAsync();
 
-        // ¿ì¼±ÀÌ ÀÖ¾ú´Ù¸é ÇØÁ¦
+        // ìš°ì„ ì´ ìˆì—ˆë‹¤ë©´ í•´ì œ
         if (S_PlayerStat.Instance.IsFirst != S_FirstEffectEnum.None) await S_EffectActivator.Instance.AppliedFirstAsync();
 
-        // È÷Æ® Ä«µå ÁøÇà
+        // íˆíŠ¸ ì¹´ë“œ ì§„í–‰
         if (S_GameFlowManager.Instance.GetCardOrderQueueCount() <= 1)
         {
             await S_GameFlowManager.Instance.StartHittingCard();
         }
     }
-
-
-    // ¹öÆ°¿¡ ¸¶¿ì½º ¿Ã¸®¸é ³ª¿À´Â È£¹ö¸µ È¿°ú
+    #endregion
+    #region ë²„ìŠ¤íŠ¸ ë° í´ë¦°íˆíŠ¸ ì•Œë ¤ì£¼ëŠ” ê¸°ëŠ¥
     public void RenewProbText()
     {
         int limit = S_PlayerStat.Instance.CurrentLimit;
         int stackSum = S_PlayerStat.Instance.StackSum;
+        var preDeckCards = S_PlayerCard.Instance.GetPreDeckCards();
 
+        S_FirstEffectEnum firstEffect = S_PlayerStat.Instance.IsFirst;
+
+        if (firstEffect != S_FirstEffectEnum.None)
+        {
+            var firstCards = S_PlayerCard.Instance.GetValidCardsByFirst();
+
+            if (firstCards.Count > 0)
+            {
+                CalculateProb(firstCards, stackSum, limit);
+                return;
+            }
+        }
+
+        // Noneì´ê±°ë‚˜, ìš°ì„  ì¹´ë“œê°€ ì—†ì„ ë•Œ
+        CalculateProb(preDeckCards, stackSum, limit);
+    }
+    void CalculateProb(List<S_Card> cards, int stackSum, int limit)
+    {
         int cleanHitCount = 0;
         int burstCount = 0;
+        int totalCount = cards.Count;
 
-        foreach (S_Card c in S_PlayerCard.Instance.GetPreDeckCards())
+        foreach (var c in cards)
         {
             int i = stackSum + c.Number;
-
             if (i == limit)
             {
                 cleanHitCount++;
@@ -218,32 +250,36 @@ public class S_HitBtnSystem : MonoBehaviour
             }
         }
 
-        float cleanHitProbF = (float)cleanHitCount / (float)S_PlayerCard.Instance.GetPreDeckCards().Count * 100;
-        float burstProbF = (float)burstCount / (float)S_PlayerCard.Instance.GetPreDeckCards().Count * 100;
+        float cleanHitProbF = (float)cleanHitCount / totalCount * 100f;
+        float burstProbF = (float)burstCount / totalCount * 100f;
 
         text_CleanHitProb.text = $"{cleanHitProbF.ToString("F1")}%";
         text_BurstProb.text = $"{burstProbF.ToString("F1")}%";
     }
     public void PointerEnterOnHitBtn()
     {
-        RenewProbText();
-
-        if (!image_HoverHitBtnInfoBase.activeInHierarchy)
+        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit)
         {
-            image_HoverHitBtnInfoBase.SetActive(true);
+            RenewProbText();
+
+            if (!image_HoverHitBtnInfoBase.activeInHierarchy)
+            {
+                image_HoverHitBtnInfoBase.SetActive(true);
+            }
         }
     }
     public void PointerExitOnHitBtn()
     {
         image_HoverHitBtnInfoBase.SetActive(false);
     }
-
-    bool isHoverTwist = false;
+    #endregion
+    #region ë¹„í‹€ê¸° ì‹œ ì‚¬ë¼ì§€ëŠ” ì¹´ë“œ ë³´ì—¬ì£¼ëŠ” ê¸°ëŠ¥
     public void PointerEnterOnTwistBtn()
     {
-        if (S_StackInfoSystem.Instance.GetCurrentTurnHitCardObjects().Count != 0 && !isHoverTwist)
+        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit && S_StackInfoSystem.Instance.GetCurrentTurnHitCardObjects().Count != 0)
         {
-            isHoverTwist = true;
+            sprite_BlackBackgroundByTwistBtn.DOKill();
+            sprite_BlackBackgroundByTwistBtn.DOFade(0.8f, 0.1f);
 
             int order = 600;
             foreach (GameObject go in S_StackInfoSystem.Instance.GetCurrentTurnHitCardObjects())
@@ -252,18 +288,36 @@ public class S_HitBtnSystem : MonoBehaviour
 
                 order += 10;
             }
-
-            sprite_BlackBackgroundByTwistBtn.DOKill();
-            sprite_BlackBackgroundByTwistBtn.DOFade(0.8f, 0.1f);
         }
     }
-    public async void PointerExitOnTwistBtn()
+    public void PointerExitOnTwistBtn()
     {
-        isHoverTwist = false;
-
         sprite_BlackBackgroundByTwistBtn.DOKill();
         sprite_BlackBackgroundByTwistBtn.DOFade(0f, 0.1f);
 
-        await S_StackInfoSystem.Instance.SortStackVFXAsync();
+        S_StackInfoSystem.Instance.SortStackVFXOnlyOrder();
     }
+    #endregion
+    #region ë³´ì¡° ë©”ì„œë“œ
+    bool IsPointerOverUIObject(GameObject target)
+    {
+        PointerEventData pointerData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+
+        List<RaycastResult> raycastResults = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, raycastResults);
+
+        foreach (var result in raycastResults)
+        {
+            if (result.gameObject == target || result.gameObject.transform.IsChildOf(target.transform))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    #endregion
 }

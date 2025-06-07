@@ -7,8 +7,8 @@ public class Skill_Cull : S_Skill
     public Skill_Cull() : base
     (
         "Skill_Cull",
-        "µµ·ú",
-        "½ºÅÄµå ½Ã ¹«ÀÛÀ§ ´É·ÂÄ¡ 2°³¸¦ °öÇÑ¸¸Å­ ÇÇÇØ¸¦ Áİ´Ï´Ù.\n¸Å ÅÏ¸¶´Ù ´É·ÂÄ¡°¡ º¯°æµË´Ï´Ù.",
+        "ë„ë¥™",
+        "ìŠ¤íƒ ë“œ ì‹œ ë¬´ì‘ìœ„ ëŠ¥ë ¥ì¹˜ 2ê°œë¥¼ ê³±í•œë§Œí¼ í”¼í•´ë¥¼ ì¤ë‹ˆë‹¤.\në§¤ í„´ë§ˆë‹¤ ëŠ¥ë ¥ì¹˜ê°€ ë³€ê²½ë©ë‹ˆë‹¤.",
         S_SkillConditionEnum.Stand,
         S_SkillPassiveEnum.None,
         false
@@ -16,33 +16,28 @@ public class Skill_Cull : S_Skill
 
     S_BattleStatEnum stat = S_BattleStatEnum.Strength_Mind;
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = true;
 
-        return CanActivateEffect;
-    }
     public override async Task ActiveSkill(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect)
+        if (IsMeetCondition)
         {
             switch (stat)
             {
                 case S_BattleStatEnum.Strength_Mind:
-                    await eA.HarmCreature(this, new List<S_Card>(), stat, S_PlayerStat.Instance.CurrentStrength * S_PlayerStat.Instance.CurrentMind);
+                    await eA.HarmFoe(this, null, stat, S_PlayerStat.Instance.CurrentStrength * S_PlayerStat.Instance.CurrentMind);
                     break;
                 case S_BattleStatEnum.Strength_Luck:
-                    await eA.HarmCreature(this, new List<S_Card>(), stat, S_PlayerStat.Instance.CurrentStrength * S_PlayerStat.Instance.CurrentLuck);
+                    await eA.HarmFoe(this, null, stat, S_PlayerStat.Instance.CurrentStrength * S_PlayerStat.Instance.CurrentLuck);
                     break;
                 case S_BattleStatEnum.Mind_Luck:
-                    await eA.HarmCreature(this, new List<S_Card>(), stat, S_PlayerStat.Instance.CurrentMind * S_PlayerStat.Instance.CurrentLuck);
+                    await eA.HarmFoe(this, null, stat, S_PlayerStat.Instance.CurrentMind * S_PlayerStat.Instance.CurrentLuck);
                     break;
             }
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByBasic(S_Card card = null)
     {
-
+        IsMeetCondition = true;
     }
     public override void StartNewTurn(int currentTrial)
     {
@@ -56,13 +51,13 @@ public class Skill_Cull : S_Skill
         switch (stat)
         {
             case S_BattleStatEnum.Strength_Mind:
-                str = $"½ºÅÄµå ½Ã Èû°ú Á¤½Å·ÂÀ» °öÇÑ¸¸Å­ ÇÇÇØ¸¦ Áİ´Ï´Ù.\n¸Å ÅÏ¸¶´Ù ´É·ÂÄ¡°¡ º¯°æµË´Ï´Ù.";
+                str = $"ìŠ¤íƒ ë“œ ì‹œ í˜ê³¼ ì •ì‹ ë ¥ì„ ê³±í•œë§Œí¼ í”¼í•´ë¥¼ ì¤ë‹ˆë‹¤.\në§¤ í„´ë§ˆë‹¤ ëŠ¥ë ¥ì¹˜ê°€ ë³€ê²½ë©ë‹ˆë‹¤.";
                 break;
             case S_BattleStatEnum.Strength_Luck:
-                str = $"½ºÅÄµå ½Ã Èû°ú Çà¿îÀ» °öÇÑ¸¸Å­ ÇÇÇØ¸¦ Áİ´Ï´Ù.\n¸Å ÅÏ¸¶´Ù ´É·ÂÄ¡°¡ º¯°æµË´Ï´Ù.";
+                str = $"ìŠ¤íƒ ë“œ ì‹œ í˜ê³¼ í–‰ìš´ì„ ê³±í•œë§Œí¼ í”¼í•´ë¥¼ ì¤ë‹ˆë‹¤.\në§¤ í„´ë§ˆë‹¤ ëŠ¥ë ¥ì¹˜ê°€ ë³€ê²½ë©ë‹ˆë‹¤.";
                 break;
             case S_BattleStatEnum.Mind_Luck:
-                str = $"½ºÅÄµå ½Ã Á¤½Å·Â°ú Çà¿î °öÇÑ¸¸Å­ ÇÇÇØ¸¦ Áİ´Ï´Ù.\n¸Å ÅÏ¸¶´Ù ´É·ÂÄ¡°¡ º¯°æµË´Ï´Ù.";
+                str = $"ìŠ¤íƒ ë“œ ì‹œ ì •ì‹ ë ¥ê³¼ í–‰ìš´ ê³±í•œë§Œí¼ í”¼í•´ë¥¼ ì¤ë‹ˆë‹¤.\në§¤ í„´ë§ˆë‹¤ ëŠ¥ë ¥ì¹˜ê°€ ë³€ê²½ë©ë‹ˆë‹¤.";
                 break;
         }
 

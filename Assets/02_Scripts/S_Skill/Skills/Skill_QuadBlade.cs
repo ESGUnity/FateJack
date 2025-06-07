@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -8,8 +7,8 @@ public class Skill_QuadBlade : S_Skill
     public Skill_QuadBlade() : base
     (
         "Skill_QuadBlade",
-        "»çµµ·ù",
-        "ÇÑ ÅÏ¿¡ 1¹ø ½ºÆäÀÌµå Ä«µå¸¦ 4Àå ÀÌ»ó È÷Æ®ÇÒ ¶§ ÈûÀ» 1.5¹è Áõ°¡½ÃÅµ´Ï´Ù.",
+        "ì‚¬ë„ë¥˜",
+        "í•œ í„´ì— 1ë²ˆ ìŠ¤í˜ì´ë“œ ì¹´ë“œë¥¼ 4ì¥ ì´ìƒ íˆíŠ¸í•  ë•Œ í˜ì„ 1.5ë°° ì¦ê°€ì‹œí‚µë‹ˆë‹¤.",
         S_SkillConditionEnum.Reverb,
         S_SkillPassiveEnum.NeedActivatedCount,
         false
@@ -17,33 +16,22 @@ public class Skill_QuadBlade : S_Skill
 
     bool WasActivatedThisTurn = false;
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = ActivatedCount >= 4;
-
-        return CanActivateEffect;
-    }
     public override async Task ActiveSkill(S_EffectActivator eA, S_Card hitCard)
     {
-        if (CanActivateEffect && !WasActivatedThisTurn)
+        if (IsMeetCondition && !WasActivatedThisTurn)
         {
             int amount = (int)System.Math.Round(S_PlayerStat.Instance.CurrentStrength * 0.5f, System.MidpointRounding.AwayFromZero);
 
-            await eA.AddBattleStats(this, new List<S_Card>() { hitCard }, S_BattleStatEnum.Strength, amount);
+            await eA.AddBattleStats(this, hitCard, S_BattleStatEnum.Strength, amount);
 
             WasActivatedThisTurn = true;
         }
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        if (isTwist)
-        {
-            ActivatedCount = 0;
-        }
-        else
-        {
-            ActivatedCount = S_EffectChecker.Instance.GetSameSuitCardsInStackInCurrentTurn(S_CardSuitEnum.Spade).Count;
-        }
+        ActivatedCount = S_EffectChecker.Instance.GetSameSuitCardsInStackInCurrentTurn(S_CardSuitEnum.Spade).Count;
+
+        IsMeetCondition = ActivatedCount >= 4;
     }
     public override void StartNewTurn(int currentTrial)
     {
@@ -52,7 +40,7 @@ public class Skill_QuadBlade : S_Skill
     }
     public override string GetDescription()
     {
-        return $"{Description}\n{ActivatedCount}Àå Â°";
+        return $"{Description}\nìŠ¤í˜ì´ë“œ ì¹´ë“œ : {ActivatedCount}ì¥ ì§¸";
     }
     public override S_Skill Clone()
     {

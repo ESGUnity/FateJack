@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,17 +17,22 @@ public class S_GameFlowManager : MonoBehaviour
 
     [Header("연출 관련")]
     public const float PANEL_APPEAR_TIME = 0.5f;
-    Vector3 storeCameraPos = new Vector3(0, 10, -15);
-    Vector3 inGameCameraPos = new Vector3(0, 0, -15);
+    public static Vector3 InGameCameraPos { get; set; }
+    public static Vector3 InGameCameraRot { get; set; }
+    public static Vector3 DeckCameraPos { get; set; }
+    public static Vector3 DeckCameraRot { get; set; }
+    public static Vector3 StoreCameraPos { get; set; }
+    public static Vector3 StoreCameraRot { get; set; }
 
     [Header("보상 관련")]
-    public int SlayCreatureGold = 5;
-    public int SlayPowerCreatureGold = 5;
+    [HideInInspector] public int SlayFoeGold = 5;
+    [HideInInspector] public int SlayEliteFoeGold = 3;
+    [HideInInspector] public int SlayBossFoeGold = 10;
     [HideInInspector] public int RemainHealthPerGold = 1;
     [HideInInspector] public int RemainDeterminationPerGold = 1;
 
     [Header("다이얼로그 관련")]
-    public bool IsCompleteDialog;
+    [HideInInspector] public bool IsCompleteDialog;
 
     [Header("히트 관련")]
     Queue<S_CardOrder> cardOrderQueue = new();
@@ -38,6 +43,13 @@ public class S_GameFlowManager : MonoBehaviour
 
     void Awake()
     {
+        InGameCameraPos = new Vector3(0, 22.7f, -13f);
+        InGameCameraRot = new Vector3(60f, 0, 0);
+        DeckCameraPos = new Vector3(0, 26.8f, -21.7f);
+        DeckCameraRot = new Vector3(85f, 0, 0);
+        StoreCameraPos = new Vector3(0f, 22.9f, -3.15f);
+        StoreCameraRot = new Vector3(60, 0, 0);
+
         // 싱글턴
         if (instance == null)
         {
@@ -106,19 +118,25 @@ public class S_GameFlowManager : MonoBehaviour
         // 카드 세팅
         S_PlayerCard.Instance.InitCardsByStartTrial();
 
-        // UI 등장 : 피조물, 전리품, 전투능력치, 플레이어이미지, 덱보기버튼, 스택정렬버튼
-        S_FoeInfoSystem.Instance.AppearCreature();          
+        // UI 등장 : 피조물, 전리품, 전투능력치, 덱보기버튼, 스택정렬버튼
+        S_FoeInfoSystem.Instance.AppearUIFoe();
+        S_FoeInfoSystem.Instance.AppearFoeSprite();
         S_SkillInfoSystem.Instance.AppearSkill();
         S_StatInfoSystem.Instance.AppearBattleStat();
-        S_PlayerInfoSystem.Instance.AppearPlayerImage();
         S_DeckInfoSystem.Instance.AppearViewDeckInfoBtn();
         S_StackInfoSystem.Instance.AppearStackInfoBtn();
 
         // 카메라 이동
-        Camera.main.transform.DOMove(inGameCameraPos, PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        Camera.main.transform.DOMove(InGameCameraPos, PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        Camera.main.transform.DORotate(InGameCameraRot, PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
 
         // UI 등장 시간동안 대기
         await Task.Delay(Mathf.RoundToInt(PANEL_APPEAR_TIME * 1000));
+
+        // 능력의 조건 체크
+        S_PlayerSkill.Instance.CheckSkillMeetCondition();
+        // 적의 조건 체크
+        S_FoeInfoSystem.Instance.CheckFoeMeetCondition();
 
         // 시련 시작 시 능력 발동
         await S_PlayerSkill.Instance.ActivateStartTrialSkillsByStartTrial();
@@ -141,6 +159,85 @@ public class S_GameFlowManager : MonoBehaviour
         // 히트 시작
         StartNewTurn();
     }
+    public async Task StartTrialAsync()
+    {
+        /////////////////////////데모판 코드//////////////////////////
+        //if (CurrentTrial == 4)
+        //{
+        //    S_DemoSystem.Instance.AppearDemoPanel();
+        //    return;
+        //}
+
+        GameFlowState = S_GameFlowStateEnum.None;
+
+        // 시련 설정
+        CurrentTrial++;
+        S_StatInfoSystem.Instance.ChangeCurrentTrialText();
+
+        // 턴 설정
+        CurrentTurn = 0;
+
+        // TODO : 모이라이의 다이얼로그
+
+
+        // 첫 시련 시 설정
+        if (CurrentTrial == 1)
+        {
+            S_PlayerCard.Instance.InitDeckByStartGame(); // 덱 초기화
+            S_PlayerStat.Instance.InitStatsByStartGame(); // 스탯 초기화
+            S_PlayerSkill.Instance.InitSkillsByStartGame(); // 초기 전리품 생성
+            S_FoeManager.Instance.GenerateFoeByStartGame(); // 모든 피조물 생성
+        }
+
+        // 피조물 생성
+        S_FoeManager.Instance.SpawnFoe();
+
+        // 카드 세팅
+        S_PlayerCard.Instance.InitCardsByStartTrial();
+
+        // UI 등장 : 피조물, 전리품, 전투능력치, 덱보기버튼, 스택정렬버튼
+        S_FoeInfoSystem.Instance.AppearUIFoe();
+        S_FoeInfoSystem.Instance.AppearFoeSprite();
+        S_SkillInfoSystem.Instance.AppearSkill();
+        S_StatInfoSystem.Instance.AppearBattleStat();
+        S_DeckInfoSystem.Instance.AppearViewDeckInfoBtn();
+        S_StackInfoSystem.Instance.AppearStackInfoBtn();
+
+        // 카메라 이동
+        Camera.main.transform.DOMove(InGameCameraPos, PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        Camera.main.transform.DORotate(InGameCameraRot, PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+
+        // UI 등장 시간동안 대기
+        await Task.Delay(Mathf.RoundToInt(PANEL_APPEAR_TIME * 1000));
+
+        // 능력의 조건 체크
+        S_PlayerSkill.Instance.CheckSkillMeetCondition();
+        // 적의 조건 체크
+        S_FoeInfoSystem.Instance.CheckFoeMeetCondition();
+
+        // 시련 시작 시 능력 발동
+        await S_PlayerSkill.Instance.ActivateStartTrialSkillsByStartTrial();
+
+        // 시련 시작 시 피조물 능력 발동
+        await S_FoeInfoSystem.Instance.ActivateStartTrialFoeByStartTrial();
+
+        // 시련 시작 시에 카드오더큐에 1개 이상 있다면 히트 실행
+        if (GetCardOrderQueueCount() >= 1)
+        {
+            await StartHittingCard();
+        }
+
+        // 덱 인포 갱신
+        S_DeckInfoSystem.Instance.UpdateDeckCardsState();
+
+        // 시련 시작 시로 히스토리 저장
+        S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.StartTrial);
+
+        // 히트 시작
+        StartNewTurn();
+
+        await Task.Delay(100);
+    }
     public void StartNewTurn()
     {
         // 턴 늘리고 UI 등장
@@ -157,6 +254,9 @@ public class S_GameFlowManager : MonoBehaviour
         // 적은 빨간 표시 하기
         S_FoeInfoSystem.Instance.UpdateFoeObject();
 
+        // 히트 버튼 등장
+        S_HitBtnSystem.Instance.AppearHitBtn();
+
         GameFlowState = S_GameFlowStateEnum.Hit;
     }
     public async Task StartHittingCard() // 히트, 덱 제외 시 호출
@@ -172,6 +272,7 @@ public class S_GameFlowManager : MonoBehaviour
             // 제외와 히트 진행
             if (cardOrder.Type == S_CardOrderTypeEnum.Exclusion) // 제외 시
             {
+                // 실제로 제외
                 S_PlayerCard.Instance.ExclusionCardByExclusionPre(executedCard);
             }
             else // 히트 시
@@ -191,45 +292,21 @@ public class S_GameFlowManager : MonoBehaviour
 
                 // 카드를 내는 순간 카드의 조건 체크
                 S_PlayerCard.Instance.CheckCardMeetCondition(executedCard);
-                // 방금 낸 카드가 발현이라면 별도로 체크하기
-                if (executedCard.BasicCondition == S_CardBasicConditionEnum.Unleash)
-                {
-                    if (S_EffectActivator.Instance.IsMeetAdditiveCondition(executedCard))
-                    {
-                        executedCard.CanActivateEffect = true;
-                    }
-                    else
-                    {
-                        executedCard.CanActivateEffect = false;
-                    }
-                }
-                // 카드를 내는 것으로 조건이 만족되는 카드를 초록 표시하는 부분
-                S_DeckInfoSystem.Instance.UpdateDeckCardsState();
-                S_StackInfoSystem.Instance.UpdateStackCardsState();
-
-                // 능력의 ActivatedCount도 활성화
-                S_PlayerSkill.Instance.CalcSkillActivatedCountByHit(executedCard);
                 // 능력의 조건 체크
                 S_PlayerSkill.Instance.CheckSkillMeetCondition(executedCard);
-                // 능력도 초록 표시 하기
-                S_SkillInfoSystem.Instance.UpdateSkillObject();
-
-                // 적의 ActivatedCount 활성화
-                S_FoeInfoSystem.Instance.CalcFoeActivatedCountByHit(executedCard);
                 // 적의 조건 체크
                 S_FoeInfoSystem.Instance.CheckFoeMeetCondition(executedCard);
-                // 적은 빨간 표시 하기
-                S_FoeInfoSystem.Instance.UpdateFoeObject();
 
                 // 카드 효과 계산
                 await S_EffectActivator.Instance.ActivateHitCard(executedCard, cardOrder.Type);
-
                 // 능력 계산
                 await S_PlayerSkill.Instance.ActivateReverbSkillsByHitCard(executedCard);
-
                 // 적 계산
                 await S_FoeInfoSystem.Instance.ActivateReverbFoeByHitCard(executedCard);
             }
+
+            S_DeckInfoSystem.Instance.UpdateDeckCardsState();
+            cardOrderQueue.Dequeue();
         }
 
         GameFlowState = S_GameFlowStateEnum.Hit;
@@ -242,6 +319,8 @@ public class S_GameFlowManager : MonoBehaviour
     }
     public async Task EnqueueCardOrderAndUpdateCardsState(S_Card card, S_CardOrderTypeEnum type) // 히트, 제외 시 호출. 여긴 내는 시늉만 하는 곳. 창조와 인도 때문에...
     {
+        GameFlowState = S_GameFlowStateEnum.HittingCard;
+
         S_CardOrder order = new S_CardOrder(card, type);
         cardOrderQueue.Enqueue(order);
 
@@ -290,24 +369,15 @@ public class S_GameFlowManager : MonoBehaviour
         // 의지 사용
         S_PlayerStat.Instance.UseDetermination();
 
-        // 카드 제외 및 제외된 카드 복구. 이하 3개 메서드는 반드시 붙어다녀야한다. S_PlayerCard내에서 모든 카드 관련 오브젝트까지 다 처리되는게 맞는데 능력 ActivatedCount 땜에 어쩔 수 없이 out 써야해서 뺸 것.
+        // 카드 제외 및 제외된 카드 복구. 이하 3개 메서드는 반드시 붙어다녀야한다.
         S_PlayerCard.Instance.ResetCardsByTwist(out List<S_Card> stacks, out List<S_Card> exclusions);
         await S_StackInfoSystem.Instance.ExclusionCardsByTwistAsync(stacks);
         await S_UICardEffecter.Instance.ReturnExclusionCardsByTwistAsync(exclusions);
 
-        // 능력도 ActivatedCount 되돌리기
-        S_PlayerSkill.Instance.SubtractSkillActivatedCountByTwist(stacks);
         // 능력의 조건 체크
         S_PlayerSkill.Instance.CheckSkillMeetCondition();
-        // 능력도 초록 표시 하기
-        S_SkillInfoSystem.Instance.UpdateSkillObject();
-
-        // 적의 ActivatedCount 활성화
-        S_FoeInfoSystem.Instance.SubtractFoeActivatedCountByTwist(stacks);
         // 적의 조건 체크
         S_FoeInfoSystem.Instance.CheckFoeMeetCondition();
-        // 적은 빨간 표시 하기
-        S_FoeInfoSystem.Instance.UpdateFoeObject();
 
         // 스탯, 히스토리를 스택의 카드를 내기 전으로 되돌리기.
         S_PlayerStat.Instance.ResetStatsByTwist();
@@ -367,7 +437,6 @@ public class S_GameFlowManager : MonoBehaviour
             S_PlayerStat.Instance.ResetStackSum();
             S_PlayerStat.Instance.CheckBurstAndCleanHit();
             S_StatInfoSystem.Instance.ChangeSpecialAbility();
-            S_PlayerInfoSystem.Instance.ChangeSpecialAbilityVFX();
 
             // 히트 다시 시작
             StartNewTurn();
@@ -402,31 +471,35 @@ public class S_GameFlowManager : MonoBehaviour
         int greedCount = S_PlayerCard.Instance.GetPreDeckCards().Where(x => x.AdditiveEffect == S_CardAdditiveEffectEnum.Greed).Where(x => x.IsCursed).Count();
         greedCount += S_PlayerCard.Instance.GetPreStackCards().Where(x => x.AdditiveEffect == S_CardAdditiveEffectEnum.Greed).Where(x => x.IsCursed).Count();
 
-        // UI 퇴장(피조물, 히트 버튼, 플레이어 이미지)
-        S_FoeInfoSystem.Instance.DisappearCreature();
+        // UI 퇴장(적과 히트 버튼)
+        S_FoeInfoSystem.Instance.DisappearUIFoe();
+        S_FoeInfoSystem.Instance.DisappearFoeSprite();
         S_HitBtnSystem.Instance.DisappearHitBtn();
-        S_PlayerInfoSystem.Instance.DisappearPlayerImage();
-
-        // 능력도 ActivatedCount를 0으로 초기화
-        S_PlayerSkill.Instance.ResetSkillActivatedCountByEndTrial();
-        // 능력의 조건 체크
-        S_PlayerSkill.Instance.CheckSkillMeetCondition();
-        // 능력도 초록 표시 하기
-        S_SkillInfoSystem.Instance.UpdateSkillObject();
-
-        // 적의 ActivatedCount 끄기(필요없긴한데)
-        S_FoeInfoSystem.Instance.ResetFoeActivatedCountByEndTrial();
-        // 적의 조건 체크
-        S_FoeInfoSystem.Instance.CheckFoeMeetCondition();
-        // 적은 빨간 표시 하기
-        S_FoeInfoSystem.Instance.UpdateFoeObject();
 
         // 스탯 초기화
         S_PlayerStat.Instance.ResetStatsByEndTrial();
 
         // 덱으로 모든 카드를 돌려보내기
         S_PlayerCard.Instance.ResetCardsByEndTrial();
-        await S_StackInfoSystem.Instance.ResetCardsByEndTrial();
+        await S_StackInfoSystem.Instance.ResetCardsByEndTrialAsync();
+
+        // 누적량 능력은 시련 종료 시 Trial에 누적시켜야한다.
+        foreach (S_Skill s in S_PlayerSkill.Instance.GetPlayerOwnedSkills())
+        {
+            if (s.IsAccumulate)
+            {
+                s.TrialAccumulateValue += s.CurrentAccumulateValue;
+            }
+        }
+        // 능력도 ActivatedCount를 0으로 초기화
+        S_PlayerSkill.Instance.ResetSkillActivatedCountByEndTrial();
+        // 능력의 조건 체크
+        S_PlayerSkill.Instance.CheckSkillMeetCondition();
+
+        // 적의 ActivatedCount 끄기(필요없긴한데)
+        S_FoeInfoSystem.Instance.ResetFoeActivatedCountByEndTrial();
+        // 적의 조건 체크
+        S_FoeInfoSystem.Instance.CheckFoeMeetCondition();
 
         // 보상 패널 등장
         S_ResultInfoSystem.Instance.AppearResult();
@@ -440,7 +513,7 @@ public class S_GameFlowManager : MonoBehaviour
         S_PlayerStat.Instance.AddOrSubtractGold(gold);
 
         // 피조물 제거
-        S_FoeInfoSystem.Instance.DefeatCreatureByEndTrial();
+        S_FoeInfoSystem.Instance.DestroyFoeByEndTrial();
 
         // 시련 종료로 히스토리 저장
         S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.EndTrial);
@@ -449,14 +522,15 @@ public class S_GameFlowManager : MonoBehaviour
     }
     public async void StartStore()
     {
-        GameFlowState = S_GameFlowStateEnum.None; // 클릭 연타로 보상을 여러번 획득하는 버그 해결
+        GameFlowState = S_GameFlowStateEnum.None;
 
         S_ResultInfoSystem.Instance.DisappearResult();
         S_ResultInfoSystem.Instance.DisappearResultOKBtn();
-        S_StoreInfoSystem.Instance.StartStore();
-        Camera.main.transform.DOMove(storeCameraPos, PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        await Task.Delay(Mathf.RoundToInt(PANEL_APPEAR_TIME * 1000)); // 보상 캔버스 퇴장 대기
 
-        await Task.Delay(Mathf.RoundToInt(PANEL_APPEAR_TIME * 1000)); // 캔버스 등장 동안 대기
+        Camera.main.transform.DOMove(StoreCameraPos, PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        Camera.main.transform.DORotate(S_GameFlowManager.StoreCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        await S_StoreInfoSystem.Instance.StartStore();
 
         GameFlowState = S_GameFlowStateEnum.Store;
     }
@@ -475,12 +549,22 @@ public class S_GameFlowManager : MonoBehaviour
     public int CalcResultGold()
     {
         // 처치 시 기본 골드
-        int gold = SlayCreatureGold;
+        int gold = SlayFoeGold;
 
-        // 강력한 피조물 처치 시 골드
-        if (CurrentTrial % 3 == 0)
+        // 엘리트 적이라면 보너스 골드
+        if (S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Clotho_Elite || 
+            S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Lachesis_Elite || 
+            S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Atropos_Elite)
         {
-            gold += SlayPowerCreatureGold; 
+            gold += SlayEliteFoeGold; 
+        }
+
+        // 보스 적이라면 보너스 골드
+        if (S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Clotho_Boss ||
+            S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Lachesis_Boss ||
+            S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Atropos_Boss)
+        {
+            gold += SlayBossFoeGold;
         }
 
         // 남은 체력과 의지 1당 골드
@@ -496,6 +580,10 @@ public class S_GameFlowManager : MonoBehaviour
         gold += (omenCount * 2) + (robberyCount * 2) + (greedCount * 2);
 
         return gold;
+    }
+    public static async Task PanelAppearTimeAsync()
+    {
+        await Task.Delay(Mathf.RoundToInt(PANEL_APPEAR_TIME * 1000));
     }
 }
 
@@ -528,7 +616,7 @@ public enum S_GameFlowStateEnum
     Twist,
     Stand,
     Store,
-    StoreByRemove,
+    StoreByDeckInfo,
     GameMenu,
     GameOver
 }

@@ -6,28 +6,24 @@ public class Foe_TaboosWatcher : S_Foe
     public Foe_TaboosWatcher() : base
     (
         "Foe_TaboosWatcher",
-        "±İ±â ÆÄ¼ö²Û",
-        "½Ã·Ã ½ÃÀÛ ½Ã ¼ıÀÚ°¡ 10ÀÎ Ä«µå¸¦ ¸ğµÎ ÀúÁÖÇÕ´Ï´Ù.",
+        "ê¸ˆê¸° íŒŒìˆ˜ê¾¼",
+        "ì‹œë ¨ ì‹œì‘ ì‹œ ìˆ«ìê°€ 10ì¸ ì¹´ë“œë¥¼ ëª¨ë‘ ì €ì£¼í•©ë‹ˆë‹¤.",
         S_FoeTypeEnum.Clotho,
         S_FoeAbilityConditionEnum.StartTrial,
         S_FoePassiveEnum.None
     ) { }
 
-    public override bool IsMeetCondition(S_Card card = null)
-    {
-        return base.IsMeetCondition(card);
-    }
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
         await eA.CurseRandomCards(this, 999, S_CardSuitEnum.None, 10);
     }
-    public override void ActivateCount(S_Card card, bool isTwist = false)
+    public override void CheckMeetCondition(S_Card card = null)
     {
-        base.ActivateCount(card, isTwist);
+        IsMeetCondition = false;
     }
     public override string GetDescription()
     {
-        return base.GetDescription();
+        return AbilityDescription;
     }
     public override S_Foe Clone()
     {

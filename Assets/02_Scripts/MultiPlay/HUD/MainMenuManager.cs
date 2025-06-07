@@ -14,7 +14,7 @@ public enum LobbyTypeEnum
 
 public class MainMenuManager : MonoBehaviour
 {
-    LobbyTypeEnum _lobbyType;
+    //LobbyTypeEnum _lobbyType;
     float transitionDuration = 0.2f;
 
     GameObject mainMenuBase;
@@ -35,7 +35,7 @@ public class MainMenuManager : MonoBehaviour
     GameObject tutorialBtnBase;
     TMP_Text text_HighTrial;
 
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static MainMenuManager instance;
     public static MainMenuManager Instance { get { return instance; } }
     void Awake()
@@ -52,7 +52,7 @@ public class MainMenuManager : MonoBehaviour
 
     void Start()
     {
-        _lobbyType = LobbyTypeEnum.None;
+        //_lobbyType = LobbyTypeEnum.None;
 
         Transform[] transforms = GetComponentsInChildren<Transform>(true);
 
@@ -78,7 +78,7 @@ public class MainMenuManager : MonoBehaviour
         text_HighTrial = Array.Find(transforms, c => c.gameObject.name.Equals("Text_HighTrial")).gameObject.GetComponent<TMP_Text>();
 
 
-        // Æ©Åä¸®¾ó ¿©ºÎ
+        // íŠœí† ë¦¬ì–¼ ì—¬ë¶€
         if (PlayerPrefs.HasKey("TutorialCompleted"))
         {
             tutorialBtnBase.SetActive(true);
@@ -88,8 +88,8 @@ public class MainMenuManager : MonoBehaviour
             tutorialBtnBase.SetActive(false);
         }
 
-        // ÃÖ°í ½Ã·Ã
-        text_HighTrial.text = $"µî¹İÇÑ ÃÖ°í ½Ã·Ã : {PlayerPrefs.GetInt("HighTrial"), 0}";
+        // ìµœê³  ì‹œë ¨
+        text_HighTrial.text = $"ë“±ë°˜í•œ ìµœê³  ì‹œë ¨ : {PlayerPrefs.GetInt("HighTrial"), 0}";
     }
     void Update()
     {
@@ -131,15 +131,15 @@ public class MainMenuManager : MonoBehaviour
     }
     public void PressOptionBtn()
     {
-        Debug.Log("¿É¼Ç");
+        Debug.Log("ì˜µì…˜");
     }
     public void PressExitBtn()
     {
-        Debug.Log("°ÔÀÓ Á¾·á");
+        Debug.Log("ê²Œì„ ì¢…ë£Œ");
         Application.Quit();
     }
 
-    // ¸ÖÆ¼ ÄÚµå
+    // ë©€í‹° ì½”ë“œ
     //public void PressMultiGameBtn()
     //{
     //    DoTransition(mainMenuBase, multiGameBase);
@@ -172,16 +172,16 @@ public class MainMenuManager : MonoBehaviour
     //{
     //    if (_lobbyType == LobbyTypeEnum.None)
     //    {
-    //        Debug.Log("·ÎºñÅ¸ÀÔ ¼³Á¤ÇÏ½Ã¿À");
+    //        Debug.Log("ë¡œë¹„íƒ€ì… ì„¤ì •í•˜ì‹œì˜¤");
     //    }
     //    else if (string.IsNullOrEmpty(lobbyNameInputField.text))
     //    {
-    //        Debug.Log("¹æÁ¦¸¦ ÀÔ·ÂÇÏ½Ã¿À");
+    //        Debug.Log("ë°©ì œë¥¼ ì…ë ¥í•˜ì‹œì˜¤");
     //    }
     //    else
     //    {
     //        loadingPanel.SetActive(true);
-    //        loadingText.text = "¹æ »ı¼º Áß...";
+    //        loadingText.text = "ë°© ìƒì„± ì¤‘...";
     //        await HostSingleton.Instance.StartHostAsync(_lobbyType, lobbyNameInputField.text);
     //        loadingPanel.SetActive(false);
     //    }
@@ -202,7 +202,7 @@ public class MainMenuManager : MonoBehaviour
     //public async void PressClientStart()
     //{
     //    loadingPanel.SetActive(true);
-    //    loadingText.text = "Á¢¼Ó Áß...";
+    //    loadingText.text = "ì ‘ì† ì¤‘...";
     //    await ClientSingleton.Instance.StartClientAsync(joinCodeInputField.text);
     //    loadingPanel.SetActive(false);
     //}

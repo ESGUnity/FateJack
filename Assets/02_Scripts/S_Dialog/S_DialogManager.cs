@@ -1,249 +1,142 @@
-using DG.Tweening;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+//using DG.Tweening;
+//using System;
+//using System.Collections;
+//using System.Collections.Generic;
+//using System.Threading.Tasks;
+//using TMPro;
+//using UnityEngine;
+//using UnityEngine.EventSystems;
+//using UnityEngine.UI;
 
-public class S_DialogManager : MonoBehaviour
-{
-    [Header("∞¢ ¥Ÿ¿ÃæÛ∑Œ±◊ ∏ÆΩ∫∆Æ")]
-    [SerializeField] List<GameObject> dialogList = new();
-    [SerializeField] List<GameObject> tutorialDialogList = new();
+//public class S_DialogManager : MonoBehaviour
+//{
+//    // Îã§Ïù¥ÏñºÎ°úÍ∑∏ Ï†ïÎ≥¥
+//    public int Trial;
+//    public S_DialogStateEnum DialogState; // Îã§Ïù¥ÏñºÎ°úÍ∑∏ Ìò∏Ï∂ú Ïãú
+//    public bool IsTutorial;
 
-    [Header("æ¿ ø¿∫Í¡ß∆Æ")]
-    [SerializeField] GameObject sprite_WorldObjectBlockingBackground;
-    [SerializeField] GameObject image_UIBlockingBackground;
+//    // Ïù∏Ïä§ÌéôÌÑ∞ Ìï†Îãπ
+//    [SerializeField] DialogData[] dialogArray;
 
-    [Header("∏µÁ πˆ∆∞ æ¿ ø¿∫Í¡ß∆Æ")]
-    [SerializeField] Canvas creatureInfoCanvas; // ««¡∂π∞ (sortingOrder)
-    [SerializeField] Canvas statInfoCanvas; // Ω∫≈» (sortingOrder)
-    [SerializeField] Image image_DeckBtnBase; // µ¶ ¡§∫∏ πˆ∆∞ (raycastTarget, sortingOrder)
-    [SerializeField] Canvas lootInfoCanvas; // ¿¸∏Æ«∞ (sortingOrder)
-    [SerializeField] Image image_BasicHitBtnBase; // »˜∆Æ πˆ∆∞ (raycastTarget, sortingOrder)
-    [SerializeField] Image image_DeterminationHitBtnBase; // ¿«¡ˆ »˜∆Æ πˆ∆∞ (raycastTarget, sortingOrder)
-    [SerializeField] Image image_DeterminationHitBtnBaseByDeckInfo; // µ¶ ¿Œ∆˜ø°º≠ «œ¥¬ ¿«¡ˆ »˜∆Æ πˆ∆∞ (raycastTarget, sortingOrder)
-    [SerializeField] Image image_TwistBtnBase; // ∫Ò∆≤±‚ πˆ∆∞ (raycastTarget, sortingOrder)
-    [SerializeField] Image image_StandBtnBase; // Ω∫≈ƒµÂ πˆ∆∞ (raycastTarget, sortingOrder)
+//    // Ïª¥Ìè¨ÎÑåÌä∏
+//    RectTransform panel_DialogBase;
+//    Image image_Character;
+//    Image image_DialogBase;
+//    TMP_Text text_Name;
+//    TMP_Text text_Dialog;
+//    GameObject image_OKBtnBase;
+//    GraphicRaycaster raycaster;
 
-    // ¥Ÿ¿ÃæÛ∑Œ±◊ øÎ ∫Øºˆ
-    S_GameFlowStateEnum prevState;
-    [HideInInspector] public bool IsCompleteDialog;
-    [HideInInspector] public S_DialogSystem CurrentDialogSystem;
+//    // Î∂ÄÍ∞Ä Î≥ÄÏàò
+//    Coroutine typingCoroutine;
+//    bool isFirst = true;
+//    int currentDialogIndex = -1;
+//    float typingSpeed = 0.05f;
+//    bool isTypingEffect = false;
 
-    // ΩÃ±€≈œ
-    static S_DialogManager instance;
-    public static S_DialogManager Instance { get { return instance; } }
-    void Awake()
-    {
-        sprite_WorldObjectBlockingBackground.SetActive(false);
-        sprite_WorldObjectBlockingBackground.GetComponent<SpriteRenderer>().DOFade(0f, 0f);
-        image_UIBlockingBackground.SetActive(false);
-        image_UIBlockingBackground.GetComponent<SpriteRenderer>().DOFade(0f, 0f);
+//    [Header("VFX")]
+//    Vector3 posOffsetValue = new Vector3(0, 20, 0);
 
-        SetBtn(S_ActivateUIEnum.OKBtn);
+//    // Ïã±Í∏ÄÌÑ¥
+//    static S_DialogManager instance;
+//    public static S_DialogManager Instance { get { return instance; } }
 
-        // ΩÃ±€≈œ
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
+//    void Awake()
+//    {
+//        // Ïã±Í∏ÄÌÑ¥
+//        if (instance == null)
+//        {
+//            instance = this;
+//        }
+//        else
+//        {
+//            Destroy(gameObject);
+//        }
+//    }
 
-    public void StartDialog(int trial, S_DialogStateEnum state, bool isTutorial = false)
-    {
-        prevState = S_GameFlowManager.Instance.GameFlowState;
-        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.Dialog;
+//    public void SetUp()
+//    {
+//        Transform[] transforms = GetComponentsInChildren<Transform>(true);
+//        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+//        Image[] images = GetComponentsInChildren<Image>(true);
 
-        // πÈ±◊∂ÛøÓµÂ ª˝º∫
-        sprite_WorldObjectBlockingBackground.SetActive(true);
-        image_UIBlockingBackground.SetActive(true);
-        image_UIBlockingBackground.GetComponent<Image>().DOFade(0.95f, 0.8f);
+//        panel_DialogBase = GetComponent<RectTransform>();
+//        image_Character = Array.Find(images, c => c.gameObject.name.Equals("Image_Character"));
+//        image_DialogBase = Array.Find(images, c => c.gameObject.name.Equals("Image_DialogBase"));
+//        text_Name = Array.Find(texts, c => c.gameObject.name.Equals("Text_Name"));
+//        text_Dialog = Array.Find(texts, c => c.gameObject.name.Equals("Text_Dialog"));
+//        image_OKBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_OKBtnBase")).gameObject;
 
-        GameObject dialogGo = null;
+//        text_Dialog = Array.Find(texts, c => c.gameObject.name.Equals("Text_Dialog"));
 
-        if (isTutorial)
-        {
-            foreach (GameObject dialog in tutorialDialogList)
-            {
-                S_DialogSystem dia = dialog.GetComponent<S_DialogSystem>();
+//        SetActiveObjects(true);
 
-                if (dia.Trial == trial && dia.DialogState == state)
-                {
-                    dialogGo = Instantiate(dialog, transform);
-                    CurrentDialogSystem = dialogGo.GetComponent<S_DialogSystem>();
-                    CurrentDialogSystem.SetUp();
-                    break;
-                }
-            }
-        }
-        else
-        {
-            foreach (GameObject dialog in dialogList)
-            {
-                S_DialogSystem dia = dialog.GetComponent<S_DialogSystem>();
+//        // Í∑∏ÎûòÌîΩ Î†àÏù¥ÏºÄÏä§ÌÑ∞ Ï∞æÍ∏∞
+//        raycaster = GetComponent<GraphicRaycaster>();
+//        if (raycaster == null)
+//        {
+//            raycaster = GetComponentInParent<GraphicRaycaster>();
+//        }
 
-                if (dia.Trial == trial && dia.DialogState == state)
-                {
-                    dialogGo = Instantiate(dialog, transform);
-                    CurrentDialogSystem = dialogGo.GetComponent<S_DialogSystem>();
-                    CurrentDialogSystem.SetUp();
-                    break;
-                }
-            }
-        }
+//        // Ï≤´ ÎåÄÌôîÎäî ÎßàÏö∞Ïä§ ÌÅ¥Î¶≠ ÏóÜÏù¥ Ïû¨ÏÉùÎêòÏñ¥ÏïºÌïòÍ∏∞Ïóê Îã§Ïùå Î°úÏßÅ Ï∂îÍ∞Ä
+//        if (isFirst)
+//        {
+//            SetNextDialog();
 
-        // πˆ∆∞ ºº∆√«œ±‚
-        SetBtn(CurrentDialogSystem.GetActiveBtn());
+//            isFirst = false;
+//        }
+//    }
+//    void SetNextDialog()
+//    {
+//        SetActiveObjects(true);
+//        currentDialogIndex++; // Îã§Ïù¥ÏñºÎ°úÍ∑∏ Ïù∏Îç±Ïä§++
+//        text_Name.text = dialogArray[currentDialogIndex].Name; // Ïù¥Î¶Ñ ÏÑ§Ï†ï
+//        image_Character.sprite = dialogArray[currentDialogIndex].Character; // Ï∫êÎ¶≠ÌÑ∞ Ïù¥ÎØ∏ÏßÄ ÏÑ§Ï†ï
+//        panel_DialogBase.anchoredPosition = dialogArray[currentDialogIndex].DialogBasePos; // Îã§Ïù¥ÏñºÎ°úÍ∑∏ ÏúÑÏπò ÏÑ§Ï†ï
+//        S_DialogInfoSystem.Instance.SetBtn(GetActiveBtn()); // Î≤ÑÌäº ÏÑ§Ï†ï
 
-        if (dialogGo != null)
-        {
-            StartCoroutine(DialogCoroutine());
-        }
-        else
-        {
-            S_GameFlowManager.Instance.GameFlowState = prevState;
-        }
-    }
-    IEnumerator DialogCoroutine()
-    {
-        yield return null;
+//        typingCoroutine = StartCoroutine(OnTypingText());
+//    }
+//    void SetActiveObjects(bool visible)
+//    {
+//        panel_DialogBase.gameObject.SetActive(visible);
+//        image_Character.gameObject.SetActive(visible);
+//        image_DialogBase.gameObject.SetActive(visible);
+//        text_Name.gameObject.SetActive(visible);
+//        text_Dialog.gameObject.SetActive(visible);
+//        image_OKBtnBase.SetActive(false); // Î≤ÑÌäºÏùÄ Î≥ÑÎèÑÎ°ú ÌôúÏÑ±ÌôîÌïúÎã§.
+//    }
+//    IEnumerator OnTypingText()
+//    {
+//        int index = 0;
 
-        while (!IsCompleteDialog)
-        {
-            yield return null;
-        }
-        IsCompleteDialog = false;
+//        isTypingEffect = true;
 
-        // ∞‘¿”«√∑ŒøÏ ªÛ≈¬∏¶ Dialogø°º≠ ø¯∑°¥Î∑Œ µπ∏Æ±‚
-        S_GameFlowManager.Instance.GameFlowState = prevState;
-        Debug.Log(S_GameFlowManager.Instance.GameFlowState.ToString());
+//        while (index < dialogArray[currentDialogIndex].Dialog.Length)
+//        {
+//            text_Dialog.text = dialogArray[currentDialogIndex].Dialog.Substring(0, index);
 
-        // πÈ±◊∂ÛøÓµÂ æ¯æ÷±‚
-        sprite_WorldObjectBlockingBackground.SetActive(false);
-        image_UIBlockingBackground.SetActive(false);
-        image_UIBlockingBackground.GetComponent<Image>().DOFade(0f, 0.8f);
+//            index++;
 
-        yield return new WaitForSeconds(0.3f);
+//            yield return new WaitForSeconds(typingSpeed);
+//        }
 
-        // πˆ∆∞ ø¯∑°¥Î∑Œ
-        SetBtn(S_ActivateUIEnum.OKBtn);
+//        isTypingEffect = false;
 
-        Debug.Log(S_GameFlowManager.Instance.GameFlowState.ToString());
+//        text_Dialog.text = dialogArray[currentDialogIndex].Dialog;
 
-        S_TutorialManager.Instance.IsCompleteDialog = true;
-    }
-    public void SetBtn(S_ActivateUIEnum btn)
-    {
-        // ∞¢ UI¿« ±‚∫ª∞™ ºº∆√
-        creatureInfoCanvas.sortingLayerName = "UI";
-        creatureInfoCanvas.sortingOrder = 0;
+//        // OKBtnÏù¥Í±∞ÎÇò Î≥¥Ïó¨Ï£ºÍ∏∞Ïö© Ï∫îÎ≤ÑÏä§ÎùºÎ©¥ ÌôúÏÑ±Ìôî
+//        if (GetActiveBtn() == S_ActivateUIEnum.NextBtn ||
+//            GetActiveBtn() == S_ActivateUIEnum.CreatureCanvas ||
+//            GetActiveBtn() == S_ActivateUIEnum.StatCanvas ||
+//            GetActiveBtn() == S_ActivateUIEnum.LootCanvas)
+//        {
+//            image_OKBtnBase.SetActive(true);
+//        }
+//    }
+//    public S_ActivateUIEnum GetActiveBtn()
+//    {
+//        return dialogArray[currentDialogIndex].ActivateUI;
+//    }
+//}
 
-        statInfoCanvas.sortingLayerName = "UI";
-        statInfoCanvas.sortingOrder = 0;
-
-        image_DeckBtnBase.GetComponent<Canvas>().sortingLayerName = "UI";
-        image_DeckBtnBase.GetComponent<Canvas>().sortingOrder = 0;
-
-        lootInfoCanvas.sortingLayerName = "UI";
-        lootInfoCanvas.sortingOrder = 0;
-
-        image_BasicHitBtnBase.GetComponent<Canvas>().sortingLayerName = "UI";
-        image_BasicHitBtnBase.GetComponent<Canvas>().sortingOrder = 0;
-
-        image_DeterminationHitBtnBase.GetComponent<Canvas>().sortingLayerName = "UI";
-        image_DeterminationHitBtnBase.GetComponent<Canvas>().sortingOrder = 0;
-
-        image_DeterminationHitBtnBaseByDeckInfo.GetComponent<Canvas>().sortingLayerName = "UI";
-        image_DeterminationHitBtnBaseByDeckInfo.GetComponent<Canvas>().sortingOrder = 0;
-
-        image_TwistBtnBase.GetComponent<Canvas>().sortingLayerName = "UI";
-        image_TwistBtnBase.GetComponent<Canvas>().sortingOrder = 0;
-
-        image_StandBtnBase.GetComponent<Canvas>().sortingLayerName = "UI";
-        image_StandBtnBase.GetComponent<Canvas>().sortingOrder = 0;
-
-        // »∞º∫»≠«“ πˆ∆∞ ºº∆√
-        switch (btn)
-        {
-            case S_ActivateUIEnum.OKBtn:
-                break;
-            case S_ActivateUIEnum.CreatureCanvas:
-                creatureInfoCanvas.sortingLayerName = "Dialog";
-                creatureInfoCanvas.sortingOrder = 1;
-                break;
-            case S_ActivateUIEnum.StatCanvas:
-                statInfoCanvas.sortingLayerName = "Dialog";
-                statInfoCanvas.sortingOrder = 1;
-                break;
-            case S_ActivateUIEnum.DeckInfoBtn:
-                image_DeckBtnBase.GetComponent<Canvas>().sortingLayerName = "Dialog";
-                image_DeckBtnBase.GetComponent<Canvas>().sortingOrder = 1;
-                break;
-            case S_ActivateUIEnum.LootCanvas:
-                lootInfoCanvas.sortingLayerName = "Dialog";
-                lootInfoCanvas.sortingOrder = 1;
-                break;
-            case S_ActivateUIEnum.HitBtn:
-                image_BasicHitBtnBase.GetComponent<Canvas>().sortingLayerName = "Dialog";
-                image_BasicHitBtnBase.GetComponent<Canvas>().sortingOrder = 1;
-                break;
-            case S_ActivateUIEnum.DeterminationHitBtn:
-                image_DeterminationHitBtnBase.GetComponent<Canvas>().sortingLayerName = "Dialog";
-                image_DeterminationHitBtnBase.GetComponent<Canvas>().sortingOrder = 1;
-                break;
-            case S_ActivateUIEnum.DeterminationHitBtnByDeckInfo:
-                image_DeterminationHitBtnBaseByDeckInfo.GetComponent<Canvas>().sortingLayerName = "Dialog";
-                image_DeterminationHitBtnBaseByDeckInfo.GetComponent<Canvas>().sortingOrder = 1;
-                break;
-            case S_ActivateUIEnum.TwistBtn:
-                image_TwistBtnBase.GetComponent<Canvas>().sortingLayerName = "Dialog";
-                image_TwistBtnBase.GetComponent<Canvas>().sortingOrder = 1;
-                break;
-            case S_ActivateUIEnum.StandBtn:
-                image_StandBtnBase.GetComponent<Canvas>().sortingLayerName = "Dialog";
-                image_StandBtnBase.GetComponent<Canvas>().sortingOrder = 1;
-                break;
-        }
-    }
-    public void BlockAllClick()
-    {
-        sprite_WorldObjectBlockingBackground.SetActive(true);
-        image_UIBlockingBackground.SetActive(true);
-        image_UIBlockingBackground.GetComponent<Image>().DOFade(0f, 0f);
-    }
-}
-public enum S_DialogStateEnum
-{
-    None,
-    StartTrial,
-    ExplainUniverse,
-    Creature,
-    Stat,
-    Deck,
-    CardInfo,
-    Loot,
-    Hit,
-    DeterminationHit,
-    Stand,
-    Twist,
-    CardProduct,
-    LootProduct,
-    StatProduct
-}
-public enum S_ActivateUIEnum
-{
-    OKBtn,
-    CreatureCanvas,
-    StatCanvas,
-    DeckInfoBtn,
-    LootCanvas,
-    HitBtn,
-    DeterminationHitBtn,
-    DeterminationHitBtnByDeckInfo,
-    TwistBtn,
-    StandBtn
-}

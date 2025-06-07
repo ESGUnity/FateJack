@@ -5,18 +5,13 @@ using UnityEngine;
 
 public class S_TutorialManager : MonoBehaviour
 {
-    // ÇÁ¸®ÆÕ
-    [SerializeField] List<S_TutorialBase> tutorialList;
-
-    // ´ÙÀÌ¾ó·Î±× ¿ë º¯¼ö
-    public bool IsCompleteDialog;
-
-    // ½Ì±ÛÅÏ
+    // ì‹±ê¸€í„´
     static S_TutorialManager instance;
     public static S_TutorialManager Instance { get { return instance; } }
+
     void Awake()
     {
-        // ½Ì±ÛÅÏ
+        // ì‹±ê¸€í„´
         if (instance == null)
         {
             instance = this;
@@ -27,154 +22,123 @@ public class S_TutorialManager : MonoBehaviour
         }
     }
 
-    public void StartTutorial()
+    public async void StartTutorial()
     {
-        StartCoroutine(TutorialCoroutine());
+        await S_GameFlowManager.Instance.StartTrialAsync();
+
+        await StartTutorialAsync();
     }
-
-    IEnumerator TutorialCoroutine()
+    async Task StartTutorialAsync()
     {
-        ////////////////////////////////////////////////////////////////////////////////// StartTrial
+        Queue<DialogData> dialogs = new Queue<DialogData>();
 
-        // ¼¼°è°ü ¼³¸í ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(1, S_DialogStateEnum.ExplainUniverse, true);
-        while (!IsCompleteDialog)
+        // íŠœí† ë¦¬ì–¼ ì¸íŠ¸ë¡œ
+        List<DialogData> dialogList = S_DialogMetaData.GetDialogsByPrefix("Tutorial_Intro");
+        for (int i = 0; i < dialogList.Count; i++)
         {
-            yield return null;
+            dialogs.Enqueue(dialogList[i]);
         }
-        IsCompleteDialog = false;
-
-        // ÇÇÁ¶¹° Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(1, S_DialogStateEnum.Creature, true);
-        while (!IsCompleteDialog)
+        await S_DialogInfoSystem.Instance.StartDialogByInGame(dialogs);
+        // íˆíŠ¸ ì‹œì‘
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+        S_Card hitCard = S_PlayerCard.Instance.DrawRandomCard(1)[0];
+        // ì¹´ë“œ ë‚´ê¸°
+        await S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(hitCard, S_CardOrderTypeEnum.BasicHit);
+        // ìš°ì„ ì´ ìˆì—ˆë‹¤ë©´ í•´ì œ
+        if (S_PlayerStat.Instance.IsFirst != S_FirstEffectEnum.None) await S_EffectActivator.Instance.AppliedFirstAsync();
+        // íˆíŠ¸ ì¹´ë“œ ì§„í–‰
+        if (S_GameFlowManager.Instance.GetCardOrderQueueCount() <= 1)
         {
-            yield return null;
-        }
-        IsCompleteDialog = false;
-
-        // ½ºÅÈ Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(1, S_DialogStateEnum.Stat, true);
-        while (!IsCompleteDialog)
-        {
-            yield return null;
-        }
-        IsCompleteDialog = false;
-
-        // µ¦ Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(1, S_DialogStateEnum.Deck, true);
-        while (!IsCompleteDialog)
-        {
-            yield return null;
-        }
-        IsCompleteDialog = false;
-
-        // µ¦ ³Ñ¾î°¥ ½Ã°£µ¿¾È ´ë±â
-        S_DialogManager.Instance.BlockAllClick();
-        yield return new WaitForSeconds(S_GameFlowManager.PANEL_APPEAR_TIME * 1.5f);
-
-        // Ä«µå Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(1, S_DialogStateEnum.CardInfo, true);
-        while (!IsCompleteDialog)
-        {
-            yield return null;
-        }
-        IsCompleteDialog = false;
-
-        // µ¦À» ´Ù µÑ·¯º¸°í µ¦À» ²ø ¶§±îÁö ´ë±â
-        while (S_GameFlowManager.Instance.GameFlowState != S_GameFlowStateEnum.Hit)
-        {
-            yield return null;
+            await S_GameFlowManager.Instance.StartHittingCard();
         }
 
-        // Àü¸®Ç° Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(1, S_DialogStateEnum.Loot, true);
-        while (!IsCompleteDialog)
+        // íŠœí† ë¦¬ì–¼ íˆíŠ¸, ì˜ì§€ íˆíŠ¸, ë¹„í‹€ê¸°, ìŠ¤íƒ ë“œ
+        dialogList = S_DialogMetaData.GetDialogsByPrefix("Tutorial_Action");
+        for (int i = 0; i < dialogList.Count; i++)
         {
-            yield return null;
+            dialogs.Enqueue(dialogList[i]);
         }
-        IsCompleteDialog = false;
-
-        // È÷Æ® Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(1, S_DialogStateEnum.Hit, true);
-        while (!IsCompleteDialog)
+        await S_DialogInfoSystem.Instance.StartDialogByInGame(dialogs);
+        // ë¹„í‹€ê¸°
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+        S_PlayerStat.Instance.UseDetermination();
+        // ì¹´ë“œ ì œì™¸ ë° ì œì™¸ëœ ì¹´ë“œ ë³µêµ¬. ì´í•˜ 3ê°œ ë©”ì„œë“œëŠ” ë°˜ë“œì‹œ ë¶™ì–´ë‹¤ë…€ì•¼í•œë‹¤.
+        S_PlayerCard.Instance.ResetCardsByTwist(out List<S_Card> stacks, out List<S_Card> exclusions);
+        await S_StackInfoSystem.Instance.ExclusionCardsByTwistAsync(stacks);
+        await S_UICardEffecter.Instance.ReturnExclusionCardsByTwistAsync(exclusions);
+        // ëŠ¥ë ¥ì˜ ì¡°ê±´ ì²´í¬
+        S_PlayerSkill.Instance.CheckSkillMeetCondition();
+        // ì ì˜ ì¡°ê±´ ì²´í¬
+        S_FoeInfoSystem.Instance.CheckFoeMeetCondition();
+        // ìŠ¤íƒ¯, íˆìŠ¤í† ë¦¬ë¥¼ ìŠ¤íƒì˜ ì¹´ë“œë¥¼ ë‚´ê¸° ì „ìœ¼ë¡œ ë˜ëŒë¦¬ê¸°.
+        S_PlayerStat.Instance.ResetStatsByTwist();
+        // ë¹„í‹€ê¸°ë¡œ íˆìŠ¤í† ë¦¬ ì €ì¥
+        S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.Twist);
+        // í”¼ì¡°ë¬¼ì´ ì£½ì—ˆë‹¤ë©´ ì „íˆ¬ ì¢…ë£Œ
+        if (S_FoeInfoSystem.Instance.CurrentFoe.CurrentHealth <= 0)
         {
-            yield return null;
+            S_GameFlowManager.Instance.EndTrial();
         }
-        IsCompleteDialog = false;
-
-        // È÷Æ® µÉ ¶§±îÁö Á»¸¸ ´ë±âÇØÁÖ±â
-        S_DialogManager.Instance.BlockAllClick();
-        yield return new WaitForSeconds(S_GameFlowManager.PANEL_APPEAR_TIME * 4f);
-
-        // È÷Æ® Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(2, S_DialogStateEnum.Hit, true);
-        while (!IsCompleteDialog)
+        else // ì•„ë‹ˆë¼ë©´ íˆíŠ¸ ë‹¤ì‹œ ì‹œì‘
         {
-            yield return null;
-        }
-        IsCompleteDialog = false;
-
-        // ÀÇÁö È÷Æ® Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(1, S_DialogStateEnum.DeterminationHit, true);
-        while (!IsCompleteDialog)
-        {
-            yield return null;
-        }
-        IsCompleteDialog = false;
-
-        // µ¦À¸·Î ³Ñ¾î°¥ ¶§±îÁö Á»¸¸ ´ë±âÇØÁÖ±â
-        S_DialogManager.Instance.BlockAllClick();
-        yield return new WaitForSeconds(S_GameFlowManager.PANEL_APPEAR_TIME * 1f);
-
-        // ÀÇÁö È÷Æ® Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(2, S_DialogStateEnum.DeterminationHit, true);
-        while (!IsCompleteDialog)
-        {
-            yield return null;
-        }
-        IsCompleteDialog = false;
-
-        // ÀÇÁö È÷Æ®¸¦ ÇÏ°Å³ª Ãë¼ÒÇÒ ¶§±îÁö ´ë±â
-        while (S_GameFlowManager.Instance.GameFlowState != S_GameFlowStateEnum.Hit)
-        {
-            yield return null;
+            S_GameFlowManager.Instance.StartNewTurn();
         }
 
-        // ºñÆ²±â Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(1, S_DialogStateEnum.Twist, true);
-        while (!IsCompleteDialog)
+        // íŠœí† ë¦¬ì–¼ ì¹´ë“œ
+        dialogList = S_DialogMetaData.GetDialogsByPrefix("Tutorial_Card");
+        for (int i = 0; i < dialogList.Count; i++)
         {
-            yield return null;
+            dialogs.Enqueue(dialogList[i]);
         }
-        IsCompleteDialog = false;
-
-        // ºñÆ²±â ¿¬Ãâ ³¡³¯ ¶§°¡Áö ´ë±â
-        S_DialogManager.Instance.BlockAllClick();
-        yield return new WaitForSeconds(S_GameFlowManager.PANEL_APPEAR_TIME * 1f);
-
-        // ºñÆ²±â Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(2, S_DialogStateEnum.Twist, true);
-        while (!IsCompleteDialog)
+        await S_DialogInfoSystem.Instance.StartDialogByInGame(dialogs);
+        // ìŠ¤íƒ ë“œ
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+        // ì¹´ë“œì˜ ê²°ì˜ íš¨ê³¼ ë°œë™
+        await S_EffectActivator.Instance.ActivatedResolveCard();
+        // ëŠ¥ë ¥ ë°œë™
+        await S_PlayerSkill.Instance.ActivateStandSkillsByStand();
+        // ì  ë°œë™
+        await S_FoeInfoSystem.Instance.ActivateStandFoeByStand();
+        // ì¹´ë“œì˜¤ë”íê°€ 1ê°œë¼ë©´, ì¦‰ ì‹œë ¨ ì‹œì‘ ì‹œ í˜¹ì€ ìŠ¤íƒ ë“œ ì‹œì— ì°½ì¡°ë˜ì—ˆë‹¤ë©´, ì¹´ë“œì— ì˜í•´ ì°½ì¡°ëœê²Œ ì•„ë‹ˆë¼ë©´
+        if (S_GameFlowManager.Instance.GetCardOrderQueueCount() >= 1)
         {
-            yield return null;
+            await S_GameFlowManager.Instance.StartHittingCard();
         }
-        IsCompleteDialog = false;
-
-        // ½ºÅÄµå Á¤º¸ ´ÙÀÌ¾ó·Î±× ½ÃÀÛ
-        S_DialogManager.Instance.StartDialog(1, S_DialogStateEnum.Stand, true);
-        while (!IsCompleteDialog)
+        // ì¹´ë“œ ê³ ì •. IsCurrentHitì„ falseë¡œ ë§Œë“œëŠ” ê³¼ì •
+        S_PlayerCard.Instance.FixCardsByStand();
+        // ë” ì´ìƒ ë°ë¯¸ì§€ê°€ ë˜ëŒì•„ê°€ì§€ ì•ŠëŠ”ë‹¤.
+        S_FoeInfoSystem.Instance.FixHealthByStand();
+        // ìŠ¤íƒ ë“œë¡œ íˆìŠ¤í† ë¦¬ ì €ì¥
+        S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.Stand);
+        // í”¼ì¡°ë¬¼ ì²˜ì¹˜ ì—¬ë¶€ì— ë”°ë¥¸ ì²˜ë¦¬
+        if (S_FoeInfoSystem.Instance.CurrentFoe.OldHealth <= 0) // í”¼ì¡°ë¬¼ì´ ì£½ì—ˆë‹¤ë©´ ì „íˆ¬ ì¢…ë£Œ
         {
-            yield return null;
+            S_GameFlowManager.Instance.EndTrial();
         }
-        IsCompleteDialog = false;
+        else // ì‚´ì•˜ë‹¤ë©´ í”¼ì¡°ë¬¼ì´ í”Œë ˆì´ì–´ë¥¼ ê³µê²©
+        {
+            // í”Œë ˆì´ì–´ ê³µê²©
+            await S_FoeInfoSystem.Instance.AttackPlayer();
 
-        // Æ©Åä¸®¾ó ¿Ï·á
-        CompletedAllTutorial();
-    }
+            // ê³µê²©ë°›ê³  ë‚˜ì„œ ìŠ¤íƒ í•©ì„ 0ìœ¼ë¡œ ë§Œë“¤ê³  í´ë¦°íˆíŠ¸, ë²„ìŠ¤íŠ¸ ì´ˆê¸°í™”í•˜ì.
+            S_PlayerStat.Instance.ResetStackSum();
+            S_PlayerStat.Instance.CheckBurstAndCleanHit();
+            S_StatInfoSystem.Instance.ChangeSpecialAbility();
 
-    public void CompletedAllTutorial()
-    {
-        PlayerPrefs.SetInt("TutorialCompleted", 1); // Æ©Åä¸®¾ó ¿Ï¼öÇßÀ½À» ¾Ë¸®´Â ·ÎÁ÷
+            // íˆíŠ¸ ë‹¤ì‹œ ì‹œì‘
+            S_GameFlowManager.Instance.StartNewTurn();
+        }
+
+        // íŠœí† ë¦¬ì–¼ ëŠ¥ë ¥
+        dialogList = S_DialogMetaData.GetDialogsByPrefix("Tutorial_Skill");
+        for (int i = 0; i < dialogList.Count; i++)
+        {
+            dialogs.Enqueue(dialogList[i]);
+        }
+        await S_DialogInfoSystem.Instance.StartDialogByInGame(dialogs);
+
+        // íŠœí† ë¦¬ì–¼ ì™„ë£Œ
+        PlayerPrefs.SetInt("TutorialCompleted", 1); // íŠœí† ë¦¬ì–¼ ì™„ìˆ˜í–ˆìŒì„ ì•Œë¦¬ëŠ” ë¡œì§
         PlayerPrefs.Save();
     }
 }

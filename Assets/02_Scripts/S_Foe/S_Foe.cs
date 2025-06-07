@@ -10,7 +10,7 @@ public class S_Foe
     public S_FoeAbilityConditionEnum Condition;
     public S_FoePassiveEnum Passive;
     public int ActivatedCount;
-    public bool CanActivateEffect;
+    public bool IsMeetCondition;
 
     public S_Foe(string key, string name, string abilityDescription, S_FoeTypeEnum foeType, S_FoeAbilityConditionEnum condition, S_FoePassiveEnum passive)
     {
@@ -20,20 +20,20 @@ public class S_Foe
         FoeType = foeType;
         Condition = condition;
         Passive = passive;
-        CanActivateEffect = false;
+        IsMeetCondition = false;
 
         S_GameFlowManager.Instance.OnNewTurn += StartNewTurn;
     }
-    public virtual bool IsMeetCondition(S_Card card = null)
-    {
-        CanActivateEffect = false;
-        return CanActivateEffect;
-    }
+
     public virtual async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
         await Task.Delay(1);
     }
-    public virtual void ActivateCount(S_Card card, bool isTwist = false)
+    public virtual void CheckMeetCondition(S_Card card = null)
+    {
+        IsMeetCondition = false;
+    }
+    public virtual void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
 
     }
