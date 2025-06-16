@@ -18,12 +18,12 @@ public class Foe_LachesisTheDecider : S_Foe
     {
         if (IsMeetCondition)
         {
-            await eA.CurseRandomCards(this, S_PlayerCard.Instance.GetImmediateDeckCards().Count / 2, S_CardSuitEnum.None, -1, true, false);
+            await eA.CurseRandomCards(this, S_PlayerCard.Instance.GetDeckCards().Count / 2, S_EngravingEnum.None, -1, true, false);
         }
     }
     public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        ActivatedCount = S_PlayerCard.Instance.GetPreStackCards().Where(x => x.IsCurrentTurnHit).Count();
+        ActivatedCount = S_PlayerCard.Instance.GetStackCards().Where(x => x.IsCurrentTurn).Count();
 
         IsMeetCondition = ActivatedCount >= 6;
     }

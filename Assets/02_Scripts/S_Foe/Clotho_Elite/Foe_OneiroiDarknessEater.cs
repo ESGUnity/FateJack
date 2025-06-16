@@ -16,9 +16,9 @@ public class Foe_OneiroiDarknessEater : S_Foe
 
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
-        S_EffectChecker.Instance.GetLeastSuitCardsInStack(out S_CardSuitEnum suit);
+        S_EffectChecker.Instance.GetLeastTypeCardsInStack(out S_CardTypeEnum type);
 
-        await eA.CurseRandomCards(this, 999, suit, -1, false, true);
+        await eA.CurseRandomCards(this, 999, type, -1, false, true);
     }
     public override void CheckMeetCondition(S_Card card = null)
     {

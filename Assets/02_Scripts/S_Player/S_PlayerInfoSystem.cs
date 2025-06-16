@@ -35,7 +35,7 @@ public class S_PlayerInfoSystem : MonoBehaviour
         }
     }
 
-    public async Task PlayerVFXAsync(S_PlayerVFXEnum vfx, GameObject target = null) // 각종 버프 및 디버프 VFX
+    public async Task PlayerVFXAsync(S_PlayerVFXEnum vfx, GameObject target = null) // 카드 위에 표시되는 각종 버프 및 디버프 VFX
     {
         GameObject go = Instantiate(prefab_PlayerVFX);
         if (target == null)
@@ -57,12 +57,13 @@ public class S_PlayerInfoSystem : MonoBehaviour
 public enum S_PlayerVFXEnum
 {
     Burst,
-    CleanHit,
+    Perfect,
     Delusion,
     First,
     Expansion,
-    Add_StackSum,
-    Subtract_StackSum,
+    ColdBlood,
+    Add_Weight,
+    Subtract_Weight,
     Add_Limit,
     Subtract_Limit,
     Add_Strength,

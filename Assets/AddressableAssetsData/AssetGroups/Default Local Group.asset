@@ -396,7 +396,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 332c7fddc77055e4f862dbfea82dc291
-    m_Address: Sprite_PlayerVFX_CleanHit
+    m_Address: Sprite_PlayerVFX_Perfect
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -681,7 +681,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65659ed7d1ef857499429915ef451c84
-    m_Address: Sprite_PlayerVFX_Add_StackSum
+    m_Address: Sprite_PlayerVFX_Add_Weight
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -816,7 +816,7 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 72579dead840de148aaa5385dc60d60b
-    m_Address: Sprite_PlayerVFX_Subtract_StackSum
+    m_Address: Sprite_PlayerVFX_Subtract_Weight
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

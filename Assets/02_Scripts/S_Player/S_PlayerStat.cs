@@ -6,10 +6,10 @@ public class S_PlayerStat : MonoBehaviour
 {
     [Header("컴포넌트")]
     S_PlayerCard pCard;
-    S_PlayerSkill pSkill;
+    S_PlayerTrinket pSkill;
 
     [Header("피조물 관련")]
-    [HideInInspector] public int StackSum { get; set; }
+    [HideInInspector] public int CurrentWeight { get; set; }
     [HideInInspector] public int CurrentLimit { get; set; }
     public const int ORIGIN_LIMIT = 21;
 
@@ -34,16 +34,17 @@ public class S_PlayerStat : MonoBehaviour
     [HideInInspector] public int CurrentGold { get; private set; }
 
     [Header("전투 능력치")]
-    [HideInInspector] public int CurrentStrength { get; private set; }
+    [HideInInspector] public int CurrentStr { get; private set; }
     [HideInInspector] public int CurrentMind { get; private set; }
     [HideInInspector] public int CurrentLuck { get; private set; }
 
     [Header("특수 상태")]
     [HideInInspector] public bool IsBurst { get; set; }
-    [HideInInspector] public bool IsCleanHit { get; set; }
+    [HideInInspector] public bool IsPerfect { get; set; }
     [HideInInspector] public bool IsDelusion { get; set; }
-    [HideInInspector] public S_FirstEffectEnum IsFirst { get; set; }
+    [HideInInspector] public bool IsFirst { get; set; }
     [HideInInspector] public bool IsExpansion { get; set; }
+    [HideInInspector] public bool IsColdBlood { get; set; }
 
     [Header("히스토리")]
     [HideInInspector] public int h_HitCardCount { get; private set; } // 이번 게임에서 히트한 카드 개수만큼 활성화
@@ -67,7 +68,7 @@ public class S_PlayerStat : MonoBehaviour
     {
         // 컴포넌트 할당
         pCard = GetComponent<S_PlayerCard>();
-        pSkill = GetComponent<S_PlayerSkill>();
+        pSkill = GetComponent<S_PlayerTrinket>();
 
         // 싱글턴
         if (instance == null)
@@ -84,7 +85,7 @@ public class S_PlayerStat : MonoBehaviour
     public void InitStatsByStartGame() // 게임 시작 시 능력치 초기화
     {
         CurrentLimit = ORIGIN_LIMIT;
-        StackSum = 0;
+        CurrentWeight = 0;
 
         MaxHealth = START_MAX_HEALTH;
         standDamagedHealth = 0;
@@ -98,38 +99,39 @@ public class S_PlayerStat : MonoBehaviour
 
         CurrentGold = START_GOLD;
 
-        CurrentStrength = 0;
+        CurrentStr = 0;
         CurrentMind = 0;
         CurrentLuck = 0;
 
-        IsFirst = S_FirstEffectEnum.None;
+        IsFirst = false;
         IsDelusion = false;
         IsExpansion = false;
+        IsColdBlood = false;
     }
     public void CalcHistory(S_CardOrderTypeEnum type, S_Card hitCard) // 히트 또는 제외 시 히스토리 계산. 카드 낼 때(카드오더큐) 바로 적용
     {
-        if ((type == S_CardOrderTypeEnum.BasicHit || type == S_CardOrderTypeEnum.IllusionHit) && hitCard != null)
+        if ((type == S_CardOrderTypeEnum.Hit || type == S_CardOrderTypeEnum.Gen) && hitCard != null)
         {
             // 문양에 따른 히스토리 추가
             h_HitCardCount++;
-            h_HitCardSum += hitCard.Number;
-            switch (hitCard.Suit)
+            h_HitCardSum += hitCard.Num;
+            switch (hitCard.Engraving)
             {
-                case S_CardSuitEnum.Spade:
+                case S_EngravingEnum.Circle:
                     h_SpadeHitCardCount++;
-                    h_SpadeHitCardSum += hitCard.Number;
+                    h_SpadeHitCardSum += hitCard.Num;
                     break;
-                case S_CardSuitEnum.Heart:
+                case S_EngravingEnum.Tri:
                     h_HeartHitCardCount++;
-                    h_HeartHitCardSum += hitCard.Number;
+                    h_HeartHitCardSum += hitCard.Num;
                     break;
-                case S_CardSuitEnum.Diamond:
+                case S_EngravingEnum.Quad:
                     h_DiamondHitCardCount++;
-                    h_DiamondHitCardSum += hitCard.Number;
+                    h_DiamondHitCardSum += hitCard.Num;
                     break;
-                case S_CardSuitEnum.Clover:
+                case S_EngravingEnum.Star:
                     h_CloverHitCardCount++;
-                    h_CloverHitCardSum += hitCard.Number;
+                    h_CloverHitCardSum += hitCard.Num;
                     break;
             }
         }
@@ -151,13 +153,14 @@ public class S_PlayerStat : MonoBehaviour
             AdditionalDetermination = additionalDetermination,
             CurrentGold = CurrentGold,     
 
-            CurrentStrength = CurrentStrength, // 추가 능력치
+            CurrentStrength = CurrentStr, // 추가 능력치
             CurrentMind = CurrentMind,
             CurrentLuck = CurrentLuck,
 
             IsFirst = IsFirst, // 특수 상태
             IsDelusion = IsDelusion,
             IsExpansion = IsExpansion,
+            IsColdBlood = IsColdBlood,
 
             H_HitCardCount = h_HitCardCount, // 히스토리
             H_SpadeHitCardCount = h_SpadeHitCardCount,
@@ -213,7 +216,7 @@ public class S_PlayerStat : MonoBehaviour
         CurrentGold = h.CurrentGold;
 
         // 추가 능력치 되돌리기
-        CurrentStrength = h.CurrentStrength;
+        CurrentStr = h.CurrentStrength;
         CurrentMind = h.CurrentMind;
         CurrentLuck = h.CurrentLuck;
 
@@ -221,9 +224,10 @@ public class S_PlayerStat : MonoBehaviour
         IsFirst = h.IsFirst;
         IsDelusion = h.IsDelusion;
         IsExpansion = h.IsExpansion;
+        IsColdBlood = h.IsColdBlood;
 
-        CheckBurstAndCleanHit();
-        S_StatInfoSystem.Instance.ChangeSpecialAbility();
+        CheckBurstAndPerfect();
+        S_StatInfoSystem.Instance.UpdateSpecialAbility();
 
         // 각종 값 민맥스 체크
         CheckStatsMinMaxValue();
@@ -247,16 +251,17 @@ public class S_PlayerStat : MonoBehaviour
         additionalDetermination = 0;
         currentDetermination = MaxDetermination - useDetermination + additionalDetermination;
 
-        CurrentStrength = 0;
+        CurrentStr = 0;
         CurrentMind = 0;
         CurrentLuck = 0;
 
-        IsFirst = S_FirstEffectEnum.None;
         IsDelusion = false;
+        IsFirst = false;
         IsExpansion = false;
+        IsColdBlood = false;
 
-        CheckBurstAndCleanHit();
-        S_StatInfoSystem.Instance.ChangeSpecialAbility();
+        CheckBurstAndPerfect();
+        S_StatInfoSystem.Instance.UpdateSpecialAbility();
 
         // 각종 값 민맥스 체크
         CheckStatsMinMaxValue();
@@ -266,7 +271,7 @@ public class S_PlayerStat : MonoBehaviour
     #region 각종 보조 함수
     public void ResetStackSum()
     {
-        StackSum = 0;
+        CurrentWeight = 0;
         S_StatInfoSystem.Instance.ChangeStatVFX();
     }
     public async Task GetDamagedByStand(int value) // 데미지
@@ -312,7 +317,7 @@ public class S_PlayerStat : MonoBehaviour
         //if (StackSum < 0) StackSum = 0;
         if (CurrentLimit < 0) CurrentLimit = 0;
         if (CurrentGold < 0) CurrentGold = 0;
-        if (CurrentStrength < 0) CurrentStrength = 0;
+        if (CurrentStr < 0) CurrentStr = 0;
         if (CurrentMind < 0) CurrentMind = 0;
         if (CurrentLuck < 0) CurrentLuck = 0;
     }
@@ -327,23 +332,25 @@ public class S_PlayerStat : MonoBehaviour
         CheckStatsMinMaxValue();
         S_StatInfoSystem.Instance.ChangeStatVFX();
     }
-    public void CheckBurstAndCleanHit()
+    public void CheckBurstAndPerfect()
     {
-        if (StackSum > CurrentLimit) // 스택 합이 한계를 초과했다면
+        if (CurrentWeight > CurrentLimit) // 스택 합이 한계를 초과했다면
         {
             IsBurst = true;
-            IsCleanHit = false;
+            IsPerfect = false;
         }
-        else if (StackSum == CurrentLimit) // 스택 합이 한계와 같다면
+        else if (CurrentWeight == CurrentLimit) // 스택 합이 한계와 같다면
         {
             IsBurst = false;
-            IsCleanHit = true;
+            IsPerfect = true;
         }
         else
         {
             IsBurst = false;
-            IsCleanHit = false;
+            IsPerfect = false;
         }
+
+        S_StatInfoSystem.Instance.UpdateSpecialAbility();
     }
     public int GetCurrentHealth()
     {
@@ -357,9 +364,9 @@ public class S_PlayerStat : MonoBehaviour
     }
     #endregion
     #region 능력치 계산
-    public void AddOrSubtractStackSum(int value)
+    public void AddOrSubtractWeight(int value)
     {
-        StackSum += value;
+        CurrentWeight += value;
         CheckStatsMinMaxValue();
         S_StatInfoSystem.Instance.ChangeStatVFX();
     }
@@ -371,7 +378,7 @@ public class S_PlayerStat : MonoBehaviour
     }
     public void AddStrength(int value)
     {
-        CurrentStrength += value;
+        CurrentStr += value;
         CheckStatsMinMaxValue();
         S_StatInfoSystem.Instance.ChangeStatVFX();
     }
@@ -429,9 +436,10 @@ public struct S_StatHistory // 비틀기를 위한 각종 능력치 및 특수 �
     public int CurrentLuck;
 
     // 특수 상태
-    public S_FirstEffectEnum IsFirst;
     public bool IsDelusion;
+    public bool IsFirst;
     public bool IsExpansion;
+    public bool IsColdBlood;
 
     // 역사
     public int H_HitCardCount;

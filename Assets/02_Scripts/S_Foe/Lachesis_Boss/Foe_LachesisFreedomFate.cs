@@ -14,7 +14,7 @@ public class Foe_LachesisFreedomFate : S_Foe
 
     public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        ActivatedCount = S_PlayerCard.Instance.GetPreStackCards().Count;
+        ActivatedCount = S_PlayerCard.Instance.GetStackCards().Count;
         IsMeetCondition = ActivatedCount >= 13;
     }
     public override string GetDescription()

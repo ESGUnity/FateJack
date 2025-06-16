@@ -14,7 +14,7 @@ public class Foe_ThanatosTheRest : S_Foe
 
     public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        ActivatedCount = S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(1);
+        ActivatedCount = S_EffectChecker.Instance.GetGrandChaosInPreStack(1);
 
         IsMeetCondition = ActivatedCount <= 2;
     }

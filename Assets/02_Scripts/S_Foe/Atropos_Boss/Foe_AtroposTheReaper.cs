@@ -25,9 +25,9 @@ public class Foe_AtroposTheReaper : S_Foe
     }
     public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        int count = S_PlayerCard.Instance.GetPreStackCards().Count % 2;
+        int count = S_PlayerCard.Instance.GetStackCards().Count % 2;
 
-        if (S_PlayerCard.Instance.GetPreStackCards().Count == 0)
+        if (S_PlayerCard.Instance.GetStackCards().Count == 0)
         {
             ActivatedCount = 0;
         }

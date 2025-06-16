@@ -12,49 +12,29 @@ public class S_DeckInfoSystem : MonoBehaviour
     [SerializeField] GameObject deckCard;
 
     [Header("씬 오브젝트")]
-    [SerializeField] GameObject spadeDeckBase;
-    [SerializeField] GameObject heartDeckBase;
-    [SerializeField] GameObject diamondDeckBase;
-    [SerializeField] GameObject cloverDeckBase;
-    [SerializeField] GameObject selectCard;
-    [SerializeField] SpriteRenderer sprite_BlackBackgroundByDeckInfo;
-
-    [SerializeField] GameObject text_SpadeCount;
-    [SerializeField] GameObject text_HeartCount;
-    [SerializeField] GameObject text_DiamondCount;
-    [SerializeField] GameObject text_CloverCount;
-    [SerializeField] GameObject text_ExclusionCount;
-    [SerializeField] GameObject text_StackCount;
+    [SerializeField] GameObject pos_DeckBase;
     [SerializeField] GameObject text_DeckCount;
-
-    [Header("덱 카드 오브젝트 리스트")]
-    List<GameObject> spadeCards = new();
-    List<GameObject> heartCards = new();
-    List<GameObject> diamondCards = new();
-    List<GameObject> cloverCards = new();
-    List<GameObject> deckCardObjects = new();
+    [SerializeField] SpriteRenderer sprite_BlackBackgroundByDeckInfo;
+    [SerializeField] GameObject sprite_ViewDeck;
 
     [Header("컴포넌트")]
-    GameObject panel_DeterminationHitBtnAndCancelBtnBase;
-    GameObject panel_CloseDeckBtnBase;
-    GameObject panel_ViewDeckInfoBtnBase;
-    TMP_Text text_CloseBtn;
+    GameObject panel_DeckBtnBase;
 
-    [Header("덱 열거나 닫는 UI")]
-    Vector2 deckInfoBtnsHidePos = new Vector2(0, -80);
-    Vector2 deckInfoBtnsOriginPos = new Vector2(0, 85);
-    Vector2 viewDeckInfoBtnHidePos = new Vector2(-180, -10);
-    Vector2 viewDeckInfoBtnOriginPos = new Vector2(10, -10);
+    [Header("덱 카드 오브젝트 리스트")]
+    List<GameObject> deckCardObjs = new();
 
-    [Header("카드 UI")]
-    Vector3 startPoint = new Vector3(-3.5f, 0, 0);
-    Vector3 endPoint = new Vector3(3.5f, 0, 0);
+    [Header("UI")]
+    Vector2 DECK_BTN_HIDE_POS = new Vector2(0, -80);
+    Vector2 DECK_BTN_ORIGIN_POS = new Vector2(0, 85);
+    S_GameFlowStateEnum prevState;
+
+    [Header("연출")]
+    Vector3 DECK_BASE_START_POS = new Vector3(-8.2f, 0, 0);
+    Vector3 DECK_BASE_END_POS = new Vector3(8.2f, 0, 0);
     const float STACK_Z_VALUE = -0.02f;
+    Vector3 STACK_CARD_ORIGIN_SCALE = new Vector3(1.7f, 1.7f, 1.7f);
 
-    [Header("의지 히트 관련")]
-    bool isDeterminationHit;
-    bool isSelect;
-    S_Card selectedCard;
+    S_OrderStateEnum orderState = S_OrderStateEnum.GetOrder;
 
     // 싱글턴
     static S_DeckInfoSystem instance;
@@ -66,41 +46,12 @@ public class S_DeckInfoSystem : MonoBehaviour
         Transform[] transforms = GetComponentsInChildren<Transform>(true);
         TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
 
-        panel_DeterminationHitBtnAndCancelBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Panel_DeterminationHitBtnAndCancelBtnBase")).gameObject;
-        panel_CloseDeckBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Panel_CloseDeckBtnBase")).gameObject;
-        panel_ViewDeckInfoBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Panel_ViewDeckInfoBtnBase")).gameObject;
-        text_CloseBtn = Array.Find(texts, c => c.gameObject.name.Equals("Text_CloseBtn"));
+        panel_DeckBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Panel_DeckBtnBase")).gameObject;
 
         // TMP의 소팅오더 조절
-        text_SpadeCount.GetComponent<MeshRenderer>().sortingLayerName = "UI";
-        text_SpadeCount.GetComponent<MeshRenderer>().sortingOrder = 0;
-        text_SpadeCount.GetComponent<TMP_Text>().raycastTarget = false;
-
-        text_HeartCount.GetComponent<MeshRenderer>().sortingLayerName = "UI";
-        text_HeartCount.GetComponent<MeshRenderer>().sortingOrder = 0;
-        text_HeartCount.GetComponent<TMP_Text>().raycastTarget = false;
-
-        text_DiamondCount.GetComponent<MeshRenderer>().sortingLayerName = "UI";
-        text_DiamondCount.GetComponent<MeshRenderer>().sortingOrder = 0;
-        text_DiamondCount.GetComponent<TMP_Text>().raycastTarget = false;
-
-        text_CloverCount.GetComponent<MeshRenderer>().sortingLayerName = "UI";
-        text_CloverCount.GetComponent<MeshRenderer>().sortingOrder = 0;
-        text_CloverCount.GetComponent<TMP_Text>().raycastTarget = false;
-
-        text_ExclusionCount.GetComponent<MeshRenderer>().sortingLayerName = "UI";
-        text_ExclusionCount.GetComponent<MeshRenderer>().sortingOrder = 0;
-        text_ExclusionCount.GetComponent<TMP_Text>().raycastTarget = false;
-
-        text_StackCount.GetComponent<MeshRenderer>().sortingLayerName = "UI";
-        text_StackCount.GetComponent<MeshRenderer>().sortingOrder = 0;
-        text_StackCount.GetComponent<TMP_Text>().raycastTarget = false;
-
         text_DeckCount.GetComponent<MeshRenderer>().sortingLayerName = "UI";
         text_DeckCount.GetComponent<MeshRenderer>().sortingOrder = 0;
         text_DeckCount.GetComponent<TMP_Text>().raycastTarget = false;
-
-        selectCard.GetComponent<S_DeckCard>().CardInfo = null;
 
         // 싱글턴
         if (instance == null)
@@ -111,117 +62,97 @@ public class S_DeckInfoSystem : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        InitPos();
-
-        selectCard.GetComponent<S_DeckCard>().OriginPRS = new PRS(selectCard.transform.localPosition, Vector3.zero, new Vector3(1.35f, 1.35f, 1.35f));
-        selectCard.GetComponent<S_DeckCard>().OriginOrder = 10;
-        selectCard.GetComponent<S_DeckCard>().SetOrder(selectCard.GetComponent<S_DeckCard>().OriginOrder);
-    }
-
-    void InitPos()
-    {
-        panel_DeterminationHitBtnAndCancelBtnBase.GetComponent<RectTransform>().anchoredPosition = deckInfoBtnsHidePos;
-        panel_DeterminationHitBtnAndCancelBtnBase.SetActive(false);
-        panel_ViewDeckInfoBtnBase.GetComponent<RectTransform>().anchoredPosition = viewDeckInfoBtnHidePos;
-        panel_ViewDeckInfoBtnBase.SetActive(false);
-        sprite_BlackBackgroundByDeckInfo.DOFade(0f, 0f);
-    }
-    public void AppearViewDeckInfoBtn()
-    {
-        panel_ViewDeckInfoBtnBase.SetActive(true);
-
-        // 두트윈으로 등장 애니메이션 주기
-        panel_ViewDeckInfoBtnBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-        panel_ViewDeckInfoBtnBase.GetComponent<RectTransform>().DOAnchorPos(viewDeckInfoBtnOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-    }
-    public void DisappearViewDeckInfoBtn()
-    {
-        panel_ViewDeckInfoBtnBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-        panel_ViewDeckInfoBtnBase.GetComponent<RectTransform>().DOAnchorPos(viewDeckInfoBtnHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
-            .OnComplete(() => panel_ViewDeckInfoBtnBase.SetActive(false));
     }
 
     public void AddDeck(S_Card card) // 덱에 카드 추가하기
     {
         GameObject go = Instantiate(deckCard); // 덱 카드 프리팹 생성
 
-        go.GetComponent<S_DeckCard>().SetCardInfo(card); // 카드 정보 설정
-        deckCardObjects.Add(go); // 스택 카드 오브젝트에 추가
+        go.GetComponent<S_DeckCardObj>().SetCardInfo(card); // 카드 정보 설정
+        deckCardObjs.Add(go); // 스택 카드 오브젝트에 추가
 
-        // 문양에 따라 베이스 정해주기
-        switch (card.Suit)
-        {
-            case S_CardSuitEnum.Spade:
-                go.transform.SetParent(spadeDeckBase.transform, true);
-                spadeCards.Add(go);
-                AlignmentStackCard(spadeCards);
-                break;
-            case S_CardSuitEnum.Heart:
-                go.transform.SetParent(heartDeckBase.transform, true);
-                heartCards.Add(go);
-                AlignmentStackCard(heartCards);
-                break;
-            case S_CardSuitEnum.Diamond:
-                go.transform.SetParent(diamondDeckBase.transform, true);
-                diamondCards.Add(go);
-                AlignmentStackCard(diamondCards);
-                break;
-            case S_CardSuitEnum.Clover:
-                go.transform.SetParent(cloverDeckBase.transform, true);
-                cloverCards.Add(go);
-                AlignmentStackCard(cloverCards);
-                break;
-        }
+        AlignmentDeckCards();
     }
-    void AlignmentStackCard(List<GameObject> suitCards) // 카드를 정렬하기
+    void AlignmentDeckCards() // 카드를 정렬하기
     {
-        List<PRS> originCardPRS = SetStackCardPos(suitCards.Count);
+        List<PRS> originCardPRS = SetDeckCardsPos(deckCardObjs.Count);
         List<Task> tweenTask = new List<Task>();
 
-        suitCards.Sort((a, b) => a.GetComponent<S_DeckCard>().CardInfo.Number.CompareTo(b.GetComponent<S_DeckCard>().CardInfo.Number));
-
-        for (int i = 0; i < suitCards.Count; i++)
+        switch (orderState)
         {
-            // 카드 위치 설정
-            suitCards[i].GetComponent<S_DeckCard>().OriginPRS = originCardPRS[i];
+            case S_OrderStateEnum.GetOrder:
+                List<S_Card> decks = S_PlayerCard.Instance.GetOriginPlayerDeckCards();
+                deckCardObjs.Sort((a, b) =>
+                {
+                    var aCard = a.GetComponent<S_DeckCardObj>().CardInfo;
+                    var bCard = b.GetComponent<S_DeckCardObj>().CardInfo;
+
+                    int aIndex = decks.IndexOf(aCard);
+                    int bIndex = decks.IndexOf(bCard);
+
+                    return aIndex.CompareTo(bIndex);
+                });
+                break;
+            case S_OrderStateEnum.WeightOrder:
+                deckCardObjs.Sort((a, b) => a.GetComponent<S_DeckCardObj>().CardInfo.Num.CompareTo(b.GetComponent<S_DeckCardObj>().CardInfo.Num));
+                break;
+            case S_OrderStateEnum.TypeOrder:
+                // 우선 CardTypeEnum 순서 정해서 인덱스로 비교할 거임
+                List<S_CardTypeEnum> order = new() { S_CardTypeEnum.Str, S_CardTypeEnum.Mind, S_CardTypeEnum.Luck, S_CardTypeEnum.Common };
+
+                deckCardObjs.Sort((a, b) =>
+                {
+                    var aCard = a.GetComponent<S_DeckCardObj>().CardInfo;
+                    var bCard = b.GetComponent<S_DeckCardObj>().CardInfo;
+
+                    int aTypeOrder = order.IndexOf(aCard.CardType);
+                    int bTypeOrder = order.IndexOf(bCard.CardType);
+
+                    // CardType 순서로 먼저 비교
+                    int typeCompare = aTypeOrder.CompareTo(bTypeOrder);
+
+                    if (typeCompare != 0)
+                    {
+                        return typeCompare;  // 타입 순서 다르면 그 순서대로
+                    }
+
+                    return aCard.Num.CompareTo(bCard.Num); // CardType 같으면 Num 기준 오름차순 정렬
+                });
+                break;
+        }
+
+        for (int i = 0; i < deckCardObjs.Count; i++)
+        {
+            // PRS 설정
+            deckCardObjs[i].GetComponent<S_DeckCardObj>().OriginPRS = originCardPRS[i];
 
             // 소팅오더 설정
-            suitCards[i].GetComponent<S_DeckCard>().OriginOrder = (i + 1) * 10;
-            suitCards[i].GetComponent<S_DeckCard>().SetOrder(suitCards[i].GetComponent<S_DeckCard>().OriginOrder);
+            deckCardObjs[i].GetComponent<S_DeckCardObj>().OriginOrder = (i + 1) * 10;
+            deckCardObjs[i].GetComponent<S_DeckCardObj>().SetOrder(deckCardObjs[i].GetComponent<S_DeckCardObj>().OriginOrder);
 
             // 카드의 위치 설정
-            suitCards[i].GetComponent<Transform>().localPosition = suitCards[i].GetComponent<S_DeckCard>().OriginPRS.Pos;
-            suitCards[i].transform.DOLocalRotate(suitCards[i].GetComponent<S_DeckCard>().OriginPRS.Rot, 0);
-            suitCards[i].GetComponent<Transform>().localScale = suitCards[i].GetComponent<S_DeckCard>().OriginPRS.Scale;
+            deckCardObjs[i].transform.DOKill();
+            deckCardObjs[i].transform.DOLocalMove(deckCardObjs[i].GetComponent<S_DeckCardObj>().OriginPRS.Pos, S_EffectActivator.Instance.GetHitAndSortCardsTime()).SetEase(Ease.OutQuart);
+            deckCardObjs[i].transform.DOLocalRotate(deckCardObjs[i].GetComponent<S_DeckCardObj>().OriginPRS.Rot, S_EffectActivator.Instance.GetHitAndSortCardsTime()).SetEase(Ease.OutQuart);
+            deckCardObjs[i].transform.DOScale(deckCardObjs[i].GetComponent<S_DeckCardObj>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime()).SetEase(Ease.OutQuart);
         }
 
         UpdateDeckCardsState();
     }
-    List<PRS> SetStackCardPos(int cardCount) // 카드 위치 설정하는 메서드
+    List<PRS> SetDeckCardsPos(int cardCount) // 카드 위치 설정하는 메서드
     {
-        float[] lerps = new float[cardCount];
         List<PRS> results = new List<PRS>(cardCount);
-
-        if (cardCount == 1)
-        {
-            lerps[0] = 0;
-        }
-        else if (cardCount > 1)
-        {
-            float interval = 1f / (cardCount - 1);
-            for (int i = 0; i < cardCount; i++)
-            {
-                lerps[i] = interval * i;
-            }
-        }
+        float interval = cardCount == 1 ? 0 : 1f / (cardCount - 1);
 
         for (int i = 0; i < cardCount; i++)
         {
-            Vector3 pos = Vector3.Lerp(startPoint, endPoint, lerps[i]);
+            Vector3 pos = Vector3.Lerp(DECK_BASE_START_POS, DECK_BASE_END_POS, interval * i);
             pos = new Vector3(pos.x, pos.y, i * STACK_Z_VALUE);
+
             Vector3 rot = Vector3.zero;
-            Vector3 scale = new Vector3(1.35f, 1.35f, 1.35f);
+
+            Vector3 scale = STACK_CARD_ORIGIN_SCALE;
+
             results.Add(new PRS(pos, rot, scale));
         }
 
@@ -229,180 +160,78 @@ public class S_DeckInfoSystem : MonoBehaviour
     }
     public void RemoveDeck(S_Card card) // 덱에서 카드 제거하기
     {
-        GameObject remove = null;
-        foreach (GameObject go in deckCardObjects)
+        GameObject removeObj = null;
+        foreach (GameObject go in deckCardObjs)
         {
-            if (go.GetComponent<S_DeckCard>().CardInfo.Equals(card))
+            if (go.GetComponent<S_DeckCardObj>().CardInfo == card)
             {
-                remove = go;
+                removeObj = go;
                 break;
             }
         }
 
-        deckCardObjects.Remove(remove);
-        switch (card.Suit)
-        {
-            case S_CardSuitEnum.Spade:
-                spadeCards.Remove(remove);
-                AlignmentStackCard(spadeCards);
-                break;
-            case S_CardSuitEnum.Heart:
-                heartCards.Remove(remove);
-                AlignmentStackCard(heartCards);
-                break;
-            case S_CardSuitEnum.Diamond:
-                diamondCards.Remove(remove);
-                AlignmentStackCard(diamondCards);
-                break;
-            case S_CardSuitEnum.Clover:
-                cloverCards.Remove(remove);
-                AlignmentStackCard(cloverCards);
-                break;
-        }
+        deckCardObjs.Remove(removeObj);
+        Destroy(removeObj);
 
-        Destroy(remove);
-
-        UpdateDeckCardsState();
+        AlignmentDeckCards();
     }
-
     #region 버튼 함수
-    public async void ClickViewDeckInfoBtn() // Open 덱 보기 버튼 함수
+    public async void ClickViewDeckSprite() // 덱 보기 스프라이트 클릭 시
     {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit)
+        if (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.Hit))
         {
             S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
 
-            await OpenDeckInfoCommonProperty(false);
+            // 인게임 인터페이스를 숨기기(히트 버튼)
+            S_HitBtnSystem.Instance.DisappearHitBtn();
 
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.OnDeckInfo;
+            await OpenDeckInfoCommonProperty(S_GameFlowStateEnum.Hit);
         }
-        else if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Store)
+        else if (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.Store))
         {
             S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
 
-            // Store UI 세팅
-            S_StoreInfoSystem.Instance.DisappearDaedalusImage();
+            // Store UI 퇴장
             S_StoreInfoSystem.Instance.DisappearRefreshAndExitBtn();
-            S_StoreInfoSystem.Instance.DisappearSelectCardOrSkillText();
+
+            // 덱 열기
+            await OpenDeckInfoCommonProperty(S_GameFlowStateEnum.Store);
+        }
+        else if (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.StoreBuying))
+        {
+            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+
+            // Store UI 퇴장
+            S_StoreInfoSystem.Instance.DisappearRefreshAndExitBtn();
+            S_StoreInfoSystem.Instance.DisappearSelectCardOrTrinketText();
             S_StoreInfoSystem.Instance.DisappearBlackBackground();
 
             // 덱 열기
-            await OpenDeckInfoCommonProperty(false);
-
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.Store;
+            await OpenDeckInfoCommonProperty(S_GameFlowStateEnum.StoreBuying);
         }
     }
-    public async void ClickDeterminationHitBtn() // Open 본 게임 화면의 의지 히트 버튼 함수
+    public async void ClickCloseDeckInfoBtn() // 덱 보기 닫을 때 호출
     {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit && !S_PlayerStat.Instance.IsBurst && S_PlayerStat.Instance.CanUseDetermination() && S_PlayerCard.Instance.GetPreDeckCards().Count > 0 && S_PlayerCard.Instance.GetPreStackCards().Count <= 48)
+        if (prevState == S_GameFlowStateEnum.Hit)
         {
             S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
 
-            await OpenDeckInfoCommonProperty(true);
-
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.OnDeckInfo;
-        }
-        else if (S_GameFlowManager.Instance.GameFlowState != S_GameFlowStateEnum.Hit)
-        {
-
-        }
-        else if (S_PlayerStat.Instance.IsBurst)
-        {
-            S_InGameUISystem.Instance.CreateLog("버스트 시엔 의지 히트도 할 수 없다는 것이네~!");
-        }
-        else if (!S_PlayerStat.Instance.CanUseDetermination())
-        {
-            S_InGameUISystem.Instance.CreateLog("의지가 부족하군.");
-        }
-        else if (S_PlayerCard.Instance.GetPreDeckCards().Count <= 0)
-        {
-            S_InGameUISystem.Instance.CreateLog("덱에 카드가 없어.");
-        }
-        else if (S_PlayerCard.Instance.GetPreStackCards().Count > 48)
-        {
-            S_InGameUISystem.Instance.CreateLog("더 이상 스택에 카드를 낼 수 없습니다. 최대 장수 : 48장");
-        }
-    }
-    public async void ClickDecideDeterminationHitCardBtn() // Close. 의지 히트할 카드를 결정하는 버튼 함수
-    {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.OnDeckInfo && S_PlayerStat.Instance.CanUseDetermination())
-        {
-            if (isSelect)
-            {
-                // 히트 시 의지 차감
-                S_PlayerStat.Instance.UseDetermination();
-
-                // 추가 UI 등장(적과 히트 버튼)
-                S_FoeInfoSystem.Instance.AppearUIFoe();
-                S_HitBtnSystem.Instance.AppearHitBtn();
-
-                // 카메라 이동
-                Camera.main.transform.DOMove(S_GameFlowManager.InGameCameraPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-                Camera.main.transform.DORotate(S_GameFlowManager.InGameCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-
-                // 의지 히트 시 사용되는 selectCard 오브젝트 비활성화하고 선택 여부도 끄기
-                selectCard.SetActive(false);
-                isSelect = false;
-
-                // 덱 정보 닫기
-                await CloseDeckInfoCommonProperty();
-
-                // 카드 내기
-                await S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(selectCard.GetComponent<S_DeckCard>().CardInfo, S_CardOrderTypeEnum.BasicHit);
-
-                // 히트 카드 진행
-                if (S_GameFlowManager.Instance.GetCardOrderQueueCount() <= 1)
-                {
-                    await S_GameFlowManager.Instance.StartHittingCard();
-                }
-            }
-            else
-            {
-                S_InGameUISystem.Instance.CreateLog("의지 히트할 카드를 선택해.");
-            }
-        }
-    }
-    public async void ClickCloseDeckInfoBtn() // Close 덱 정보나 의지 히트 취소할 때 호출
-    {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.OnDeckInfo)
-        {
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
-
-            // 추가 UI 등장(적과 히트 버튼)
-            S_FoeInfoSystem.Instance.AppearUIFoe();
+            // 시련 중인 UI 재등장(히트 버튼)
             S_HitBtnSystem.Instance.AppearHitBtn();
 
             // 카메라 이동
             Camera.main.transform.DOMove(S_GameFlowManager.InGameCameraPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
             Camera.main.transform.DORotate(S_GameFlowManager.InGameCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
 
-            // 의지 히트 시 사용되는 selectCard 오브젝트 비활성화하고 선택 여부도 끄기
-            selectCard.SetActive(false);
-            isSelect = false;
-
             // 덱 정보 닫기
             await CloseDeckInfoCommonProperty();
-
-            // 다시 Hit로 변환
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.Hit;
         }
-        else if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Store)
+        else if (prevState == S_GameFlowStateEnum.Store)
         {
             S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
 
-            // 상점 UI 재정비
-            S_StoreInfoSystem.Instance.AppearDaedalusImage();
+            // 상점 UI 재등장
             S_StoreInfoSystem.Instance.AppearRefreshAndExitBtn();
-            if (S_StoreInfoSystem.Instance.BuiedProduct != S_ProductInfoEnum.None) // 구매 중인 상품이 있는 경우
-            {
-                S_StoreInfoSystem.Instance.AppearSelectCardOrSkillText(false);
-                S_StoreInfoSystem.Instance.AppearBlackBackground();
-            }
-            else // 없는 경우
-            {
-                S_StoreInfoSystem.Instance.DisappearSelectCardOrSkillText();
-                S_StoreInfoSystem.Instance.DisappearBlackBackground();
-            }
 
             // 카메라 이동
             Camera.main.transform.DOMove(S_GameFlowManager.StoreCameraPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
@@ -410,271 +239,120 @@ public class S_DeckInfoSystem : MonoBehaviour
 
             // 덱 정보 닫기
             await CloseDeckInfoCommonProperty();
-
-            // 다시 Store로 변환
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.Store;
         }
-        else if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.StoreByDeckInfo)
+        else if (prevState == S_GameFlowStateEnum.StoreBuying)
         {
-            S_StoreInfoSystem.Instance.DecideSelectCard();
+            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+
+            // 상점 UI 재등장
+            S_StoreInfoSystem.Instance.AppearRefreshAndExitBtn();
+            S_StoreInfoSystem.Instance.AppearSelectCardOrTrinketText(false);
+            S_StoreInfoSystem.Instance.AppearBlackBackground();
+
+            // 카메라 이동
+            Camera.main.transform.DOMove(S_GameFlowManager.StoreCameraPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+            Camera.main.transform.DORotate(S_GameFlowManager.StoreCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+
+            // 덱 정보 닫기
+            await CloseDeckInfoCommonProperty();
         }
     }
-    public async Task OpenDeckInfoByStore()
+    public void ClickGetOrderBtn() // 획득 순 정렬
     {
-        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+        orderState = S_OrderStateEnum.GetOrder;
 
-        // 상점 UI 설정
-        S_StoreInfoSystem.Instance.DisappearDaedalusImage();
-        S_StoreInfoSystem.Instance.DisappearProductsBase();
-        S_StoreInfoSystem.Instance.DisappearRefreshAndExitBtn();
-        S_StoreInfoSystem.Instance.AppearSelectCardOrSkillText(true);
-        S_StoreInfoSystem.Instance.DisappearBlackBackground();
-
-        text_CloseBtn.text = "선택";
-
-        // 덱 정보 UI 설정
-        await OpenDeckInfoCommonProperty(false, true); // TODO : 닫기 버튼에 넣어놨다. 나중에 버튼 Text 바꾸는거만 넣자
-
-        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.StoreByDeckInfo;
+        AlignmentDeckCards();
     }
-    public async Task ClosetDeckInfoByStore()
+    public void ClickWeightOrderBtn() // 무게 순 정렬
     {
-        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+        orderState = S_OrderStateEnum.WeightOrder;
 
-        // 상점 UI 설정
-        S_StoreInfoSystem.Instance.AppearDaedalusImage();
-        S_StoreInfoSystem.Instance.AppearProductsBase();
-        S_StoreInfoSystem.Instance.AppearRefreshAndExitBtn();
-        S_StoreInfoSystem.Instance.DisappearSelectCardOrSkillText();
-        S_StoreInfoSystem.Instance.DisappearBlackBackground();
-
-        // 카메라 이동
-        Camera.main.transform.DOMove(S_GameFlowManager.StoreCameraPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-        Camera.main.transform.DORotate(S_GameFlowManager.StoreCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-
-        text_CloseBtn.text = "닫기";
-
-        // 덱 정보 닫기
-        await CloseDeckInfoCommonProperty();
-
-        // 다시 Store로 변환
-        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.Store;
+        AlignmentDeckCards();
     }
-    #endregion
-    #region 의지 히트 시 호출되는 함수
-    PRS selectCardPRS;
-    public void SelectCardByDeterminationHit(S_Card card)
+    public void ClickTypeOrderBtn() // 타입 순 정렬
     {
-        if (isDeterminationHit)
-        {
-            S_DeckCard deckCardObject = selectCard.GetComponent<S_DeckCard>();
-            S_Card deckCard = deckCardObject.CardInfo;
+        orderState = S_OrderStateEnum.TypeOrder;
 
-            if (deckCard == card)
-            {
-                // 취소
-                isSelect = false;
-                deckCardObject.CardInfo = null;
-                selectCard.SetActive(false);
-
-                deckCardObject.BackToOriginPRSByDeterminationHit();
-            }
-            else
-            {
-                // 선택
-                isSelect = true;
-                deckCardObject.CardInfo = card;
-                deckCardObject.SetCardInfo(card);
-
-                if (!selectCard.activeInHierarchy)
-                {
-                    selectCard.SetActive(true);
-                }
-            }
-        }
+        AlignmentDeckCards();
     }
     #endregion
     #region 보조 함수
     public void UpdateDeckCardsState() // 저주, 덱에 없는 상태, 카드의 개수 현황 업데이트
     {
         // InDeck과 Cursed 업데이트
-        foreach (GameObject go in deckCardObjects)
+        foreach (GameObject go in deckCardObjs)
         {
-            go.GetComponent<S_DeckCard>().UpdateCardState();
+            go.GetComponent<S_DeckCardObj>().UpdateCardState();
         }
 
         // 텍스트 업데이트
-        int spadeC = 0;
-        foreach (GameObject go in spadeCards)
-        {
-            if (go.GetComponent<S_DeckCard>().CardInfo.IsInDeck)
-            {
-                spadeC++;
-            }
-        }
-        text_SpadeCount.GetComponent<TMP_Text>().text = $"{spadeC} / {spadeCards.Count}";
-        int heartC = 0;
-        foreach (GameObject go in heartCards)
-        {
-            if (go.GetComponent<S_DeckCard>().CardInfo.IsInDeck)
-            {
-                heartC++;
-            }
-        }
-        text_HeartCount.GetComponent<TMP_Text>().text = $"{heartC} / {heartCards.Count}";
-        int diamondC = 0;
-        foreach (GameObject go in diamondCards)
-        {
-            if (go.GetComponent<S_DeckCard>().CardInfo.IsInDeck)
-            {
-                diamondC++;
-            }
-        }
-        text_DiamondCount.GetComponent<TMP_Text>().text = $"{diamondC} / {diamondCards.Count}";
-        int cloverC = 0;
-        foreach (GameObject go in cloverCards)
-        {
-            if (go.GetComponent<S_DeckCard>().CardInfo.IsInDeck)
-            {
-                cloverC++;
-            }
-        }
-        text_CloverCount.GetComponent<TMP_Text>().text = $"{cloverC} / {cloverCards.Count}";
+        text_DeckCount.GetComponent<TMP_Text>().text = $"{S_PlayerCard.Instance.GetDeckCards().Count} / {S_PlayerCard.Instance.GetOriginPlayerDeckCards().Count}";
 
-        text_ExclusionCount.GetComponent<TMP_Text>().text = $"제외된 카드 개수 : {S_PlayerCard.Instance.GetPreExclusionTotalCards().Count}";
-        text_StackCount.GetComponent<TMP_Text>().text = $"스택에 있는 카드 개수 : {S_PlayerCard.Instance.GetPreStackCards().Count}";
-        text_DeckCount.GetComponent<TMP_Text>().text = $"덱에 있는 카드 개수 : {S_PlayerCard.Instance.GetPreDeckCards().Count}";
+        AlignmentDeckCards();
     }
     public void SetDeckCardInfo() // 상점 전용 업데이트
     {
-        foreach (GameObject go in deckCardObjects)
+        foreach (GameObject go in deckCardObjs)
         {
-            go.GetComponent<S_DeckCard>().SetCardInfo(go.GetComponent<S_DeckCard>().CardInfo);
+            go.GetComponent<S_DeckCardObj>().SetCardInfo(go.GetComponent<S_DeckCardObj>().CardInfo); // 변한 카드들을 모두 재설정 해준다.
         }
 
         // 텍스트 업데이트
-        int spadeC = 0;
-        foreach (GameObject go in spadeCards)
-        {
-            if (go.GetComponent<S_DeckCard>().CardInfo.IsInDeck)
-            {
-                spadeC++;
-            }
-        }
-        text_SpadeCount.GetComponent<TMP_Text>().text = $"{spadeC} / {spadeCards.Count}";
-        int heartC = 0;
-        foreach (GameObject go in heartCards)
-        {
-            if (go.GetComponent<S_DeckCard>().CardInfo.IsInDeck)
-            {
-                heartC++;
-            }
-        }
-        text_HeartCount.GetComponent<TMP_Text>().text = $"{heartC} / {heartCards.Count}";
-        int diamondC = 0;
-        foreach (GameObject go in diamondCards)
-        {
-            if (go.GetComponent<S_DeckCard>().CardInfo.IsInDeck)
-            {
-                diamondC++;
-            }
-        }
-        text_DiamondCount.GetComponent<TMP_Text>().text = $"{diamondC} / {diamondCards.Count}";
-        int cloverC = 0;
-        foreach (GameObject go in cloverCards)
-        {
-            if (go.GetComponent<S_DeckCard>().CardInfo.IsInDeck)
-            {
-                cloverC++;
-            }
-        }
-        text_CloverCount.GetComponent<TMP_Text>().text = $"{cloverC} / {cloverCards.Count}";
+        text_DeckCount.GetComponent<TMP_Text>().text = $"{ S_PlayerCard.Instance.GetDeckCards().Count } / { S_PlayerCard.Instance.GetOriginPlayerDeckCards().Count }";
 
-        text_ExclusionCount.GetComponent<TMP_Text>().text = $"제외된 카드 개수 : {S_PlayerCard.Instance.GetPreExclusionTotalCards().Count}";
-        text_StackCount.GetComponent<TMP_Text>().text = $"스택에 있는 카드 개수 : {S_PlayerCard.Instance.GetPreStackCards().Count}";
-        text_DeckCount.GetComponent<TMP_Text>().text = $"덱에 있는 카드 개수 : {S_PlayerCard.Instance.GetPreDeckCards().Count}";
-
-        AlignmentStackCard(spadeCards);
-        AlignmentStackCard(heartCards);
-        AlignmentStackCard(diamondCards);
-        AlignmentStackCard(cloverCards);
+        AlignmentDeckCards();
     }
-    // 공통되는 덱 열고 닫는 로직
-    public async Task OpenDeckInfoCommonProperty(bool isDetermination, bool needBtn = true)
+    public async Task OpenDeckInfoCommonProperty(S_GameFlowStateEnum prev)
     {
-        // 인게임 인터페이스를 숨기기(피조물, 전리품, 전투 능력치, 히트 버튼, 플레이어 이미지, 덱 정보 버튼, 스택에 정렬하는 버튼)
-        S_FoeInfoSystem.Instance.DisappearUIFoe();
-        S_SkillInfoSystem.Instance.DisappearSkill();
-        S_StatInfoSystem.Instance.DisappearBattleStat();
-        S_HitBtnSystem.Instance.DisappearHitBtn();
-        S_DeckInfoSystem.Instance.DisappearViewDeckInfoBtn();
-        S_StackInfoSystem.Instance.DisappearStackInfoBtn();
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+
+        // 덱에 오기 전 State를 저장
+        prevState = prev;
 
         // 덱 정보에서 사용할 버튼 등장
-        isDeterminationHit = isDetermination;
-        if (needBtn)
-        {
-            if (isDetermination)
-            {
-                panel_DeterminationHitBtnAndCancelBtnBase.SetActive(true);
-                panel_DeterminationHitBtnAndCancelBtnBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-                panel_DeterminationHitBtnAndCancelBtnBase.GetComponent<RectTransform>().DOAnchorPos(deckInfoBtnsOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-                panel_CloseDeckBtnBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-                panel_CloseDeckBtnBase.GetComponent<RectTransform>().DOAnchorPos(deckInfoBtnsHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
-                    .OnComplete(() => panel_CloseDeckBtnBase.SetActive(false));
-            }
-            else
-            {
-                panel_CloseDeckBtnBase.SetActive(true);
-                panel_CloseDeckBtnBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-                panel_CloseDeckBtnBase.GetComponent<RectTransform>().DOAnchorPos(deckInfoBtnsOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-                panel_DeterminationHitBtnAndCancelBtnBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-                panel_DeterminationHitBtnAndCancelBtnBase.GetComponent<RectTransform>().DOAnchorPos(deckInfoBtnsHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
-                    .OnComplete(() => panel_DeterminationHitBtnAndCancelBtnBase.SetActive(false));
-            }
-        }
+        panel_DeckBtnBase.SetActive(true);
+        panel_DeckBtnBase.GetComponent<RectTransform>().DOKill();
+        panel_DeckBtnBase.GetComponent<RectTransform>().DOAnchorPos(DECK_BTN_ORIGIN_POS, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
 
         // 살짝 어두워지게 만드는 효과
-        sprite_BlackBackgroundByDeckInfo.DOFade(0.7f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        sprite_BlackBackgroundByDeckInfo.DOKill();
+        sprite_BlackBackgroundByDeckInfo.DOFade(0.51f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
 
         // 카메라 이동
         Camera.main.transform.DOMove(S_GameFlowManager.DeckCameraPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
         Camera.main.transform.DORotate(S_GameFlowManager.DeckCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
 
-        // UI 이동 대기
-        await Task.Delay(Mathf.RoundToInt(S_GameFlowManager.PANEL_APPEAR_TIME * 1000));
+        // 카메라 이동 대기
+        await S_GameFlowManager.WaitPanelAppearTimeAsync();
+
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.Deck;
     }
     public async Task CloseDeckInfoCommonProperty()
     {
-        // 기본적인 공용 인터페이스 등장(전리품, 전투 능력치, 덱 보기 버튼, 스택에 정렬하는 버튼)
-        S_SkillInfoSystem.Instance.AppearSkill();
-        S_StatInfoSystem.Instance.AppearBattleStat();
-        S_DeckInfoSystem.Instance.AppearViewDeckInfoBtn();
-        S_StackInfoSystem.Instance.AppearStackInfoBtn();
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
 
         // 덱 버튼 퇴장
-        if (isDeterminationHit)
-        {
-            panel_DeterminationHitBtnAndCancelBtnBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-            panel_DeterminationHitBtnAndCancelBtnBase.GetComponent<RectTransform>().DOAnchorPos(deckInfoBtnsHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
-                .OnComplete(() => panel_DeterminationHitBtnAndCancelBtnBase.SetActive(false));
-        }
-        else
-        {
-            panel_CloseDeckBtnBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-            panel_CloseDeckBtnBase.GetComponent<RectTransform>().DOAnchorPos(deckInfoBtnsHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
-                .OnComplete(() => panel_CloseDeckBtnBase.SetActive(false));
-        }
+        panel_DeckBtnBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
+        panel_DeckBtnBase.GetComponent<RectTransform>().DOAnchorPos(DECK_BTN_HIDE_POS, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
+            .OnComplete(() => panel_DeckBtnBase.SetActive(false));
 
         // 어두워진걸 다시 풀어주기
         sprite_BlackBackgroundByDeckInfo.DOKill();
         sprite_BlackBackgroundByDeckInfo.DOFade(0f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
 
-        await Task.Delay(Mathf.RoundToInt(S_GameFlowManager.PANEL_APPEAR_TIME * 1000));
+        // UI 연출 대기
+        await S_GameFlowManager.WaitPanelAppearTimeAsync();
+
+        S_GameFlowManager.Instance.GameFlowState = prevState;
     }
-    public List<GameObject> GetDeckCardObjects()
+    public List<GameObject> GetDeckCardObjs()
     {
-        return deckCardObjects.ToList();
+        return deckCardObjs.ToList();
     }
     #endregion
+}
+
+public enum S_OrderStateEnum
+{
+    None, GetOrder, WeightOrder, TypeOrder
 }

@@ -21,12 +21,13 @@ public class S_StatInfoSystem : MonoBehaviour
     TMP_Text text_CurrentLuck;
 
     GameObject image_BurstStateBase;
-    GameObject image_CleanHitStateBase;
+    GameObject image_PerfectStateBase;
     GameObject image_DelusionStateBase;
     GameObject image_FirstStateBase;
     TMP_Text text_FirstState;
     GameObject image_ExpansionStateBase;
     TMP_Text text_ExpansionState;
+    GameObject image_ColdBloodStateBase;
 
     [Header("UI")]
     Vector2 basicStatHidePos = new Vector2(0, -100);
@@ -63,12 +64,13 @@ public class S_StatInfoSystem : MonoBehaviour
         text_CurrentLuck = Array.Find(texts, c => c.gameObject.name.Equals("Text_CurrentLuck"));
 
         image_BurstStateBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_BurstStateBase")).gameObject;
-        image_CleanHitStateBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_CleanHitStateBase")).gameObject;
+        image_PerfectStateBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_PerfectStateBase")).gameObject;
         image_DelusionStateBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_DelusionStateBase")).gameObject;
         image_FirstStateBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_FirstStateBase")).gameObject;
         text_FirstState = Array.Find(texts, c => c.gameObject.name.Equals("Text_FirstState"));
         image_ExpansionStateBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_ExpansionStateBase")).gameObject;
         text_ExpansionState = Array.Find(texts, c => c.gameObject.name.Equals("Text_ExpansionState"));
+        image_ColdBloodStateBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_ColdBloodStateBase")).gameObject;
 
         // 싱글턴
         if (instance == null)
@@ -82,10 +84,10 @@ public class S_StatInfoSystem : MonoBehaviour
     }
     void Start()
     {
-        InitPos();
+        InitText();
     }
 
-    public void InitPos()
+    public void InitText()
     {
         text_Health.text = $"체력 : {S_PlayerStat.Instance.GetCurrentHealth()} / {S_PlayerStat.Instance.MaxHealth}";
         text_Determination.text = $"의지 : {S_PlayerStat.Instance.GetCurrentDetermination()} / {S_PlayerStat.Instance.MaxDetermination}";
@@ -93,31 +95,16 @@ public class S_StatInfoSystem : MonoBehaviour
         text_CurrentLimit.text = $"한계 : {S_PlayerStat.Instance.CurrentLimit.ToString()}";
         text_CurrentTrial.text = $"시련 : {S_GameFlowManager.Instance.CurrentTrial.ToString()}";
         image_StackSumBar.DOFillAmount(0, 0);
-        text_StackSumValue.text = $"{S_PlayerStat.Instance.StackSum} / {S_PlayerStat.Instance.CurrentLimit}";
+        text_StackSumValue.text = $"{S_PlayerStat.Instance.CurrentWeight} / {S_PlayerStat.Instance.CurrentLimit}";
 
-        text_CurrentStrength.text = S_PlayerStat.Instance.CurrentStrength.ToString();
+        text_CurrentStrength.text = S_PlayerStat.Instance.CurrentStr.ToString();
         text_CurrentMind.text = S_PlayerStat.Instance.CurrentMind.ToString();
         text_CurrentLuck.text = S_PlayerStat.Instance.CurrentLuck.ToString();
 
         image_BurstStateBase.SetActive(false);
-        image_CleanHitStateBase.SetActive(false);
+        image_PerfectStateBase.SetActive(false);
         image_DelusionStateBase.SetActive(false);
         image_FirstStateBase.SetActive(false);
-    }
-    public void AppearBattleStat() // 패널 등장
-    {
-        // 패널 위치 초기화
-        panel_BattleStatInfoBase.SetActive(true);
-
-        // 두트윈으로 등장 애니메이션 주기
-        panel_BattleStatInfoBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-        panel_BattleStatInfoBase.GetComponent<RectTransform>().DOAnchorPos(battleStatOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-    }
-    public void DisappearBattleStat() // 패널 퇴장
-    {
-        panel_BattleStatInfoBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-        panel_BattleStatInfoBase.GetComponent<RectTransform>().DOAnchorPos(battleStatHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
-            .OnComplete(() => panel_BattleStatInfoBase.SetActive(false));
     }
     public void ChangeCurrentTrialText()
     {
@@ -144,31 +131,31 @@ public class S_StatInfoSystem : MonoBehaviour
         }
 
         // 전투 능력치
-        ChangeStatVFXTween(int.Parse(text_CurrentStrength.text), S_PlayerStat.Instance.CurrentStrength, text_CurrentStrength);
+        ChangeStatVFXTween(int.Parse(text_CurrentStrength.text), S_PlayerStat.Instance.CurrentStr, text_CurrentStrength);
         ChangeStatVFXTween(int.Parse(text_CurrentMind.text), S_PlayerStat.Instance.CurrentMind, text_CurrentMind);
         ChangeStatVFXTween(int.Parse(text_CurrentLuck.text), S_PlayerStat.Instance.CurrentLuck, text_CurrentLuck);
 
-        // 숫자 합
-        ChangeStackOrLimitSumValueVFX();
+        // 무게 합
+        ChangeWeightValueVFX();
     }
-    public void ChangeStackOrLimitSumValueVFX()
+    public void ChangeWeightValueVFX()
     {
-        if (S_PlayerStat.Instance.StackSum != int.Parse(text_StackSumValue.text.Split('/')[0].Trim()))
+        if (S_PlayerStat.Instance.CurrentWeight != int.Parse(text_StackSumValue.text.Split('/')[0].Trim()))
         {
-            image_StackSumBar.DOFillAmount((float)S_PlayerStat.Instance.StackSum / S_PlayerStat.Instance.CurrentLimit, S_EffectActivator.Instance.GetEffectLifeTime() / 5 * 4).SetEase(Ease.OutQuart);
-            ChangeStackSumValueVFXTween(int.Parse(text_StackSumValue.text.Split('/')[0].Trim()), S_PlayerStat.Instance.StackSum, text_StackSumValue);
+            image_StackSumBar.DOFillAmount((float)S_PlayerStat.Instance.CurrentWeight / S_PlayerStat.Instance.CurrentLimit, S_EffectActivator.Instance.GetEffectLifeTime() / 5 * 4).SetEase(Ease.OutQuart);
+            ChangeWeightValueVFXTween(int.Parse(text_StackSumValue.text.Split('/')[0].Trim()), S_PlayerStat.Instance.CurrentWeight, text_StackSumValue);
         }
         if (S_PlayerStat.Instance.CurrentLimit != int.Parse(text_StackSumValue.text.Split('/')[1].Trim()))
         {
-            image_StackSumBar.DOFillAmount((float)S_PlayerStat.Instance.StackSum / S_PlayerStat.Instance.CurrentLimit, S_EffectActivator.Instance.GetEffectLifeTime() / 5 * 4).SetEase(Ease.OutQuart);
+            image_StackSumBar.DOFillAmount((float)S_PlayerStat.Instance.CurrentWeight / S_PlayerStat.Instance.CurrentLimit, S_EffectActivator.Instance.GetEffectLifeTime() / 5 * 4).SetEase(Ease.OutQuart);
             ChangeLimitValueVFXTween(int.Parse(text_StackSumValue.text.Split('/')[1].Trim()), S_PlayerStat.Instance.CurrentLimit, text_StackSumValue);
         }
 
-        if (S_PlayerStat.Instance.StackSum == S_PlayerStat.Instance.CurrentLimit)
+        if (S_PlayerStat.Instance.CurrentWeight == S_PlayerStat.Instance.CurrentLimit)
         {
             image_StackSumBar.color = stackSumCleanHitColor;
         }
-        else if (S_PlayerStat.Instance.StackSum > S_PlayerStat.Instance.CurrentLimit)
+        else if (S_PlayerStat.Instance.CurrentWeight > S_PlayerStat.Instance.CurrentLimit)
         {
             image_StackSumBar.color = stackSumBurstColor;
         }
@@ -177,7 +164,7 @@ public class S_StatInfoSystem : MonoBehaviour
             image_StackSumBar.color = stackSumOriginColor;
         }
     }
-    void ChangeStackSumValueVFXTween(int oldValue, int newValue, TMP_Text statText)
+    void ChangeWeightValueVFXTween(int oldValue, int newValue, TMP_Text statText)
     {
         int currentNumber = oldValue;
         DOTween.To
@@ -194,7 +181,7 @@ public class S_StatInfoSystem : MonoBehaviour
         DOTween.To
             (
                 () => currentNumber,
-                x => { currentNumber = x; statText.text = $"{S_PlayerStat.Instance.StackSum} / {currentNumber}"; },
+                x => { currentNumber = x; statText.text = $"{S_PlayerStat.Instance.CurrentWeight} / {currentNumber}"; },
                 newValue,
                 S_EffectActivator.Instance.GetEffectLifeTime() / 5 * 4
             ).SetEase(Ease.OutQuart);
@@ -232,40 +219,13 @@ public class S_StatInfoSystem : MonoBehaviour
                 ).SetEase(Ease.OutQuart);
         }
     }
-    public void ChangeSpecialAbility()  // 버스트, 클린히트, 망상, 우선, 전개
+    public void UpdateSpecialAbility()  // 버스트, 클린히트, 망상, 우선, 전개
     {
         image_BurstStateBase.SetActive(S_PlayerStat.Instance.IsBurst);
-        image_CleanHitStateBase.SetActive(S_PlayerStat.Instance.IsCleanHit);
+        image_PerfectStateBase.SetActive(S_PlayerStat.Instance.IsPerfect);
         image_DelusionStateBase.SetActive(S_PlayerStat.Instance.IsDelusion);
         image_ExpansionStateBase.SetActive(S_PlayerStat.Instance.IsExpansion);
-
-        if (S_PlayerStat.Instance.IsFirst != S_FirstEffectEnum.None)
-        {
-            switch (S_PlayerStat.Instance.IsFirst)
-            {
-                case S_FirstEffectEnum.Spade: text_FirstState.text = $"우선\n스페이드"; break;
-                case S_FirstEffectEnum.Heart: text_FirstState.text = $"우선\n하트"; break;
-                case S_FirstEffectEnum.Diamond: text_FirstState.text = $"우선\n다이아몬드"; break;
-                case S_FirstEffectEnum.Clover: text_FirstState.text = $"우선\n클로버"; break;
-                case S_FirstEffectEnum.LeastSuit: text_FirstState.text = $"우선\n가장적은문양"; break;
-                case S_FirstEffectEnum.One: text_FirstState.text = $"우선\n숫자 1"; break;
-                case S_FirstEffectEnum.Two: text_FirstState.text = $"우선\n숫자 2"; break;
-                case S_FirstEffectEnum.Three: text_FirstState.text = $"우선\n숫자 3"; break;
-                case S_FirstEffectEnum.Four: text_FirstState.text = $"우선\n숫자 4"; break;
-                case S_FirstEffectEnum.Five: text_FirstState.text = $"우선\n숫자 5"; break;
-                case S_FirstEffectEnum.Six: text_FirstState.text = $"우선\n숫자 6"; break;
-                case S_FirstEffectEnum.Seven: text_FirstState.text = $"우선\n숫자 7"; break;
-                case S_FirstEffectEnum.Eight: text_FirstState.text = $"우선\n숫자 8"; break;
-                case S_FirstEffectEnum.Nine: text_FirstState.text = $"우선\n숫자 9"; break;
-                case S_FirstEffectEnum.Ten: text_FirstState.text = $"우선\n숫자 10"; break;
-                case S_FirstEffectEnum.CleanHitNumber: text_FirstState.text = $"우선\n클린히트숫자"; break;
-            }
-
-            image_FirstStateBase.SetActive(true);
-        }
-        else
-        {
-            image_FirstStateBase.SetActive(false);
-        }
+        image_FirstStateBase.SetActive(S_PlayerStat.Instance.IsFirst);
+        image_ColdBloodStateBase.SetActive(S_PlayerStat.Instance.IsColdBlood);
     }
 }

@@ -26,9 +26,9 @@ public class Foe_MorosDoomBringer : S_Foe
     }
     public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        int count = S_PlayerCard.Instance.GetPreStackCards().Count % 3;
+        int count = S_PlayerCard.Instance.GetStackCards().Count % 3;
 
-        if (S_PlayerCard.Instance.GetPreStackCards().Count == 0)
+        if (S_PlayerCard.Instance.GetStackCards().Count == 0)
         {
             ActivatedCount = 0;
         }

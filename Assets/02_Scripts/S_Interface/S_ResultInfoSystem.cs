@@ -101,7 +101,7 @@ public class S_ResultInfoSystem : MonoBehaviour
 
         text_FinalGoldReward.text = "0";
     }
-    public async Task CalcResultGoldAsync(int health, int determination, int omen, int robbery, int greed)
+    public async Task CalcResultGoldAsync(int health, int determination, int omen, int greed)
     {
         int gold = 0;
         GameObject go1 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
@@ -155,31 +155,21 @@ public class S_ResultInfoSystem : MonoBehaviour
         if (omen > 0)
         {
             GameObject go5 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
-            go5.GetComponent<S_ResultBase>().SetResultBase("흉조 카드에 의한 골드", (omen * 2).ToString());
+            go5.GetComponent<S_ResultBase>().SetResultBase("흉조 카드에 의한 골드", (omen * 3).ToString());
             go5.transform.localScale = Vector3.zero;
-            gold += omen * 2;
+            gold += omen * 3;
             ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);
             await go5.transform.DOScale(Vector3.one, RESULT_VFX_TIME).SetEase(Ease.OutBounce).AsyncWaitForCompletion();
         }
 
-        if (robbery > 0)
-        {
-            GameObject go6 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
-            go6.GetComponent<S_ResultBase>().SetResultBase("강도 카드에 의한 골드", (robbery * 2).ToString());
-            go6.transform.localScale = Vector3.zero;
-            gold += robbery * 2;
-            ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);
-            await go6.transform.DOScale(Vector3.one, RESULT_VFX_TIME).SetEase(Ease.OutBounce).AsyncWaitForCompletion();
-        }
-
         if (greed > 0)
         {
-            GameObject go7 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
-            go7.GetComponent<S_ResultBase>().SetResultBase("탐욕 카드에 의한 골드", (greed * 2).ToString());
-            go7.transform.localScale = Vector3.zero;
-            gold += greed * 2;
+            GameObject go6 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
+            go6.GetComponent<S_ResultBase>().SetResultBase("탐욕 카드에 의한 골드", (greed * 3).ToString());
+            go6.transform.localScale = Vector3.zero;
+            gold += greed * 3;
             ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);
-            await go7.transform.DOScale(Vector3.one, RESULT_VFX_TIME).SetEase(Ease.OutBounce).AsyncWaitForCompletion();
+            await go6.transform.DOScale(Vector3.one, RESULT_VFX_TIME).SetEase(Ease.OutBounce).AsyncWaitForCompletion();
         }
     }
     void ChangeGoldVFXTween(int oldValue, int newValue, TMP_Text statText)

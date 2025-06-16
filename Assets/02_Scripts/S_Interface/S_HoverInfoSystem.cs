@@ -105,12 +105,12 @@ public class S_HoverInfoSystem : MonoBehaviour
 
         // 문양과 숫자 영역
         hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.Suit, card.Number);
+        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.Engraving, card.Num);
         hoverInfoCount++;
 
         // 문양과 숫자에 따른 기본 효과 영역
         hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.StatValue, card.Number, card);
+        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.StatValue, card.Num, card);
         hoverInfoCount++;
 
         if (card.IsCursed)
@@ -119,7 +119,7 @@ public class S_HoverInfoSystem : MonoBehaviour
             additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription("저주받음!");
             additiveDescriptionCount++;
         }
-        if (card.IsIllusion)
+        if (card.IsGenerated)
         {
             additiveObjects[additiveDescriptionCount].SetActive(true);
             additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription("생성됨");
@@ -127,13 +127,13 @@ public class S_HoverInfoSystem : MonoBehaviour
         }
 
         // 조건
-        if (card.BasicCondition != S_CardBasicConditionEnum.None)
+        if (card.Engraving != S_EngravingEnum.None)
         {
             hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-            hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.BasicCondition);
+            hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetCursedAndGenDescription(card.Engraving);
             hoverInfoCount++;
             additiveObjects[additiveDescriptionCount].SetActive(true);
-            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(card.BasicCondition);
+            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(card.Engraving);
             additiveDescriptionCount++;
         }
 
@@ -160,13 +160,13 @@ public class S_HoverInfoSystem : MonoBehaviour
         }
 
         // 효과
-        if (card.BasicEffect != S_CardBasicEffectEnum.None)
+        if (card.CardEffect != S_CardEffectEnum.None)
         {
             hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-            hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.BasicEffect);
+            hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.CardEffect);
             hoverInfoCount++;
             additiveObjects[additiveDescriptionCount].SetActive(true);
-            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(card.BasicEffect);
+            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(card.CardEffect);
             additiveDescriptionCount++;
         }
 
@@ -298,7 +298,7 @@ public class S_HoverInfoSystem : MonoBehaviour
     }
     #endregion
     #region 능력
-    public void ActivateHoverInfo(S_Skill skill, RectTransform rect) // 월드 오브젝트 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
+    public void ActivateHoverInfo(S_Trinket skill, RectTransform rect) // 월드 오브젝트 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
     {
         // 튜토리얼 때문에
         if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Dialog)
@@ -321,7 +321,7 @@ public class S_HoverInfoSystem : MonoBehaviour
         panel_HoverInfoBase.SetActive(true);
         LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
     }
-    public void ActivateHoverInfo(S_Skill skill, GameObject go) // 월드 오브젝트 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
+    public void ActivateHoverInfo(S_Trinket skill, GameObject go) // 월드 오브젝트 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
     {
         FillHoverInfo(skill);
         SetPosByWorldObjectSkill(go);
@@ -332,18 +332,18 @@ public class S_HoverInfoSystem : MonoBehaviour
         panel_HoverInfoBase.SetActive(true);
         LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
     }
-    void FillHoverInfo(S_Skill skill) // 능력 전용
+    void FillHoverInfo(S_Trinket skill) // 능력 전용
     {
         int hoverInfoCount = 0;
 
         // 능력 이름
         hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescriptionBySkillName(skill);
+        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetTrinketName(skill);
         hoverInfoCount++;
 
         // 능력 설명
         hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescriptionBySkillDescription(skill);
+        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetTrinektDescription(skill);
         hoverInfoCount++;
 
         layoutGroup_HoverInfoBase.SetActive(true);

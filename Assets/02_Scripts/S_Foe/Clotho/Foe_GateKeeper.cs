@@ -16,7 +16,7 @@ public class Foe_GateKeeper : S_Foe
 
     public override async Task ActiveFoeAbility(S_EffectActivator eA, S_Card hitCard)
     {
-        await eA.CurseRandomCards(this, 999, S_CardSuitEnum.None, 1);
+        await eA.CurseRandomCards(this, 999, S_EngravingEnum.None, 1);
     }
     public override void CheckMeetCondition(S_Card card = null)
     {

@@ -24,8 +24,7 @@ public class S_TutorialManager : MonoBehaviour
 
     public async void StartTutorial()
     {
-        await S_GameFlowManager.Instance.StartTrialAsync();
-
+        // StartTrial 넣기
         await StartTutorialAsync();
     }
     async Task StartTutorialAsync()
@@ -43,9 +42,9 @@ public class S_TutorialManager : MonoBehaviour
         S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
         S_Card hitCard = S_PlayerCard.Instance.DrawRandomCard(1)[0];
         // 카드 내기
-        await S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(hitCard, S_CardOrderTypeEnum.BasicHit);
+        await S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(hitCard, S_CardOrderTypeEnum.Hit);
         // 우선이 있었다면 해제
-        if (S_PlayerStat.Instance.IsFirst != S_FirstEffectEnum.None) await S_EffectActivator.Instance.AppliedFirstAsync();
+        if (S_PlayerStat.Instance.IsFirst) await S_EffectActivator.Instance.AppliedFirstAsync();
         // 히트 카드 진행
         if (S_GameFlowManager.Instance.GetCardOrderQueueCount() <= 1)
         {
@@ -64,10 +63,8 @@ public class S_TutorialManager : MonoBehaviour
         S_PlayerStat.Instance.UseDetermination();
         // 카드 제외 및 제외된 카드 복구. 이하 3개 메서드는 반드시 붙어다녀야한다.
         S_PlayerCard.Instance.ResetCardsByTwist(out List<S_Card> stacks, out List<S_Card> exclusions);
-        await S_StackInfoSystem.Instance.ExclusionCardsByTwistAsync(stacks);
-        await S_UICardEffecter.Instance.ReturnExclusionCardsByTwistAsync(exclusions);
-        // 능력의 조건 체크
-        S_PlayerSkill.Instance.CheckSkillMeetCondition();
+        await S_StackInfoSystem.Instance.ReturnCardsByTwistAsync(stacks);
+        await S_ShowingCardEffecter.Instance.ReturnExclusionCardsByTwistAsync(exclusions);
         // 적의 조건 체크
         S_FoeInfoSystem.Instance.CheckFoeMeetCondition();
         // 스탯, 히스토리를 스택의 카드를 내기 전으로 되돌리기.
@@ -94,9 +91,9 @@ public class S_TutorialManager : MonoBehaviour
         // 스탠드
         S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
         // 카드의 결의 효과 발동
-        await S_EffectActivator.Instance.ActivatedResolveCard();
+        await S_EffectActivator.Instance.ActivatedCardByStand();
         // 능력 발동
-        await S_PlayerSkill.Instance.ActivateStandSkillsByStand();
+        await S_PlayerTrinket.Instance.ActivateStandSkillsByStand();
         // 적 발동
         await S_FoeInfoSystem.Instance.ActivateStandFoeByStand();
         // 카드오더큐가 1개라면, 즉 시련 시작 시 혹은 스탠드 시에 창조되었다면, 카드에 의해 창조된게 아니라면
@@ -122,8 +119,8 @@ public class S_TutorialManager : MonoBehaviour
 
             // 공격받고 나서 스택 합을 0으로 만들고 클린히트, 버스트 초기화하자.
             S_PlayerStat.Instance.ResetStackSum();
-            S_PlayerStat.Instance.CheckBurstAndCleanHit();
-            S_StatInfoSystem.Instance.ChangeSpecialAbility();
+            S_PlayerStat.Instance.CheckBurstAndPerfect();
+            S_StatInfoSystem.Instance.UpdateSpecialAbility();
 
             // 히트 다시 시작
             S_GameFlowManager.Instance.StartNewTurn();

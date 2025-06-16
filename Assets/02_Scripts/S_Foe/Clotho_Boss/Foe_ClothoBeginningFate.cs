@@ -15,7 +15,7 @@ public class Foe_ClothoBeginningFate : S_Foe
 
     public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        ActivatedCount = S_PlayerCard.Instance.GetPreStackCards().Where(x => x.IsCurrentTurnHit).Count();
+        ActivatedCount = S_PlayerCard.Instance.GetStackCards().Where(x => x.IsCurrentTurn).Count();
         IsMeetCondition = ActivatedCount <= 4;
     }
     public override void StartNewTurn(int currentTrial)

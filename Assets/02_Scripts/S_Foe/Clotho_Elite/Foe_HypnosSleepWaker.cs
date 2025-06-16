@@ -17,12 +17,12 @@ public class Foe_HypnosSleepWaker : S_Foe
     {
         if (IsMeetCondition)
         {
-            await eA.CurseRandomCards(this, 6, S_CardSuitEnum.None, -1, true, false);
+            await eA.CurseRandomCards(this, 6, S_EngravingEnum.None, -1, true, false);
         }
     }
     public override void CheckMeetConditionByActivatedCount(S_Card card = null)
     {
-        ActivatedCount = S_EffectChecker.Instance.GetSuitCountGreaterThanAmountInStack(1);
+        ActivatedCount = S_EffectChecker.Instance.GetGrandChaosInPreStack(1);
 
         IsMeetCondition = ActivatedCount < 4;
     }

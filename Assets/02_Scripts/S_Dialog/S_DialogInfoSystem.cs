@@ -169,7 +169,7 @@ public class S_DialogInfoSystem : MonoBehaviour
         Camera.main.transform.DOKill();
         Camera.main.transform.DOMove(S_GameFlowManager.InGameCameraPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
         Camera.main.transform.DORotate(S_GameFlowManager.InGameCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-        await S_GameFlowManager.PanelAppearTimeAsync();
+        await S_GameFlowManager.WaitPanelAppearTimeAsync();
 
         // 대사 위치
         S_HoverInfoSystem.Instance.SetPosByWorldObjectCharacter(sprite_Foe.GetComponent<SpriteRenderer>(), image_DialogBase.GetComponent<RectTransform>(), GetComponent<RectTransform>());

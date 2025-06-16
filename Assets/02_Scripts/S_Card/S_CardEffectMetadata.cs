@@ -1,176 +1,186 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 public static class S_CardEffectMetadata
 {
     #region JSON
-    public static readonly Dictionary<S_CardBasicConditionEnum, S_CardProperty> BasicConditionProperty = new()
+    public static readonly Dictionary<S_CardEffectEnum, S_CardProperty> CardEffectProperty = new()
 {
-    { S_CardBasicConditionEnum.None, new S_CardProperty(0, "없음", "없음") },
-    { S_CardBasicConditionEnum.Reverb, new S_CardProperty(1, "메아리", "다른 카드를 히트할 때 효과 발동") },
-    { S_CardBasicConditionEnum.Resolve, new S_CardProperty(2, "결의", "스탠드 시 효과 발동") },
-    { S_CardBasicConditionEnum.Unleash, new S_CardProperty(4, "발현", "이 카드가 히트될 때 효과 발동") },
+    { S_CardEffectEnum.Str_Stimulus, new S_CardProperty(1, "자극", "힘을 2 얻습니다.") },
+    { S_CardEffectEnum.Str_ZenithBreak, new S_CardProperty(10, "정점 돌파", "힘이 1.5배 증가합니다.") },
+    { S_CardEffectEnum.Str_SinisterImpulse, new S_CardProperty(3, "불길한 충동", "망상을 얻습니다. 힘을 8 얻습니다.") },
+    { S_CardEffectEnum.Str_CalamityApproaches, new S_CardProperty(8, "엄습하는 재앙", "스택에 무작위 카드를 2장 저주합니다. 힘이 1.5배 증가합니다.") },
+    { S_CardEffectEnum.Str_UntappedPower, new S_CardProperty(7, "무한한 잠재력", "가장 높은 능력치를 모두 잃습니다. 힘이 3배 증가합니다.") },
+    { S_CardEffectEnum.Str_UnjustSacrifice, new S_CardProperty(8, "불의의 희생", "정신력과 행운만큼 힘을 얻습니다. 정신력과 행운을 절반 잃습니다.") },
+    { S_CardEffectEnum.Str_WrathStrike, new S_CardProperty(2, "분노의 타격", "힘의 3배만큼 피해를 줍니다.") },
+    { S_CardEffectEnum.Str_EngulfInFlames, new S_CardProperty(5, "불사르기", "버스트라면 이 카드를 저주합니다. 힘의 12배만큼 피해를 줍니다.") },
+    { S_CardEffectEnum.Str_FinishingStrike, new S_CardProperty(6, "마무리 일격", "오른쪽에 있는 모든 카드를 저주합니다. 힘의 24배만큼 피해를 줍니다.") },
+    { S_CardEffectEnum.Str_FlowingSin, new S_CardProperty(4, "흐르는 죄악", "힘의 4배만큼 피해를 줍니다. 저주받은 카드 장수만큼 반복합니다.") },
+    { S_CardEffectEnum.Str_BindingForce, new S_CardProperty(18, "억압", "힘과 행운의 곱만큼 피해를 줍니다. 힘 카드 장수만큼 반복합니다.") },
+    { S_CardEffectEnum.Str_Grudge, new S_CardProperty(9, "원한", "힘만큼 피해를 줍니다. 적 체력이 75% 이상이라면 대신 힘과 정신력을 곱한만큼 줍니다.") },
+
+    { S_CardEffectEnum.Mind_Focus, new S_CardProperty(1, "집중", "정신력을 2 얻습니다.") },
+    { S_CardEffectEnum.Mind_DeepInsight, new S_CardProperty(10, "통찰", "정신력이 1.5배 증가합니다.") },
+    { S_CardEffectEnum.Mind_PerfectForm, new S_CardProperty(6, "무결점", "버스트가 아니라면 완벽이 될 때까지 무게를 얻습니다. 얻은 무게만큼 정신력을 얻습니다.") },
+    { S_CardEffectEnum.Mind_Unshackle, new S_CardProperty(5, "해방", "정신력 카드 1장 당 정신력을 3 얻습니다.") },
+    { S_CardEffectEnum.Mind_Drain, new S_CardProperty(4, "흡수", "힘과 행운을 최대 5만큼 잃습니다. 잃은 능력치의 2배만큼 정신력을 얻습니다.") },
+    { S_CardEffectEnum.Mind_WingsOfFreedom, new S_CardProperty(7, "자유의 날개", "한계를 5 잃습니다. 정신력이 1.5배 증가합니다.") },
+    { S_CardEffectEnum.Mind_PreciseStrike, new S_CardProperty(2, "정밀 타격", "정신력의 3배만큼 피해를 줍니다.") },
+    { S_CardEffectEnum.Mind_SharpCut, new S_CardProperty(3, "절삭", "정신력만큼 피해를 줍니다. 완벽이라면 대신 정신력의 12배만큼 줍니다.") },
+    { S_CardEffectEnum.Mind_Split, new S_CardProperty(8, "분열", "정신력과 현재 무게를 곱한만큼 피해를 줍니다. 현재 무게만큼 정신력을 잃습니다.") },
+    { S_CardEffectEnum.Mind_Accept, new S_CardProperty(6, "수긍", "정신력 10 당 한계를 1 얻습니다.") },
+    { S_CardEffectEnum.Mind_Dissolute, new S_CardProperty(9, "무절제", "정신력과 힘을 곱한만큼 피해를 줍니다. 버스트라면 정신력을 절반 잃습니다.") },
+    { S_CardEffectEnum.Mind_Awakening, new S_CardProperty(11, "각성", "정신력만큼 피해를 줍니다. 완벽이라면 대신 정신력과 행운을 곱한만큼 줍니다.") },
+
+    { S_CardEffectEnum.Luck_Chance, new S_CardProperty(1, "기회", "행운을 2 얻습니다.") },
+    { S_CardEffectEnum.Luck_Disorder, new S_CardProperty(10, "무질서", "행운이 1.5배 증가합니다.") },
+    { S_CardEffectEnum.Luck_Composure, new S_CardProperty(2, "여유부리기", "오른쪽에 있는 카드 장수만큼 행운을 얻습니다.") },
+    { S_CardEffectEnum.Luck_SilentDomination, new S_CardProperty(4, "침묵의 정복", "각인이 있는 무작위 카드를 1장 생성하고 카드의 무게만큼 행운을 얻습니다.") },
+    { S_CardEffectEnum.Luck_Artifice, new S_CardProperty(5, "기교", "오른쪽 카드의 효과를 1번 더 발동합니다. 행운 카드가 아니었다면 행운을 12 얻습니다.") },
+    { S_CardEffectEnum.Luck_AllForOne, new S_CardProperty(9, "하나를 위한 모두", "무작위 카드를 3장 생성합니다. 행운 카드가 아닌 카드를 생성할 때마다 행운이 1.5배 증가합니다.") },
+    { S_CardEffectEnum.Luck_SuddenStrike, new S_CardProperty(2, "기습 타격", "행운의 3배만큼 피해를 줍니다.") },
+    { S_CardEffectEnum.Luck_CriticalBlow, new S_CardProperty(4, "치명타", "행운 1 당 1%의 확률로 행운의 16배만큼 피해를 줍니다.") },
+    { S_CardEffectEnum.Luck_ForcedTake, new S_CardProperty(8, "강탈", "행운의 절반만큼 피해를 줍니다. 피해량만큼 골드를 얻습니다.") },
+    { S_CardEffectEnum.Luck_Grill, new S_CardProperty(6, "다그치기", "행운 10 당 오른쪽 카드를 1번 더 발동합니다.") },
+    { S_CardEffectEnum.Luck_Shake, new S_CardProperty(4, "떠보기", "행운과 힘을 곱한만큼 피해를 줍니다. 단 0.25배의 피해를 줍니다.") },
+    { S_CardEffectEnum.Luck_FatalBlow, new S_CardProperty(15, "결정타", "힘과 정신력을 곱한만큼 피해를 줍니다. 행운 10 당 1번 더 반복합니다.") },
+
+    { S_CardEffectEnum.Common_Trinity, new S_CardProperty(3, "삼위일체", "모든 능력치를 3 얻습니다.") },
+    { S_CardEffectEnum.Common_Balance, new S_CardProperty(11, "균형잡기", "무작위 능력치가 2배 증가합니다. 매 턴마다 능력치가 변경됩니다.") },
+    { S_CardEffectEnum.Common_Berserk, new S_CardProperty(9, "광란", "무작위 능력치 2개를 곱한만큼 피해를 줍니다. 매 턴마다 능력치가 변경됩니다.") },
+    { S_CardEffectEnum.Common_Carnage, new S_CardProperty(20, "대학살", "모든 능력치를 곱한만큼 피해를 줍니다.") },
+    { S_CardEffectEnum.Common_LastStruggle, new S_CardProperty(12, "최후의 발악", "모든 능력치를 15 잃습니다. 모든 능력치를 곱한만큼 피해를 줍니다.") },
+    { S_CardEffectEnum.Common_Resistance, new S_CardProperty(4, "저항", "한계를 1 얻습니다.") },
+    { S_CardEffectEnum.Common_Realization, new S_CardProperty(5, "깨달음", "왼쪽에 있는 카드 장수만큼 한계를 얻고 오른쪽에 있는 카드 장수만큼 무게를 얻습니다.") },
+    { S_CardEffectEnum.Common_Corrupt, new S_CardProperty(3, "감염", "이 카드와 같은 각인이 있는 무작위 카드를 생성합니다.") },
+    { S_CardEffectEnum.Common_Imitate, new S_CardProperty(5, "흉내", "오른쪽 카드를 복사하여 생성합니다.") },
+    { S_CardEffectEnum.Common_Plunder, new S_CardProperty(1, "약탈", "골드를 2 얻습니다.") },
+    { S_CardEffectEnum.Common_Undertow, new S_CardProperty(3, "역류", "오른쪽 카드를 1번 더 발동합니다.") },
+    { S_CardEffectEnum.Common_Adventure, new S_CardProperty(3, "모험", "전개를 얻습니다.") },
+    { S_CardEffectEnum.Common_Inspiration, new S_CardProperty(2, "영감", "우선을 얻습니다.") },
+    { S_CardEffectEnum.Common_Repose, new S_CardProperty(7, "침착", "냉혈을 얻습니다.") },
 };
-    public static readonly Dictionary<S_CardAdditiveConditionEnum, S_CardProperty> AdditiveConditionProperty = new()
+    public static readonly Dictionary<S_EngravingEnum, S_CardProperty> EngravingEffectProperty = new()
 {
-    { S_CardAdditiveConditionEnum.None, new S_CardProperty(0, "없음", "없음") },
-    { S_CardAdditiveConditionEnum.Reverb_SameSuit, new S_CardProperty(2, "메아리 : 같은 문양", "히트한 카드의 문양과 같아야만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Reverb_SameNumber, new S_CardProperty(4, "메아리 : 같은 숫자", "히트한 카드의 숫자와 같아야만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Reverb_PlethoraNumber, new S_CardProperty(3, "메아리 : 과도한 숫자", "히트한 카드가 8 이상 숫자일 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Reverb_CursedCard, new S_CardProperty(3, "메아리 : 저주 카드", "히트한 카드가 저주받았을 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Legion_SameSuit, new S_CardProperty(5, "군단 : 같은 문양", "스택에 이 카드와 같은 문양인 카드의 숫자 합이 40 이상일 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.GreatLegion_SameSuit, new S_CardProperty(8, "대군단 : 같은 문양", "스택에 이 카드와 같은 문양의 카드의 숫자 합이 60 이상일 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Finale, new S_CardProperty(8, "대미장식", "덱에 문양이 1개 이상 없어야만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Finale_Climax, new S_CardProperty(14, "대미장식 : 대단원", "덱에 문양이 2개 이상 없어야만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Chaos, new S_CardProperty(5, "혼돈", "스택에 모든 문양의 카드가 각각 1장 이상 있을 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Chaos_Anarchy, new S_CardProperty(8, "혼돈 : 무질서", "스택에 모든 문양의 카드가 각각 2장 이상 있을 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.GrandChaos_Anarchy, new S_CardProperty(11, "대혼돈 : 무질서", "스택에 모든 문양의 카드가 각각 3장 이상 있을 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Chaos_Overflow, new S_CardProperty(8, "혼돈 : 범람", "한 턴에 모든 문양의 카드를 각각 1장 이상 냈어야만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Offensive, new S_CardProperty(6, "공세", "스택에 연속되는 숫자의 최대 길이가 4 이상일 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Offensive_SameSuit, new S_CardProperty(10, "공세 : 같은 문양", "스택에 같은 문양이면서 연속되는 숫자의 최대 길이가 4 이상일 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.AllOutOffensive, new S_CardProperty(10, "총공세", "스택에 연속되는 숫자의 최대 길이가 8 이상일 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.AllOutOffensive_SameSuit, new S_CardProperty(14, "총공세 : 같은 문양", "스택에 같은 문양이면서 연속되는 숫자의 최대 길이가 8 이상일 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Offensive_Overflow, new S_CardProperty(10, "공세 : 범람", "한 턴에 낸 카드의 연속되는 숫자 길이가 4 이상일 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Precision_SameSuit, new S_CardProperty(4, "정밀 : 같은 문양", "스택에 이 카드와 같은 문양의 카드가 정확히 3의 배수만큼 있어야만 조건 작용") },
-    { S_CardAdditiveConditionEnum.HyperPrecision_SameSuit, new S_CardProperty(7, "초정밀 : 같은 문양", "스택에 이 카드와 같은 문양의 카드가 정확히 6의 배수만큼 있어야만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Precision_SameNumber, new S_CardProperty(10, "정밀 : 같은 숫자", "스택에 이 카드와 같은 숫자의 카드가 정확히 3의 배수만큼 있어야만 조건 작용") },
-    { S_CardAdditiveConditionEnum.HyperPrecision_SameNumber, new S_CardProperty(15, "초정밀 : 같은 숫자", "스택에 이 카드와 같은 숫자의 카드가 정확히 6의 배수만큼 있어야만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Precision_PlethoraNumber, new S_CardProperty(4, "정밀 : 과도한 숫자", "스택에 8 이상 숫자의 카드가 정확히 3의 배수만큼 있어야만 조건 작용") },
-    { S_CardAdditiveConditionEnum.HyperPrecision_PlethoraNumber, new S_CardProperty(7, "초정밀 : 과도한 숫자", "스택에 8 이상 숫자의 카드가 정확히 6의 배수만큼 있어야만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Overflow, new S_CardProperty(5, "범람", "한 턴에 카드를 4장 이상 냈을 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Unity, new S_CardProperty(2, "단합", "스택에 문양이 2개 이하일 때만 조건 작용") },
-    { S_CardAdditiveConditionEnum.Unity_Drastic, new S_CardProperty(5, "단합 : 급진", "스택에 문양이 1개만 있을 때만 조건 작용") },
+    { S_EngravingEnum.None, new S_CardProperty(0, "없음", "없음") },
+    { S_EngravingEnum.Reverb, new S_CardProperty(1, "메아리", "다른 카드를 히트할 때 효과 발동") },
+    { S_EngravingEnum.Resolve, new S_CardProperty(2, "결의", "스탠드 시 효과 발동") },
+
+    { S_EngravingEnum.Legion, new S_CardProperty(-3, "군단", "스택에 카드 무게 합이 30 이상이어야 효과가 발동합니다.") },
+    { S_EngravingEnum.Legion_Flip, new S_CardProperty(-6, "군단(뒤집힘)", "스택에 카드 무게 합이 50 이상이어야 효과가 발동합니다.") },
+    { S_EngravingEnum.AllOut, new S_CardProperty(6, "총공세", "스택에 카드 무게 합 15 당 효과가 1번 더 발동합니다.") },
+    { S_EngravingEnum.AllOut_Flip, new S_CardProperty(3, "총공세(뒤집힘)", "스택에 카드 무게 합 20 당 효과가 1번 더 발동합니다.") },
+
+    { S_EngravingEnum.Delicacy, new S_CardProperty(-3, "세심", "스택에 카드가 정확히 3의 배수만큼 있어야 효과가 발동합니다.") },
+    { S_EngravingEnum.Delicacy_Flip, new S_CardProperty(-7, "세심(뒤집힘)", "스택에 카드가 정확히 6의 배수만큼 있어야 효과가 발동합니다.") },
+    { S_EngravingEnum.Precision, new S_CardProperty(9, "정밀", "스택에 카드가 정확히 3의 배수만큼 있다면 효과가 2번 더 발동합니다.") },
+    { S_EngravingEnum.Precision_Flip, new S_CardProperty(4, "정밀(뒤집힘)", "스택에 카드가 정확히 6의 배수만큼 있다면 효과가 2번 더 발동합니다.") },
+
+    { S_EngravingEnum.Resection, new S_CardProperty(-2, "절제", "한 턴에 카드를 4장 이하만 내야 효과가 발동합니다.") },
+    { S_EngravingEnum.Resection_Flip, new S_CardProperty(-4, "절제(뒤집힘)", "한 턴에 카드를 3장 이하만 내야 효과가 발동합니다.") },
+    { S_EngravingEnum.Patience, new S_CardProperty(8, "인내", "한 턴에 카드를 4장 이하만 냈다면 효과가 2번 더 발동합니다.") },
+    { S_EngravingEnum.Patience_Flip, new S_CardProperty(4, "인내(뒤집힘)", "한 턴에 카드를 3장 이하만 냈다면 효과가 2번 더 발동합니다.") },
+
+    { S_EngravingEnum.Overflow, new S_CardProperty(-4, "범람", "한 턴에 카드를 5장 이상 내야 효과가 발동합니다.") },
+    { S_EngravingEnum.Overflow_Flip, new S_CardProperty(-7, "범람(뒤집힘)", "한 턴에 카드를 6장 이상 내야 효과가 발동합니다.") },
+    { S_EngravingEnum.Fierce, new S_CardProperty(7, "격렬", "한 턴에 카드를 5장 이상 냈다면 효과가 2번 더 발동합니다.") },
+    { S_EngravingEnum.Fierce_Flip, new S_CardProperty(4, "격렬(뒤집힘)", "한 턴에 카드를 6장 이상 냈다면 효과가 2번 더 발동합니다.") },
+
+    { S_EngravingEnum.GrandChaos, new S_CardProperty(-20, "대혼돈", "한 턴에 힘 카드, 정신력 카드, 행운 카드, 공용 카드를 1장씩 내야 효과가 발동합니다.") },
+    { S_EngravingEnum.GrandChaos_Flip, new S_CardProperty(-9, "대혼돈(뒤집힘)", "한 턴에 힘 카드, 정신력 카드, 행운 카드, 공용 카드를 2장씩 내야 효과가 발동합니다.") },
+    { S_EngravingEnum.Crush, new S_CardProperty(1, "파쇄", "한 턴에 힘 카드, 정신력 카드, 행운 카드, 공용 카드를 1장씩 냈다면 효과가 2번 더 발동합니다.") },
+    { S_EngravingEnum.Crush_Flip, new S_CardProperty(0, "파쇄(뒤집힘)", "한 턴에 힘 카드, 정신력 카드, 행운 카드, 공용 카드를 2장씩 냈다면 효과가 4번 더 발동합니다.") },
+
+    { S_EngravingEnum.Overdrive, new S_CardProperty(-2, "극한", "체력이 1이어야 효과가 발동합니다.") },
+    { S_EngravingEnum.Immersion, new S_CardProperty(7, "몰두", "체력이 1이라면 효과가 2번 더 발동합니다.") },
+    { S_EngravingEnum.Finale, new S_CardProperty(-8, "대미장식", "덱에 카드가 없어야 발동합니다.") },
+    { S_EngravingEnum.Climax, new S_CardProperty(2, "대단원", "덱에 카드가 없다면 효과를 2번 더 발동합니다.") },
+    { S_EngravingEnum.Immunity, new S_CardProperty(1, "면역", "저주에 걸리지 않습니다.") },
+    { S_EngravingEnum.Omen, new S_CardProperty(1, "흉조", "시련이 종료될 때 이 카드가 스택에 있다면 골드를 3 얻습니다.") },
+    { S_EngravingEnum.Greed, new S_CardProperty(1, "탐욕", "시련이 종료될 때 이 카드가 저주받았다면 골드를 3 얻습니다.") },
+    { S_EngravingEnum.Unleash, new S_CardProperty(3, "발현", "이 카드는 낼 때에도 발동합니다.") },
+    { S_EngravingEnum.Flexible, new S_CardProperty(6, "유연", "이 카드는 위치를 변경할 수 있습니다.") },
+    { S_EngravingEnum.QuickAction, new S_CardProperty(3, "속전속결", "시련 시작 시 이 카드를 냅니다.") },
+    { S_EngravingEnum.Spell, new S_CardProperty(-3, "주술", "효과 발동 시, 스택에서 카드 1장을 저주합니다.") },
+    { S_EngravingEnum.DeepShadow, new S_CardProperty(-2, "깊은 그림자", "효과 발동 시, 망상을 얻습니다.") },
 };
-    public static readonly Dictionary<S_CardDebuffConditionEnum, S_CardProperty> DebuffConditionProperty = new()
-{
-    { S_CardDebuffConditionEnum.None, new S_CardProperty(0, "없음", "없음") },
-    { S_CardDebuffConditionEnum.Breakdown, new S_CardProperty(5, "붕괴", "효과 발동 시, 덱에서 무작위 카드 1장을 제외") },
-    { S_CardDebuffConditionEnum.Delusion, new S_CardProperty(1, "망상", "효과 발동 시, 다음 히트 카드가 저주받습니다.") },
-    { S_CardDebuffConditionEnum.Spell, new S_CardProperty(3, "주술", "효과 발동 시, 덱과 스택에서 각각 무작위 카드 1장을 저주") },
-    { S_CardDebuffConditionEnum.Rebel, new S_CardProperty(4, "반발", "효과 발동 시, 한계 1 감소") },
-};
-    public static readonly Dictionary<S_CardBasicEffectEnum, S_CardProperty> BasicEffectProperty = new()
-{
-    { S_CardBasicEffectEnum.None, new S_CardProperty(0, "없음", "없음") },
-    { S_CardBasicEffectEnum.Growth_Strength, new S_CardProperty(1, "성장 : 힘", "힘을 3 얻습니다.") },
-    { S_CardBasicEffectEnum.Growth_Mind, new S_CardProperty(1, "성장 : 정신력", "정신력을 3 얻습니다.") },
-    { S_CardBasicEffectEnum.Growth_Luck, new S_CardProperty(1, "성장 : 행운", "행운을 3 얻습니다.") },
-    { S_CardBasicEffectEnum.Growth_AllStat, new S_CardProperty(3, "성장 : 모든 능력치", "모든 능력치를 3 얻습니다.") },
-    { S_CardBasicEffectEnum.Break_MostStat, new S_CardProperty(7, "돌파 : 가장 높은 능력치", "가장 높은 능력치가 1.5배 증가합니다.") },
-    { S_CardBasicEffectEnum.Break_RandomStat, new S_CardProperty(6, "돌파 : 무작위 능력치", "무작위 능력치가 1.5배 증가합니다.") },
-    { S_CardBasicEffectEnum.Manipulation, new S_CardProperty(1, "조작", "숫자 합이 2 감소합니다.") },
-    { S_CardBasicEffectEnum.Manipulation_CardNumber, new S_CardProperty(3, "조작 : 카드숫자", "이 카드의 숫자만큼 숫자 합이 감소합니다.") },
-    { S_CardBasicEffectEnum.Manipulation_CleanHit, new S_CardProperty(4, "조작 : 클린히트", "클린히트가 되도록 숫자 합이 조정됩니다.") },
-    { S_CardBasicEffectEnum.Resistance, new S_CardProperty(3, "저항", "한계를 1 얻습니다.") },
-    { S_CardBasicEffectEnum.Resistance_CardNumber, new S_CardProperty(10, "저항 : 카드숫자", "이 카드의 숫자만큼 한계를 얻습니다.") },
-    { S_CardBasicEffectEnum.Harm_Strength, new S_CardProperty(2, "피해 : 힘", "힘만큼 적에게 피해를 줍니다.") },
-    { S_CardBasicEffectEnum.Harm_Mind, new S_CardProperty(2, "피해 : 정신력", "정신력만큼 적에게 피해를 줍니다.") },
-    { S_CardBasicEffectEnum.Harm_Luck, new S_CardProperty(2, "피해 : 행운", "행운만큼 적에게 피해를 줍니다.") },
-    { S_CardBasicEffectEnum.Harm_StrengthAndMind, new S_CardProperty(8, "피해 : 힘과 정신력", "힘과 정신력의 곱만큼 적에게 피해를 줍니다.") },
-    { S_CardBasicEffectEnum.Harm_StrengthAndLuck, new S_CardProperty(8, "피해 : 힘과 행운", "힘과 행운의 곱만큼 적에게 피해를 줍니다.") },
-    { S_CardBasicEffectEnum.Harm_MindAndLuck, new S_CardProperty(8, "피해 : 정신력과 행운", "정신력과 행운의 곱만큼 적에게 피해를 줍니다.") },
-    { S_CardBasicEffectEnum.Harm_Carnage, new S_CardProperty(12, "피해 : 대학살", "모든 능력치의 곱만큼 적에게 피해를 줍니다.") },
-    { S_CardBasicEffectEnum.Tempering, new S_CardProperty(5, "단련", "의지를 1 얻습니다.") },
-    { S_CardBasicEffectEnum.Plunder, new S_CardProperty(1, "약탈", "골드를 2 얻습니다.") },
-    { S_CardBasicEffectEnum.Plunder_Break, new S_CardProperty(8, "약탈 : 돌파", "골드가 1.5배 증가합니다.") },
-    { S_CardBasicEffectEnum.Creation_Random, new S_CardProperty(4, "생성 : 무작위", "무작위 냉혈 카드를 생성하고 히트합니다.") },
-    { S_CardBasicEffectEnum.Creation_SameSuit, new S_CardProperty(5, "생성 : 같은 문양", "이 카드와 문양이 같은 무작위 냉혈 카드를 생성하고 히트합니다.") },
-    { S_CardBasicEffectEnum.Creation_SameNumber, new S_CardProperty(7, "생성 : 같은 숫자", "이 카드와 숫자가 같은 무작위 냉혈 카드를 생성하고 히트합니다.") },
-    { S_CardBasicEffectEnum.Creation_PlethoraNumber, new S_CardProperty(5, "생성 : 과도한 숫자", "숫자가 8 이상인 무작위 냉혈 카드를 생성하고 히트합니다.") },
-    { S_CardBasicEffectEnum.Expansion, new S_CardProperty(2, "전개", "다음 히트 시 추가 보기 카드 2장이 주어집니다.") },
-    { S_CardBasicEffectEnum.First_SameSuit, new S_CardProperty(1, "우선 : 같은 문양", "다음 히트 시 이 카드와 같은 문양인 카드를 우선하여 히트합니다.") },
-    { S_CardBasicEffectEnum.First_LeastSuit, new S_CardProperty(2, "우선 : 가장 적은 문양", "다음 히트 시 덱에서 가장 적은 문양의 카드를 우선하여 히트합니다.") },
-    { S_CardBasicEffectEnum.First_SameNumber, new S_CardProperty(3, "우선 : 같은 숫자", "다음 히트 시 이 카드와 같은 숫자인 카드를 우선하여 히트합니다.") },
-    { S_CardBasicEffectEnum.First_CleanHitNumber, new S_CardProperty(4, "우선 : 클린히트 숫자", "다음 히트 시 클린히트가 되는 카드를 우선하여 히트합니다.") },
-    { S_CardBasicEffectEnum.Undertow, new S_CardProperty(5, "역류", "역류를 제외한 스택에 있는 무작위 카드 2장의 효과를 발동합니다.") },
-    { S_CardBasicEffectEnum.Guidance_LeastSuit, new S_CardProperty(7, "인도 : 가장 적은 문양", "덱에서 가장 적은 문양의 카드를 모두 히트합니다.") },
-    { S_CardBasicEffectEnum.Guidance_LeastNumber, new S_CardProperty(8, "인도 : 가장 적은 숫자", "덱에서 가장 적은 숫자의 카드를 모두 히트합니다.") },
-};
-    public static readonly Dictionary<S_CardAdditiveEffectEnum, S_CardProperty> AdditiveEffectProperty = new()
-{
-    { S_CardAdditiveEffectEnum.None, new S_CardProperty(0, "없음", "없음") },
-    { S_CardAdditiveEffectEnum.Reflux_Subtle, new S_CardProperty(3, "환류 : 미묘", "효과 발동 시, 효과를 1번 더 발동") },
-    { S_CardAdditiveEffectEnum.Reflux_Violent, new S_CardProperty(5, "환류 : 격렬", "효과 발동 시, 효과를 2번 더 발동") },
-    { S_CardAdditiveEffectEnum.Reflux_Shatter, new S_CardProperty(7, "환류 : 파쇄", "효과 발동 시, 효과를 3번 더 발동") },
-    { S_CardAdditiveEffectEnum.Reflux_Stack, new S_CardProperty(4, "환류 : 스택", "효과 발동 시, 스택에 있는 카드 4장 당 효과를 1번 더 발동") },
-    { S_CardAdditiveEffectEnum.Reflux_PlethoraNumber, new S_CardProperty(4, "환류 : 과도한 숫자", "효과 발동 시, 스택에 있는 8 이상 숫자 카드 3장 당 효과를 1번 더 발동") },
-    { S_CardAdditiveEffectEnum.Reflux_Deck, new S_CardProperty(6, "환류 : 덱", "효과 발동 시, 덱에 있는 카드 6장 당 효과를 1번 더 발동") },
-    { S_CardAdditiveEffectEnum.Reflux_Chaos, new S_CardProperty(7, "환류 : 혼돈", "효과 발동 시, 스택에 있는 문양 1개 당 효과를 1번 더 발동") },
-    { S_CardAdditiveEffectEnum.Reflux_Offensive, new S_CardProperty(3, "환류 : 공세", "효과 발동 시, 스택에 연속되는 숫자의 최대 길이 2 당 효과를 1번 더 발동") },
-    { S_CardAdditiveEffectEnum.Reflux_Curse, new S_CardProperty(2, "환류 : 저주", "효과 발동 시, 덱과 스택에 있는 저주받은 카드 3장 당 효과를 1번 더 발동") },
-    { S_CardAdditiveEffectEnum.Reflux_Exclusion, new S_CardProperty(2, "환류 : 제외", "효과 발동 시, 제외된 카드 3장 당 효과를 1번 더 발동") },
-    { S_CardAdditiveEffectEnum.Reflux_Overdrive, new S_CardProperty(3, "환류 : 극한", "효과 발동 시, 체력이 1이라면 효과를 2번 더 발동") },
-    { S_CardAdditiveEffectEnum.ColdBlood, new S_CardProperty(1, "냉혈", "숫자에 의한 능력치와 숫자 합을 증가시키지 않습니다.") },
-    { S_CardAdditiveEffectEnum.Immunity, new S_CardProperty(1, "면역", "저주에 걸리지 않습니다.") },
-    { S_CardAdditiveEffectEnum.Omen, new S_CardProperty(2, "흉조", "시련이 종료될 때 이 카드가 덱에 있다면 골드 2 획득") },
-    { S_CardAdditiveEffectEnum.Robbery, new S_CardProperty(1, "강도", "시련이 종료될 때 이 카드가 스택에 있다면 골드 2 획득") },
-    { S_CardAdditiveEffectEnum.Greed, new S_CardProperty(1, "탐욕", "시련이 종료될 때 이 카드가 저주받았다면 골드 2 획득") },
-};
+    public static readonly HashSet<S_EngravingEnum> CanFlipEngraving = new()
+    {
+        S_EngravingEnum.Legion, S_EngravingEnum.Legion_Flip, S_EngravingEnum.AllOut, S_EngravingEnum.AllOut_Flip,
+        S_EngravingEnum.Delicacy, S_EngravingEnum.Delicacy_Flip, S_EngravingEnum.Precision, S_EngravingEnum.Precision_Flip,
+        S_EngravingEnum.Resection, S_EngravingEnum.Resection_Flip, S_EngravingEnum.Patience, S_EngravingEnum.Patience_Flip,
+        S_EngravingEnum.Overflow, S_EngravingEnum.Overflow_Flip, S_EngravingEnum.Fierce, S_EngravingEnum.Fierce_Flip,
+        S_EngravingEnum.GrandChaos, S_EngravingEnum.GrandChaos_Flip, S_EngravingEnum.Crush, S_EngravingEnum.Crush_Flip,
+    };
     #endregion
     #region 가중치 함수
-    public static int GetWeights(S_CardBasicConditionEnum condition)
+    public static int GetWeights(S_CardEffectEnum cardEffect)
     {
-        return BasicConditionProperty.TryGetValue(condition, out var property) ? property.Weights : 0;
+        return CardEffectProperty.TryGetValue(cardEffect, out var property) ? property.Weights : 0;
     }
-    public static int GetWeights(S_CardAdditiveConditionEnum condition)
+    public static int GetWeights(S_EngravingEnum engraving)
     {
-        return AdditiveConditionProperty.TryGetValue(condition, out var property) ? property.Weights : 0;
-    }
-    public static int GetWeights(S_CardDebuffConditionEnum condition)
-    {
-        return DebuffConditionProperty.TryGetValue(condition, out var property) ? property.Weights : 0;
-    }
-    public static int GetWeights(S_CardBasicEffectEnum condition)
-    {
-        return BasicEffectProperty.TryGetValue(condition, out var property) ? property.Weights : 0;
-    }
-    public static int GetWeights(S_CardAdditiveEffectEnum condition)
-    {
-        return AdditiveEffectProperty.TryGetValue(condition, out var property) ? property.Weights : 0;
+        return EngravingEffectProperty.TryGetValue(engraving, out var property) ? property.Weights : 0;
     }
     #endregion
     #region 이름 함수
-    public static string GetName(S_CardBasicConditionEnum condition)
+    public static string GetName(S_CardEffectEnum cardEffect)
     {
-        return BasicConditionProperty.TryGetValue(condition, out var property) ? property.Name : string.Empty;
+        return CardEffectProperty.TryGetValue(cardEffect, out var property) ? property.Name : string.Empty;
     }
-    public static string GetName(S_CardAdditiveConditionEnum condition)
+    public static string GetName(S_EngravingEnum engraving)
     {
-        return AdditiveConditionProperty.TryGetValue(condition, out var property) ? property.Name : string.Empty;
-    }
-    public static string GetName(S_CardDebuffConditionEnum condition)
-    {
-        return DebuffConditionProperty.TryGetValue(condition, out var property) ? property.Name : string.Empty;
-    }
-    public static string GetName(S_CardBasicEffectEnum condition)
-    {
-        return BasicEffectProperty.TryGetValue(condition, out var property) ? property.Name : string.Empty;
-    }
-    public static string GetName(S_CardAdditiveEffectEnum condition)
-    {
-        return AdditiveEffectProperty.TryGetValue(condition, out var property) ? property.Name : string.Empty;
+        return EngravingEffectProperty.TryGetValue(engraving, out var property) ? property.Name : string.Empty;
     }
     #endregion
     #region 설명 함수
-    public static string GetDescription(S_CardBasicConditionEnum condition)
+    public static string GetDescription(S_CardEffectEnum condition)
     {
-        return BasicConditionProperty.TryGetValue(condition, out var property) ? property.Description : string.Empty;
+        return CardEffectProperty.TryGetValue(condition, out var property) ? property.Description : string.Empty;
     }
-    public static string GetDescription(S_CardAdditiveConditionEnum condition)
+    public static string GetDescription(S_EngravingEnum condition)
     {
-        return AdditiveConditionProperty.TryGetValue(condition, out var property) ? property.Description : string.Empty;
+        return EngravingEffectProperty.TryGetValue(condition, out var property) ? property.Description : string.Empty;
     }
-    public static string GetDescription(S_CardDebuffConditionEnum condition)
+    #endregion
+    #region 카드 타입 함수
+    public static List<S_CardEffectEnum> GetCardEffectsByType(S_CardTypeEnum type) // 특정 타입의 효과를 모두 가져오기
     {
-        return DebuffConditionProperty.TryGetValue(condition, out var property) ? property.Description : string.Empty;
+        if (type == default)
+        {
+            return Enum.GetValues(typeof(S_CardEffectEnum))
+            .Cast<S_CardEffectEnum>()
+            .Where(x => x != S_CardEffectEnum.None)
+            .ToList();
+        }
+
+        string prefix = type.ToString() + "_";
+
+        return Enum.GetValues(typeof(S_CardEffectEnum))
+            .Cast<S_CardEffectEnum>()
+            .Where(e => e.ToString().StartsWith(prefix))
+            .ToList();
     }
-    public static string GetDescription(S_CardBasicEffectEnum condition)
+    public static S_CardTypeEnum GetCardTypeFromEffect(S_CardEffectEnum effectEnum) // 카드 효과가 어떤 타입인지 반환
     {
-        return BasicEffectProperty.TryGetValue(condition, out var property) ? property.Description : string.Empty;
-    }
-    public static string GetDescription(S_CardAdditiveEffectEnum condition)
-    {
-        return AdditiveEffectProperty.TryGetValue(condition, out var property) ? property.Description : string.Empty;
+        string effectName = effectEnum.ToString();
+
+        int underscoreIndex = effectName.IndexOf('_');
+        if (underscoreIndex < 0)
+        {
+            return S_CardTypeEnum.None; // '_'이 없으면 타입 판단 불가
+        }
+
+        string prefix = effectName.Substring(0, underscoreIndex);
+
+        // 문자열을 enum으로 변환 시도
+        if (Enum.TryParse<S_CardTypeEnum>(prefix, out S_CardTypeEnum result))
+        {
+            return result;
+        }
+
+        return S_CardTypeEnum.None; // 변환 실패 시 fallback
     }
     #endregion
 }

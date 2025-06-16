@@ -1,5 +1,4 @@
 using DG.Tweening;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,54 +8,51 @@ using UnityEngine;
 public class S_StoreInfoSystem : MonoBehaviour
 {
     [Header("프리팹")]
-    [SerializeField] GameObject prefab_ProductObject;
-    [SerializeField] GameObject prefab_DeckCard;
-    [SerializeField] GameObject prefab_StoreCard; // 현재 옵션으로 카드 고르는 상품이 없어서 안 쓰임.
-    [SerializeField] GameObject prefab_UICard;
-    [SerializeField] GameObject prefab_SkillObject;
-    //[SerializeField] GameObject prefab_UISkill; // 이건 실제 Skill인데 ByStore로 효과용으로 만들어도될듯
+    [SerializeField] GameObject prefab_ProductObj;
+    [SerializeField] GameObject prefab_OptionCardObj; // 현재 옵션으로 카드 고르는 상품이 없어서 안 쓰임.
+    [SerializeField] GameObject prefab_OptionTrinketObj;
+    [SerializeField] GameObject prefab_ShowingCardObj;
 
     [Header("씬 오브젝트")]
     [SerializeField] GameObject sprite_Character_Store;
     [SerializeField] GameObject pos_FreeProductsBase;
-    [SerializeField] GameObject pos_ProductsBase;
+    [SerializeField] GameObject pos_PaidProductsBase;
     [SerializeField] GameObject pos_OptionsBase;
-    [SerializeField] GameObject pos_SelectedCardsInDeckBase;
     [SerializeField] SpriteRenderer sprite_BlackBackgroundByStore;
 
     [Header("컴포넌트")]
     GameObject panel_RefreshAndExitBtnsBase;
-    TMP_Text text_SelectCardOrSkill;
     TMP_Text text_RefreshBtn;
 
     [Header("상품")]
     [HideInInspector] public S_ProductInfoEnum BuiedProduct;
     List<GameObject> freeProductObjects = new();
-    List<GameObject> productObjects = new();
-    Vector3 productsStartPos = new Vector3(-3f, 0, 0);
-    Vector3 productsEndPos = new Vector3(3f, 0, 0);
+    List<GameObject> paidProductObjects = new();
+    Vector3 FREE_PRODUCTS_START_POS = new Vector3(-3f, 0, 0);
+    Vector3 FREE_PRODUCTS_END_POS = new Vector3(3f, 0, 0);
+    Vector3 PAID_PRODUCTS_START_POS = new Vector3(-5f, 0, 0);
+    Vector3 PAID_PRODUCTS_END_POS = new Vector3(5f, 0, 0);
     int refreshGold;
     int refreshGoldIncreaseValue;
     const int ORIGIN_REFRESH_GOLD = 2;
     const int ORIGIN_REFRESH_GOLD_INCREASE_VALUE = 1;
 
-    [Header("능력관련 상품")]
-    List<GameObject> skillOptionObjects = new();
-    Vector3 skillOptionStartPos = new Vector3(-5.5f, 0, 0);
-    Vector3 skillOptionEndPos = new Vector3(5.5f, 0, 0);
+    [Header("쓸만한 물건 상품")]
+    List<GameObject> optionObjs = new();
+    Vector3 OPTION_TRINKET_START_POS = new Vector3(-5f, 0, 0);
+    Vector3 OPTION_TRINKET_END_POS = new Vector3(5f, 0, 0);
+    Vector3 MY_TRINKET_START_POS = new Vector3(-6.5f, 0, 0);
+    Vector3 MY_TRINKET_END_POS = new Vector3(6.5f, 0, 0);
 
-    [Header("카드관련 상품")]
-    List<GameObject> selectedCardInDeckObjects = new();
-    Vector3 selectedCardInDeckStartPos = new Vector3(-1.25f, 0, 0);
-    Vector3 selectedCardInDeckEndPos = new Vector3(1.25f, 0, 0);
-    public const float STACK_Z_VALUE = -0.02f;
-
-    Vector2 inStoreTextPos = new Vector2(0, 225);
-    Vector2 inDeckTextPos = new Vector2(0, -105);
-    Vector2 uICardPos = new Vector2(0, 50);
+    [Header("카드 상품")]
+    Vector3 OPTION_CARD_START_POS = new Vector3(-1.25f, 0, 0);
+    Vector3 OPTION_CARD_END_POS = new Vector3(1.25f, 0, 0);
+    Vector3 MY_CARD_START_POS = new Vector3(-1.25f, 0, 0);
+    Vector3 MY_CARD_END_POS = new Vector3(1.25f, 0, 0);
+    const float STACK_Z_VALUE = -0.02f;
 
     [Header("UI")]
-    Vector2 refreshAndExitBtnsHidePos = new Vector2(0, -150);
+    Vector2 refreshAndExitBtnsHidePos = new Vector2(0, -80);
     Vector2 refreshAndExitBtnsOriginPos = new Vector2(0, 85);
 
     Vector3 freeProductsBaseHidePos = new Vector3(-15f, -1.6f, 0);
@@ -75,8 +71,6 @@ public class S_StoreInfoSystem : MonoBehaviour
         TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
 
         panel_RefreshAndExitBtnsBase = Array.Find(transforms, c => c.gameObject.name.Equals("Panel_RefreshAndExitBtnsBase")).gameObject;
-        text_SelectCardOrSkill = Array.Find(texts, c => c.gameObject.name.Equals("Text_SelectCardOrSkill"));
-        text_SelectCardOrSkill.raycastTarget = false;
         text_RefreshBtn = Array.Find(texts, c => c.gameObject.name.Equals("Text_RefreshBtn"));
 
         // 싱글턴
@@ -88,9 +82,6 @@ public class S_StoreInfoSystem : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        // 위치 초기화
-        InitPos();
     }
 
     public async Task StartStore()
@@ -110,17 +101,10 @@ public class S_StoreInfoSystem : MonoBehaviour
         await Task.Delay(Mathf.RoundToInt(S_GameFlowManager.PANEL_APPEAR_TIME * 1000)); // 캔버스 등장 동안 대기
 
         // 데달로스 상점 조우 대사
-        S_DialogInfoSystem.Instance.StartMonologByStore(S_DialogMetaData.GetMonologData("Daedalus_Intro"));
+        S_DialogInfoSystem.Instance.StartMonologByStore(S_DialogMetaData.GetMonologData("Daedalus_Intro"), 8);
     }
+
     #region UI
-    void InitPos()
-    {
-        DisappearDaedalusImage();
-        DisappearProductsBase();
-        DisappearRefreshAndExitBtn();
-        DisappearSelectCardOrSkillText();
-        DisappearBlackBackground();
-    }
     public void AppearDaedalusImage()
     {
         sprite_Character_Store.SetActive(true);
@@ -128,7 +112,7 @@ public class S_StoreInfoSystem : MonoBehaviour
         sprite_Character_Store.GetComponent<SpriteRenderer>().DOKill();
         sprite_Character_Store.GetComponent<SpriteRenderer>().DOFade(1f, S_GameFlowManager.PANEL_APPEAR_TIME);
     }
-    public void DisappearDaedalusImage()
+    public void DisappearDaedalusSprite()
     {
         sprite_Character_Store.GetComponent<SpriteRenderer>().DOKill();
         sprite_Character_Store.GetComponent<SpriteRenderer>().DOFade(0f, S_GameFlowManager.PANEL_APPEAR_TIME)
@@ -137,23 +121,23 @@ public class S_StoreInfoSystem : MonoBehaviour
     public void AppearProductsBase()
     {
         pos_FreeProductsBase.SetActive(true);
-        pos_ProductsBase.SetActive(true);
+        pos_PaidProductsBase.SetActive(true);
 
         pos_FreeProductsBase.transform.DOKill();
-        pos_ProductsBase.transform.DOKill();
+        pos_PaidProductsBase.transform.DOKill();
 
         pos_FreeProductsBase.transform.DOLocalMove(freeProductsBaseOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-        pos_ProductsBase.transform.DOLocalMove(productsBaseOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        pos_PaidProductsBase.transform.DOLocalMove(productsBaseOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
     }
     public void DisappearProductsBase()
     {
         pos_FreeProductsBase.transform.DOKill();
-        pos_ProductsBase.transform.DOKill();
+        pos_PaidProductsBase.transform.DOKill();
 
         pos_FreeProductsBase.transform.DOLocalMove(freeProductsBaseHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
             .OnComplete(() => pos_FreeProductsBase.SetActive(false));
-        pos_ProductsBase.transform.DOLocalMove(productsBaseHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
-            .OnComplete(() => pos_ProductsBase.SetActive(false));
+        pos_PaidProductsBase.transform.DOLocalMove(productsBaseHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
+            .OnComplete(() => pos_PaidProductsBase.SetActive(false));
     }
     public void AppearRefreshAndExitBtn()
     {
@@ -169,7 +153,7 @@ public class S_StoreInfoSystem : MonoBehaviour
         panel_RefreshAndExitBtnsBase.GetComponent<RectTransform>().DOAnchorPos(refreshAndExitBtnsHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
             .OnComplete(() => panel_RefreshAndExitBtnsBase.SetActive(false));
     }
-    public void AppearSelectCardOrSkillText(bool isCardInDeck)
+    public void AppearSelectCardOrTrinketText(bool isCardInDeck)
     {
         int selectCount = GetSelectCount(BuiedProduct);
 
@@ -187,7 +171,7 @@ public class S_StoreInfoSystem : MonoBehaviour
         text_SelectCardOrSkill.DOKill();
         text_SelectCardOrSkill.DOFade(1f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
     }
-    public void DisappearSelectCardOrSkillText()
+    public void DisappearSelectCardOrTrinketText()
     {
         text_SelectCardOrSkill.DOKill();
         text_SelectCardOrSkill.DOFade(0f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
@@ -207,72 +191,63 @@ public class S_StoreInfoSystem : MonoBehaviour
     void GenerateNewProducts() // 상품 생성
     {
         // 무료 상품
-        var freeProducts = new List<S_ProductInfoEnum>() { S_ProductInfoEnum.OracleBall, S_ProductInfoEnum.ParallizeLight, S_ProductInfoEnum.PostureCorrector };
-
+        var freeProducts = new List<S_ProductInfoEnum>() { S_ProductInfoEnum.OracleBall, S_ProductInfoEnum.WasteBasket, S_ProductInfoEnum.ShellGameCup };
         // 상품 생성
         foreach (S_ProductInfoEnum product in freeProducts)
         {
-            GameObject go = Instantiate(prefab_ProductObject, pos_FreeProductsBase.transform);
+            GameObject go = Instantiate(prefab_ProductObj, pos_FreeProductsBase.transform);
             go.transform.localPosition = Vector3.zero;
             go.GetComponent<S_ProductObject>().SetProductInfo(product);
             freeProductObjects.Add(go);
         }
+        // 상품 정렬
+        AlignmentFreeProducts();
 
         // 유료 상품
-        var allProducts = Enum.GetValues(typeof(S_ProductInfoEnum))
+        var allProducts = System.Enum.GetValues(typeof(S_ProductInfoEnum))
             .Cast<S_ProductInfoEnum>()
-            .Where(x => x != S_ProductInfoEnum.None && x != S_ProductInfoEnum.OracleBall && x != S_ProductInfoEnum.ParallizeLight && x != S_ProductInfoEnum.PostureCorrector)
+            .Where(x => x != S_ProductInfoEnum.None && x != S_ProductInfoEnum.OracleBall && x != S_ProductInfoEnum.WasteBasket && x != S_ProductInfoEnum.ShellGameCup)
             .ToList();
-
         // 셔플
         for (int i = allProducts.Count - 1; i > 0; i--)
         {
             int j = UnityEngine.Random.Range(0, i + 1);
             (allProducts[i], allProducts[j]) = (allProducts[j], allProducts[i]); // Fisher–Yates 셔플
         }
-
         // 상품 뽑기
-        var products = allProducts.Take(GetAppearProductCount()).ToList();
-
+        var products = allProducts.Take(GetProductCount()).ToList();
         // 상품 생성
         foreach (S_ProductInfoEnum product in products)
         {
-            GameObject go = Instantiate(prefab_ProductObject, pos_ProductsBase.transform);
+            GameObject go = Instantiate(prefab_ProductObj, pos_PaidProductsBase.transform);
             go.transform.localPosition = Vector3.zero;
             go.GetComponent<S_ProductObject>().SetProductInfo(product);
-            productObjects.Add(go);
+            paidProductObjects.Add(go);
         }
-
         // 상품 정렬
-        AlignmentProducts();
+        AlignmentPaidProducts();
     }
-    int GetAppearProductCount() // 추후 상품 개수 늘리는 능력 생기면 ㄱㄱ
+    int GetProductCount() // 상품 개수 정하기
     {
-        foreach (var s in S_PlayerSkill.Instance.GetPlayerOwnedSkills())
+        if (S_PlayerTrinket.Instance.IsPlayerHavePassive(S_TrinketPassiveEnum.AddProductCount, out S_Trinket tri))
         {
-            if (s.Passive == S_SkillPassiveEnum.AddProductCount)
-            {
-                return 5;
-            }
+            return 5;
         }
 
         return 3;
     }
-    int GetSelectCount(S_ProductInfoEnum product) // 나중에 2개 이상 선택할 게 나오면 ㄱㄱ
-    {
-        return 1;
-    }
     public bool BuyProduct(S_ProductObject product) // S_ProductObject의 구매 버튼에서 호출
     {
-        // 능력이 가득 찼다면 리턴
-        if (product.ProductInfo == S_ProductInfoEnum.StoneOfInsight && !S_PlayerSkill.Instance.CanAddSkill())
+        // 쓸만한 물건이 가득 찼다면 리턴
+        if (product.ProductInfo == S_ProductInfoEnum.ThanatosBundle && S_PlayerTrinket.Instance.IsFullTrinket())
         {
-            S_InGameUISystem.Instance.CreateLog("능력이 가득 찼습니다!");
+            S_InGameUISystem.Instance.CreateLog("더 이상 얻을 수 없습니다.");
             return false;
         }
-        if (product.ProductInfo == S_ProductInfoEnum.ParallizeLight && S_PlayerSkill.Instance.GetPlayerOwnedSkills().Count <= 0)
+        // 제거할 물건이 없어도 리턴
+        if (product.ProductInfo == S_ProductInfoEnum.WasteBasket && S_PlayerTrinket.Instance.GetPlayerOwnedTrinkets().Count <= 0)
         {
-            S_InGameUISystem.Instance.CreateLog("제거할 능력이 없습니다!");
+            S_InGameUISystem.Instance.CreateLog("제거할 쓸만한 물건이 없습니다.");
             return false;
         }
 
@@ -284,23 +259,27 @@ public class S_StoreInfoSystem : MonoBehaviour
 
             // 현재 구매 중인 상품 설정
             BuiedProduct = product.ProductInfo;
+            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.StoreBuying;
+
+            DisappearProductsBase();
+            DisappearRefreshAndExitBtn();
+            AppearSelectCardOrTrinketText(false); // TODO : 예지구슬 별도로 하기
 
             switch (BuiedProduct)
             {
-                case S_ProductInfoEnum.StoneOfInsight: StartSelectSkillOptions(3); break;
-                case S_ProductInfoEnum.GrandBlueprint: StartSelectCardInDeck(); break;
-                case S_ProductInfoEnum.DarkRedBrush: StartSelectCardInDeck(); break;
-                case S_ProductInfoEnum.DiceOfEris: StartSelectCardInDeck(); break;
-                case S_ProductInfoEnum.AstroTool: StartSelectCardInDeck(); break;
-                case S_ProductInfoEnum.FingerOfMomus: StartSelectCardInDeck(); break;
-                case S_ProductInfoEnum.OldLoom: StartSelectCardInDeck(); break;
-                case S_ProductInfoEnum.SacredSeal: StartSelectCardInDeck(); break;
-                case S_ProductInfoEnum.CurseOfMoros: StartSelectCardInDeck(); break;
-                case S_ProductInfoEnum.EmberOfPluto: StartSelectCardInDeck(); break;
-                case S_ProductInfoEnum.OldNeedle: StartSelectCardInDeck(); break;
-                case S_ProductInfoEnum.OldScissors: StartSelectCardInDeck(); break;
-                case S_ProductInfoEnum.ParallizeLight: StartSelectMySkill(); break;
-                case S_ProductInfoEnum.PostureCorrector: StartSelectMySkill(); break;
+                case S_ProductInfoEnum.ThanatosBundle: StartSelectOptionTrinkets(3); break;
+                case S_ProductInfoEnum.OldMold: StartSelectOptionCards(5, S_CardTypeEnum.None); break;
+                case S_ProductInfoEnum.MeltedMold: StartSelectOptionCards(3, S_CardTypeEnum.Str); break;
+                case S_ProductInfoEnum.SpiritualMold: StartSelectOptionCards(3, S_CardTypeEnum.Mind); break;
+                case S_ProductInfoEnum.BrightMold: StartSelectOptionCards(3, S_CardTypeEnum.Luck); break;
+                case S_ProductInfoEnum.DelicateMold: StartSelectOptionCards(3, S_CardTypeEnum.Common); break;
+                case S_ProductInfoEnum.GerasBlueprint: StartSelectMyCards(10, S_CardTypeEnum.None); break;
+                case S_ProductInfoEnum.ErisDice: StartSelectMyCards(10, S_CardTypeEnum.None); break;
+                case S_ProductInfoEnum.HypnosBrush: StartSelectMyCards(10, S_CardTypeEnum.None); break;
+                case S_ProductInfoEnum.OneiroiChisel: StartSelectMyCards(10, S_CardTypeEnum.None); break;
+                case S_ProductInfoEnum.PlutoChisel: StartSelectFilpEngravingCards(); break;
+                case S_ProductInfoEnum.WasteBasket: StartSelectMyTrinkets(); break;
+                case S_ProductInfoEnum.ShellGameCup: StartSelectMyTrinkets(); break;
                 default:
                     S_InGameUISystem.Instance.CreateLog("S_StoreInfoSystem Send : Error At BuyProduct");
                     return false;
@@ -314,317 +293,196 @@ public class S_StoreInfoSystem : MonoBehaviour
         }
     }
     #endregion
-    #region 옵션 카드를 선택하는 상품
-    //public void StartSelectOptionCards(List<S_Card> cards) // 카드를 추가하는 상품 함수
-    //{
-    //    // 버튼 변경
-    //    DisappearUIByBuyStoreProduct();
-    //    AppearUIBySelectItem();
-    //    DisappearStoreTextInStore();
-    //    AppearSelectCardOrLootTextInStore();
-    //    AppearBlackBackground();
-
-    //    // 상품 카드 생성
-    //    foreach (S_Card card in cards)
-    //    {
-    //        GenerateOptionCard(card, optionsBase.transform, itemOptionsList);
-    //    }
-
-    //    // 정렬
-    //    AlignmentOptions(itemOptionsList);
-    //}
-    //public void SelectCardByOption(S_Card card) // 옵션 카드 선택 시 호출 
-    //{
-    //    // 선택한 카드 중에 card가 있는지 검사
-    //    bool same = false;
-    //    foreach (GameObject go in selectedItemList)
-    //    {
-    //        if (go.GetComponent<S_StoreCard>().CardInfo == card)
-    //        {
-    //            same = true;
-    //            break;
-    //        }
-    //        else
-    //        {
-    //            same = false;
-    //        }
-    //    }
-
-    //    // card가 없었다면 고른 카드 개수에 따른 처리
-    //    if (!same)
-    //    {
-    //        if (BuiedProduct.SelectCount > selectedItemList.Count)
-    //        {
-    //            GenerateOptionCard(card, selectedItemBase.transform, selectedItemList);
-    //        }
-    //        else if (BuiedProduct.SelectCount == selectedItemList.Count) // 골라야하는 개수가 같다면 이전에 선택한 것을 제거하고 추가
-    //        {
-    //            Destroy(selectedItemList[0]);
-    //            selectedItemList.RemoveAt(0);
-
-    //            GenerateOptionCard(card, selectedItemBase.transform, selectedItemList);
-    //        }
-    //    }
-
-    //    // 선택된 옵션 카드임을 체크
-    //    foreach (GameObject go in selectedItemList)
-    //    {
-    //        go.GetComponent<S_StoreCard>().IsSelectedOptionCard = true;
-    //    }
-
-    //    // 정렬
-    //    AlignmentOptions(selectedItemList);
-
-    //    // 골라야하는걸 다 골랐는지 체크
-    //    if (BuiedProduct.SelectCount == selectedItemList.Count)
-    //    {
-    //        isSelectRequiredItems = true;
-    //    }
-    //    else
-    //    {
-    //        isSelectRequiredItems = false;
-    //    }
-    //}
-    //public void GenerateOptionCard(S_Card card, Transform parent, List<GameObject> list) // 덱에 추가할 카드 선택이나 제외할 카드 선택 시에도 사용 예정
-    //{
-    //    // 옵션 카드 생성
-    //    GameObject go = Instantiate(prefab_StoreCard);
-    //    go.GetComponent<S_StoreCard>().SetCardInfo(card);
-    //    go.transform.SetParent(parent, true);
-    //    go.transform.localPosition = Vector3.zero;
-
-    //    // 리스트에 추가(추후 관리용)
-    //    list.Add(go);
-    //}
-    #endregion
-    #region 덱에서 카드 선택하는 상품(S_StoreCard 대신 S_DeckCard 씀)
-    public async void StartSelectCardInDeck()
+    #region 카드 선택 상품
+    public void StartSelectOptionCards(int count, S_CardTypeEnum cardType)
     {
-        // 덱 정보 UI 설정
-        await S_DeckInfoSystem.Instance.OpenDeckInfoByStore();
-    }
-    public void SelectCardInDeck(S_Card card, Vector3 cardPos) // S_DeckCard가 호출
-    {
-        int selectCount = GetSelectCount(BuiedProduct);
-
-        bool same = false;
-        foreach (GameObject go in selectedCardInDeckObjects)
+        for (int i = 0; i < count; i++)
         {
-            if (go.GetComponent<S_DeckCard>().CardInfo == card)
+            GenerateOptionCardObj(S_CardManager.Instance.GenerateRandomCard(cardType));
+        }
+
+        AlignmentOptionCards();
+    }
+    public void StartSelectMyCards(int count, S_CardTypeEnum cardType)
+    {
+        List<S_Card> cards = S_PlayerCard.Instance.GetDeckCards();
+
+        if (cards.Count > count)
+        {
+            cards = cards.OrderBy(x => Random.value).Take(count).ToList(); 
+        }
+        
+        foreach (S_Card card in cards)
+        {
+            GenerateOptionCardObj(card);
+        }
+
+        AlignmentMyCards();
+    }
+    public void StartSelectFilpEngravingCards()
+    {
+        foreach (S_Card card in S_PlayerCard.Instance.GetDeckCards())
+        {
+            if (S_CardEffectMetadata.CanFlipEngraving.Contains(card.Engraving))
             {
-                same = true;
-                CancelSelectCardInDeck(go, cardPos); // 만약 같은 카드를 클릭했다면 선택 취소
-                break;
-            }
-            else
-            {
-                same = false;
+                GenerateOptionCardObj(card);
             }
         }
 
-        if (!same)
-        {
-            if (selectCount > selectedCardInDeckObjects.Count) // 골라야하는 개수가 아직 남았다면 선택한 카드를 그냥 추가
-            {
-                GenerateSelectCardInDeck(card, cardPos);
-            }
-            else if (selectCount == selectedCardInDeckObjects.Count) // 골라야하는 개수가 같다면 이전에 선택한 것을 제거하고 추가
-            {
-                Destroy(selectedCardInDeckObjects[0]);
-                selectedCardInDeckObjects.RemoveAt(0);
-
-                GenerateSelectCardInDeck(card, cardPos);
-            }
-        }
-
-        // 정렬
-        AlignmentSelectedCardsInDeck();
+        AlignmentMyCards();
     }
-    public void GenerateSelectCardInDeck(S_Card card, Vector3 cardPos)
+    public void GenerateOptionCardObj(S_Card card) // 옵션 카드 생성
     {
         // 카드 생성
-        GameObject go = Instantiate(prefab_DeckCard, pos_SelectedCardsInDeckBase.transform);
-        go.GetComponent<S_DeckCard>().SetCardInfo(card);
-        go.transform.position = cardPos;
-
-        // 리스트에 추가
-        selectedCardInDeckObjects.Add(go);
-    }
-    public void CancelSelectCardInDeck(GameObject exceptedCard, Vector3 cardPos)
-    {
-        selectedCardInDeckObjects.Remove(exceptedCard);
-        Destroy(exceptedCard);
-    }
-    public async void DecideSelectCard() // S_DeckInfoSystem의 선택 버튼에서 호출
-    {
-        int selectCount = GetSelectCount(BuiedProduct);
-
-        if (selectCount == selectedCardInDeckObjects.Count)
-        {
-            // 덱 정보 UI 설정
-            await S_DeckInfoSystem.Instance.ClosetDeckInfoByStore();
-
-            S_Card card = selectedCardInDeckObjects[0].GetComponent<S_DeckCard>().CardInfo;
-
-            GameObject go = Instantiate(prefab_UICard, transform);
-            go.GetComponent<S_UICard>().SetCardInfo(card);
-
-            switch (BuiedProduct)
-            {
-                case S_ProductInfoEnum.GrandBlueprint:
-                    S_CardManager.Instance.ChangeAllProperty(card);
-                    break;
-                case S_ProductInfoEnum.DarkRedBrush:
-                    S_CardManager.Instance.ChangeAnotherSuit(card);
-                    break;
-                case S_ProductInfoEnum.DiceOfEris:
-                    S_CardManager.Instance.ChangeAnotherNumber(card);
-                    break;
-                case S_ProductInfoEnum.AstroTool:
-                    S_CardManager.Instance.ChangeAllCondition(card);
-                    break;
-                case S_ProductInfoEnum.FingerOfMomus:
-                    S_CardManager.Instance.ChangeAllEffect(card);
-                    break;
-                case S_ProductInfoEnum.OldLoom:
-                    S_CardManager.Instance.ChangeBasicCondition(card);
-                    S_CardManager.Instance.ChangedDebuffCondition(card);
-                    S_CardManager.Instance.ChangeAllEffect(card);
-                    break;
-                case S_ProductInfoEnum.SacredSeal:
-                    S_CardManager.Instance.ChangeAdditiveCondition(card);
-                    S_CardManager.Instance.ChangedDebuffCondition(card);
-                    S_CardManager.Instance.ChangeAllEffect(card);
-                    break;
-                case S_ProductInfoEnum.CurseOfMoros:
-                    S_CardManager.Instance.ChangeBasicCondition(card);
-                    S_CardManager.Instance.ChangeAdditiveCondition(card);
-                    S_CardManager.Instance.AddDebuffCondition(card);
-                    S_CardManager.Instance.ChangeAllEffect(card);
-                    break;
-                case S_ProductInfoEnum.EmberOfPluto:
-                    S_CardManager.Instance.ChangeBasicCondition(card);
-                    S_CardManager.Instance.ChangeAdditiveCondition(card);
-                    S_CardManager.Instance.DeleteDebuffCondition(card);
-                    S_CardManager.Instance.ChangeAllEffect(card);
-                    break;
-                case S_ProductInfoEnum.OldNeedle:
-                    S_CardManager.Instance.ChangeBasicEffect(card);
-                    S_CardManager.Instance.ChangeAllCondition(card);
-                    break;
-                case S_ProductInfoEnum.OldScissors:
-                    S_CardManager.Instance.ChangeAdditiveEffect(card);
-                    S_CardManager.Instance.ChangeAllCondition(card);
-                    break;
-            }
-
-            go.GetComponent<S_UICard>().ChangeCardVFXByStore(card);
-
-            // 선택 카드 지우기
-            foreach (GameObject go1 in selectedCardInDeckObjects)
-            {
-                Sequence seq = DOTween.Sequence();
-
-                seq.AppendCallback(() => go1.GetComponent<S_DeckCard>().SetAlphaValue(0, S_GameFlowManager.PANEL_APPEAR_TIME))
-                    .AppendInterval(S_GameFlowManager.PANEL_APPEAR_TIME)
-                    .OnComplete(() => Destroy(go1));
-            }
-            selectedCardInDeckObjects.Clear();
-
-            BuiedProduct = S_ProductInfoEnum.None;
-
-            S_DeckInfoSystem.Instance.SetDeckCardInfo();
-        }
-        else
-        {
-            S_InGameUISystem.Instance.CreateLog("먼저 카드를 선택해주세요!");
-        }
-    }
-    #endregion
-    #region 옵션 능력을 선택하는 상품
-    public void StartSelectSkillOptions(int count) // 옵션 능력 선택용
-    {
-        // 상품 숨기고 새로고침도 숨기고 검은 화면 등장
-        DisappearDaedalusImage();
-        DisappearProductsBase();
-        DisappearRefreshAndExitBtn();
-        AppearSelectCardOrSkillText(false);
-        AppearBlackBackground();
-
-        List<S_Skill> skills = S_SkillList.Instance.PickRandomSkills(count);
-
-        // 상품 전리품 생성
-        foreach (S_Skill skill in skills)
-        {
-            GenerateSkillOption(skill);
-        }
-
-        // 정렬
-        AlignmentSkillOptions();
-    }
-    public void StartSelectMySkill() // 내 능력 선택용
-    {
-        // 상품 숨기고 새로고침도 숨기고 검은 화면 등장
-        DisappearDaedalusImage();
-        DisappearProductsBase();
-        DisappearRefreshAndExitBtn();
-        AppearSelectCardOrSkillText(false);
-        AppearBlackBackground();
-
-        List<S_Skill> skills = S_PlayerSkill.Instance.GetPlayerOwnedSkills();
-
-        // 상품 전리품 생성
-        for (int i = 0; i < skills.Count; i++)
-        {
-            GenerateSkillOption(skills[i]);
-        }
-
-        // 정렬
-        AlignmentSkillOptions();
-    }
-    public void GenerateSkillOption(S_Skill skill) // 능력 옵션 생성
-    {
-        // 카드 생성
-        GameObject go = Instantiate(prefab_SkillObject, pos_OptionsBase.transform);
-        go.GetComponent<S_SkillObject>().SetSkillInfo(skill);
+        GameObject go = Instantiate(prefab_OptionCardObj, pos_OptionsBase.transform);
+        go.GetComponent<S_OptionCardObj>().SetCardInfo(card);
         go.transform.localPosition = Vector3.zero;
 
         // 리스트에 추가
-        skillOptionObjects.Add(go);
+        optionObjs.Add(go);
     }
-    public void DecideSkillOption(S_Skill skill) // S_SKillObject의 선택 버튼에서 호출
+    public async void DecideSelectCard(S_Card card) // 옵션 선택 버튼에서 호출
     {
-        switch(BuiedProduct)
+        // 선택한 카드를 가운데로 이동시키기
+        GameObject obj = null;
+        foreach (GameObject go in optionObjs)
         {
-            case S_ProductInfoEnum.ParallizeLight:
-                S_PlayerSkill.Instance.RemoveSkill(skill);
+            if (go.GetComponent<S_OptionCardObj>().CardInfo == card)
+            {
+                obj = go;
                 break;
-            case S_ProductInfoEnum.PostureCorrector:
-                S_PlayerSkill.Instance.ChangeSkillIndexToFirst(skill);
+            }
+        }
+        GameObject showingObj = Instantiate(prefab_ShowingCardObj);
+        showingObj.transform.SetParent(pos_OptionsBase.transform);
+        showingObj.transform.localPosition = obj.transform.localPosition;
+        showingObj.transform.eulerAngles = obj.transform.eulerAngles;
+        showingObj.transform.localScale = obj.transform.localScale;
+        // 옵션 제거
+        DestroyOptionObjs();
+        // 가운데로 이동
+        await showingObj.GetComponent<S_ShowingCardObj>().MoveShowingPos();
+  
+
+        // 단순 획득이면 바로얻기
+        if (BuiedProduct == S_ProductInfoEnum.OldMold || BuiedProduct == S_ProductInfoEnum.MeltedMold || BuiedProduct == S_ProductInfoEnum.SpiritualMold ||
+            BuiedProduct == S_ProductInfoEnum.BrightMold || BuiedProduct == S_ProductInfoEnum.DelicateMold)
+        {
+            S_PlayerCard.Instance.AddCard(card);
+            await showingObj.GetComponent<S_ShowingCardObj>().MoveDeckPos();
+        }
+        else // 효과나 각인 변경이면 추가 효과 후 얻기
+        {
+            switch (BuiedProduct)
+            {
+                case S_ProductInfoEnum.ErisDice:
+                    S_CardManager.Instance.ChangeCardEffect(card);
+                    await showingObj.GetComponent<S_ShowingCardObj>().ChangeCardEffect();
+                    break;
+                case S_ProductInfoEnum.GerasBlueprint:
+                    S_CardManager.Instance.ChangeSameTypeCardEffect(card);
+                    await showingObj.GetComponent<S_ShowingCardObj>().ChangeCardEffect();
+                    break;
+                case S_ProductInfoEnum.HypnosBrush:
+                    S_CardManager.Instance.DeleteEngraving(card);
+                    await showingObj.GetComponent<S_ShowingCardObj>().ChangeEngraving();
+                    break;
+                case S_ProductInfoEnum.OneiroiChisel:
+                    S_CardManager.Instance.GrantEngraving(card);
+                    await showingObj.GetComponent<S_ShowingCardObj>().ChangeEngraving();
+                    break;
+                case S_ProductInfoEnum.PlutoChisel:
+                    S_CardManager.Instance.FlipEngraving(card);
+                    await showingObj.GetComponent<S_ShowingCardObj>().ChangeEngraving();
+                    break;
+            }
+
+            await showingObj.GetComponent<S_ShowingCardObj>().MoveDeckPos();
+        }
+        S_DeckInfoSystem.Instance.SetDeckCardInfo();
+
+        // 각종 UI를 구매 전으로, BuiedProduct 초기화, GameFlowState 되돌리기
+        EndDecide(); 
+    }
+    #endregion
+    #region 쓸만한 물건 선택 상품
+    public void StartSelectOptionTrinkets(int count) // 옵션 능력 선택용
+    {
+        // 상품 숨기기, 새로고침 숨기기 TODO : 상품 고르는 텍스틑 데달로스가 말하도록
+        DisappearProductsBase();
+        DisappearRefreshAndExitBtn();
+        AppearSelectCardOrTrinketText(false);
+
+        List<S_Trinket> tris = S_TrinketList.PickRandomSkills(count);
+
+        // 상품 전리품 생성
+        foreach (S_Trinket tri in tris)
+        {
+            GenerateOptionTrinketObj(tri);
+        }
+
+        // 정렬
+        AlignmentOptionTrinkets();
+    }
+    public void StartSelectMyTrinkets() // 내 능력 선택용
+    {
+        // 상품 숨기고 새로고침도 숨기고 검은 화면 등장
+        DisappearProductsBase();
+        DisappearRefreshAndExitBtn();
+        AppearSelectCardOrTrinketText(false);
+
+        List<S_Trinket> tris = S_PlayerTrinket.Instance.GetPlayerOwnedTrinkets();
+
+        // 상품 전리품 생성
+        for (int i = 0; i < tris.Count; i++)
+        {
+            GenerateOptionTrinketObj(tris[i]);
+        }
+
+        // 정렬
+        AlignmentMyTrinkets();
+    }
+    public void GenerateOptionTrinketObj(S_Trinket tri) // 옵션 쓸만한 물건 생성
+    {
+        // 카드 생성
+        GameObject go = Instantiate(prefab_OptionTrinketObj, pos_OptionsBase.transform);
+        go.GetComponent<S_OptionTrinketObj>().SetTrinketInfo(tri);
+        go.transform.localPosition = Vector3.zero;
+
+        // 리스트에 추가
+        optionObjs.Add(go);
+    }
+    public void DecideTrinketOption(S_Trinket tri) // 옵션 선택 버튼에서 호출 TODO : . 스택에 나타나게 전반적 조정 필요. 추가로 MeetCondition도.
+    {
+
+
+        GameObject obj = null;
+        foreach (GameObject go in optionObjs)
+        {
+            if (go.GetComponent<S_OptionTrinketObj>().TrinketInfo == tri)
+            {
+                obj = go;
                 break;
-            case S_ProductInfoEnum.StoneOfInsight:
-                S_PlayerSkill.Instance.AddSkill(skill);
+            }
+        }
+
+        switch (BuiedProduct) // pos 넘길 때 worldPos로
+        {
+            case S_ProductInfoEnum.ThanatosBundle:
+                S_PlayerTrinket.Instance.AddTrinket(tri, obj.transform.position);
+                break;
+            case S_ProductInfoEnum.WasteBasket:
+                S_PlayerTrinket.Instance.RemoveTrinket(tri);
+                break;
+            case S_ProductInfoEnum.ShellGameCup:
+                S_PlayerTrinket.Instance.SwapLeftTrinketIndex(tri);
+                S_TrinketInfoSystem.Instance.SwapLeftTrinketObjIndex(tri);
                 break;
         }
-        S_SkillInfoSystem.Instance.UpdateSkillObject();
+        S_TrinketInfoSystem.Instance.UpdateTrinketObjState();
 
-        // 옵션 비우기
-        foreach (GameObject go in skillOptionObjects)
-        {
-            Sequence seq = DOTween.Sequence();
-            seq.AppendCallback(() => go.GetComponent<S_SkillObject>().SetAlphaValue(0, S_GameFlowManager.PANEL_APPEAR_TIME))
-                .AppendInterval(S_GameFlowManager.PANEL_APPEAR_TIME)
-                .OnComplete(() => Destroy(go));
-        }
-        skillOptionObjects.Clear();
-
-        AppearDaedalusImage();
-        AppearProductsBase();
-        AppearRefreshAndExitBtn();
-        DisappearSelectCardOrSkillText();
-        DisappearBlackBackground();
-
-        BuiedProduct = S_ProductInfoEnum.None;
+        DestroyOptionObjs();
+        EndDecide();
     }
     #endregion
     #region 버튼 함수
@@ -637,7 +495,7 @@ public class S_StoreInfoSystem : MonoBehaviour
 
             // 새로고침 비용 증가
             refreshGold += refreshGoldIncreaseValue;
-            text_RefreshBtn.text = $"새로고침\n{refreshGold} 골드";
+            text_RefreshBtn.text = $"새로고침 : {refreshGold} 골드";
 
             // 기존에 있던 상품 제거
             foreach (GameObject go in freeProductObjects)
@@ -645,11 +503,11 @@ public class S_StoreInfoSystem : MonoBehaviour
                 Destroy(go);
             }
             freeProductObjects.Clear();
-            foreach (GameObject go in productObjects)
+            foreach (GameObject go in paidProductObjects)
             {
                 Destroy(go);
             }
-            productObjects.Clear();
+            paidProductObjects.Clear();
 
             // 구매한 상품 비활성화
             BuiedProduct = S_ProductInfoEnum.None;
@@ -665,10 +523,10 @@ public class S_StoreInfoSystem : MonoBehaviour
     public void ClickExit()
     {
         S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
-        DisappearDaedalusImage();
+        DisappearDaedalusSprite();
         DisappearProductsBase();
         DisappearRefreshAndExitBtn();
-        DisappearSelectCardOrSkillText();
+        DisappearSelectCardOrTrinketText();
         DisappearBlackBackground();
 
         // 기존에 있던 상품 제거
@@ -677,11 +535,11 @@ public class S_StoreInfoSystem : MonoBehaviour
             Destroy(go);
         }
         freeProductObjects.Clear();
-        foreach (GameObject go in productObjects)
+        foreach (GameObject go in paidProductObjects)
         {
             Destroy(go);
         }
-        productObjects.Clear();
+        paidProductObjects.Clear();
 
         BuiedProduct = S_ProductInfoEnum.None;
 
@@ -689,10 +547,46 @@ public class S_StoreInfoSystem : MonoBehaviour
     }
     #endregion
     #region 보조 함수
-    void AlignmentProducts() // 상품 정렬
+    void DestroyOptionObjs() // 옵션 모두 제거
+    {
+        foreach (GameObject go in optionObjs)
+        {
+            Sequence seq = DOTween.Sequence();
+
+            seq.AppendCallback(() =>
+            {
+                if (go.TryGetComponent<S_TrinketObj>(out var trinket))
+                {
+                    trinket.SetAlphaValue(0, S_GameFlowManager.PANEL_APPEAR_TIME);
+                }
+                else if (go.TryGetComponent<S_DeckCardObj>(out var card))
+                {
+                    card.SetAlphaValue(0, S_GameFlowManager.PANEL_APPEAR_TIME);
+                }
+            })
+                .AppendInterval(S_GameFlowManager.PANEL_APPEAR_TIME)
+                .OnComplete(() => Destroy(go));
+        }
+        optionObjs.Clear();
+    }
+    void EndDecide() // 각종 UI를 구매 전으로, BuiedProduct 초기화, GameFlowState 되돌리기
+    {
+        AppearProductsBase();
+        AppearRefreshAndExitBtn();
+        DisappearSelectCardOrTrinketText();
+
+        BuiedProduct = S_ProductInfoEnum.None;
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.Store;
+    }  
+    int GetSelectCount(S_ProductInfoEnum product) // 나중에 2개 이상 선택할 게 나오면 ㄱㄱ
+    {
+        return 1;
+    }
+
+    void AlignmentFreeProducts() // 상품 정렬
     {
         // 무료 상품 정렬
-        List<PRS> originCardPRS1 = SetObjectsPos(freeProductObjects.Count, productsStartPos, productsEndPos);
+        List<PRS> originCardPRS1 = SetObjectsPos(freeProductObjects.Count, FREE_PRODUCTS_START_POS, FREE_PRODUCTS_END_POS);
 
         for (int i = 0; i < freeProductObjects.Count; i++)
         {
@@ -703,63 +597,105 @@ public class S_StoreInfoSystem : MonoBehaviour
             freeProductObjects[i].GetComponent<S_ProductObject>().OriginOrder = (i + 1) * 10;
             freeProductObjects[i].GetComponent<S_ProductObject>().SetOrder(freeProductObjects[i].GetComponent<S_ProductObject>().OriginOrder);
 
-            freeProductObjects[i].transform.DOLocalMove(freeProductObjects[i].GetComponent<S_ProductObject>().OriginPRS.Pos, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.2f);
-            freeProductObjects[i].transform.DOScale(freeProductObjects[i].GetComponent<S_ProductObject>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.2f);
+            freeProductObjects[i].transform.DOLocalMove(freeProductObjects[i].GetComponent<S_ProductObject>().OriginPRS.Pos, 0);
+            freeProductObjects[i].transform.DOScale(freeProductObjects[i].GetComponent<S_ProductObject>().OriginPRS.Scale, 0);
         }
-
+    }
+    void AlignmentPaidProducts() // 상품 정렬
+    {
         // 유료 상품 정렬
-        List<PRS> originCardPRS2 = SetObjectsPos(productObjects.Count, productsStartPos, productsEndPos);
+        List<PRS> originCardPRS2 = SetObjectsPos(paidProductObjects.Count, PAID_PRODUCTS_START_POS, PAID_PRODUCTS_END_POS);
 
-        for (int i = 0; i < productObjects.Count; i++)
+        for (int i = 0; i < paidProductObjects.Count; i++)
         {
             // 위치 설정
-            productObjects[i].GetComponent<S_ProductObject>().OriginPRS = originCardPRS2[i];
+            paidProductObjects[i].GetComponent<S_ProductObject>().OriginPRS = originCardPRS2[i];
 
             // 소팅오더 설정
-            productObjects[i].GetComponent<S_ProductObject>().OriginOrder = (i + 1) * 10;
-            productObjects[i].GetComponent<S_ProductObject>().SetOrder(productObjects[i].GetComponent<S_ProductObject>().OriginOrder);
+            paidProductObjects[i].GetComponent<S_ProductObject>().OriginOrder = (i + 1) * 10;
+            paidProductObjects[i].GetComponent<S_ProductObject>().SetOrder(paidProductObjects[i].GetComponent<S_ProductObject>().OriginOrder);
 
-            productObjects[i].transform.DOLocalMove(productObjects[i].GetComponent<S_ProductObject>().OriginPRS.Pos, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.2f);
-            productObjects[i].transform.DOScale(productObjects[i].GetComponent<S_ProductObject>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.2f);
+            paidProductObjects[i].transform.DOLocalMove(paidProductObjects[i].GetComponent<S_ProductObject>().OriginPRS.Pos, 0);
+            paidProductObjects[i].transform.DOScale(paidProductObjects[i].GetComponent<S_ProductObject>().OriginPRS.Scale, 0);
         }
     }
-    void AlignmentSkillOptions() // 각종 옵션(카드나 기술) 정렬
-    {
-        List<PRS> originCardPRS = SetObjectsPos(skillOptionObjects.Count, skillOptionStartPos, skillOptionEndPos);
 
-        for (int i = 0; i < skillOptionObjects.Count; i++)
+    void AlignmentOptionTrinkets() // 쓸만한 물건 정렬
+    {
+        List<PRS> originCardPRS = SetObjectsPos(optionObjs.Count, OPTION_TRINKET_START_POS, OPTION_TRINKET_END_POS);
+
+        for (int i = 0; i < optionObjs.Count; i++)
         {
             // 카드 위치 설정
-            skillOptionObjects[i].GetComponent<S_SkillObject>().OriginPRS = originCardPRS[i];
+            optionObjs[i].GetComponent<S_TrinketObj>().OriginPRS = originCardPRS[i];
 
             // 소팅오더 설정
-            skillOptionObjects[i].GetComponent<S_SkillObject>().OriginOrder = (i + 1) * 10;
-            skillOptionObjects[i].GetComponent<S_SkillObject>().SetOrder(skillOptionObjects[i].GetComponent<S_SkillObject>().OriginOrder);
+            optionObjs[i].GetComponent<S_TrinketObj>().OriginOrder = (i + 1) * 10;
+            optionObjs[i].GetComponent<S_TrinketObj>().SetOrder(optionObjs[i].GetComponent<S_TrinketObj>().OriginOrder);
 
             // 위치 설정
-            skillOptionObjects[i].transform.DOLocalMove(skillOptionObjects[i].GetComponent<S_SkillObject>().OriginPRS.Pos, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.2f).SetEase(Ease.OutQuart);
-            skillOptionObjects[i].transform.DOScale(skillOptionObjects[i].GetComponent<S_SkillObject>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.2f).SetEase(Ease.OutQuart);
+            optionObjs[i].transform.DOLocalMove(optionObjs[i].GetComponent<S_TrinketObj>().OriginPRS.Pos, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.2f).SetEase(Ease.OutQuart);
+            optionObjs[i].transform.DOScale(optionObjs[i].GetComponent<S_TrinketObj>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.2f).SetEase(Ease.OutQuart);
         }
     }
-    void AlignmentSelectedCardsInDeck() // 덱에서 고른 카드 정렬
+    void AlignmentMyTrinkets() // 쓸만한 물건 정렬
     {
-        List<PRS> originCardPRS = SetObjectsPos(selectedCardInDeckObjects.Count, selectedCardInDeckStartPos, selectedCardInDeckEndPos);
+        List<PRS> originCardPRS = SetObjectsPos(optionObjs.Count, MY_TRINKET_START_POS, MY_TRINKET_END_POS);
 
-        for (int i = 0; i < selectedCardInDeckObjects.Count; i++)
+        for (int i = 0; i < optionObjs.Count; i++)
         {
             // 카드 위치 설정
-            selectedCardInDeckObjects[i].GetComponent<S_DeckCard>().OriginPRS = originCardPRS[i];
-            selectedCardInDeckObjects[i].GetComponent<S_DeckCard>().OriginPRS.Scale = new Vector3(1.35f, 1.35f, 1.35f);
+            optionObjs[i].GetComponent<S_TrinketObj>().OriginPRS = originCardPRS[i];
 
             // 소팅오더 설정
-            selectedCardInDeckObjects[i].GetComponent<S_DeckCard>().OriginOrder = (i + 1) * 10;
-            selectedCardInDeckObjects[i].GetComponent<S_DeckCard>().SetOrder(selectedCardInDeckObjects[i].GetComponent<S_DeckCard>().OriginOrder);
+            optionObjs[i].GetComponent<S_TrinketObj>().OriginOrder = (i + 1) * 10;
+            optionObjs[i].GetComponent<S_TrinketObj>().SetOrder(optionObjs[i].GetComponent<S_TrinketObj>().OriginOrder);
+
+            // 위치 설정
+            optionObjs[i].transform.DOLocalMove(optionObjs[i].GetComponent<S_TrinketObj>().OriginPRS.Pos, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.2f).SetEase(Ease.OutQuart);
+            optionObjs[i].transform.DOScale(optionObjs[i].GetComponent<S_TrinketObj>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.2f).SetEase(Ease.OutQuart);
+        }
+    }
+
+    void AlignmentOptionCards() // 카드 정렬
+    {
+        List<PRS> originCardPRS = SetObjectsPos(optionObjs.Count, OPTION_CARD_START_POS, OPTION_CARD_END_POS);
+
+        for (int i = 0; i < optionObjs.Count; i++)
+        {
+            // 카드 위치 설정
+            optionObjs[i].GetComponent<S_DeckCardObj>().OriginPRS = originCardPRS[i];
+            optionObjs[i].GetComponent<S_DeckCardObj>().OriginPRS.Scale = new Vector3(1.35f, 1.35f, 1.35f);
+
+            // 소팅오더 설정
+            optionObjs[i].GetComponent<S_DeckCardObj>().OriginOrder = (i + 1) * 10;
+            optionObjs[i].GetComponent<S_DeckCardObj>().SetOrder(optionObjs[i].GetComponent<S_DeckCardObj>().OriginOrder);
 
             // 카드의 위치 설정
-            selectedCardInDeckObjects[i].transform.DOLocalMove(selectedCardInDeckObjects[i].GetComponent<S_DeckCard>().OriginPRS.Pos, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.5f).SetEase(Ease.OutQuart);
-            selectedCardInDeckObjects[i].transform.DOScale(selectedCardInDeckObjects[i].GetComponent<S_DeckCard>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.5f).SetEase(Ease.OutQuart);
+            optionObjs[i].transform.DOLocalMove(optionObjs[i].GetComponent<S_DeckCardObj>().OriginPRS.Pos, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.5f).SetEase(Ease.OutQuart);
+            optionObjs[i].transform.DOScale(optionObjs[i].GetComponent<S_DeckCardObj>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.5f).SetEase(Ease.OutQuart);
         }
     }
+    void AlignmentMyCards() // 카드 정렬
+    {
+        List<PRS> originCardPRS = SetObjectsPos(optionObjs.Count, MY_CARD_START_POS, MY_CARD_END_POS);
+
+        for (int i = 0; i < optionObjs.Count; i++)
+        {
+            // 카드 위치 설정
+            optionObjs[i].GetComponent<S_DeckCardObj>().OriginPRS = originCardPRS[i];
+            optionObjs[i].GetComponent<S_DeckCardObj>().OriginPRS.Scale = new Vector3(1.35f, 1.35f, 1.35f);
+
+            // 소팅오더 설정
+            optionObjs[i].GetComponent<S_DeckCardObj>().OriginOrder = (i + 1) * 10;
+            optionObjs[i].GetComponent<S_DeckCardObj>().SetOrder(optionObjs[i].GetComponent<S_DeckCardObj>().OriginOrder);
+
+            // 카드의 위치 설정
+            optionObjs[i].transform.DOLocalMove(optionObjs[i].GetComponent<S_DeckCardObj>().OriginPRS.Pos, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.5f).SetEase(Ease.OutQuart);
+            optionObjs[i].transform.DOScale(optionObjs[i].GetComponent<S_DeckCardObj>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.5f).SetEase(Ease.OutQuart);
+        }
+    }
+
     List<PRS> SetObjectsPos(int count, Vector3 startPos, Vector3 endPos) // 위치 설정하는 메서드
     {
         if (count <= 0) return null;
@@ -796,6 +732,7 @@ public class S_StoreInfoSystem : MonoBehaviour
 
         return results;
     }
+
     public void GenerateMonologByPointerEnter(S_ProductInfoEnum product)
     {
         string monolog = S_DialogMetaData.GetMonologData($"Daedalus_{product}");
@@ -804,16 +741,16 @@ public class S_StoreInfoSystem : MonoBehaviour
         {
             (S_Foe, int) nextFoe = S_FoeManager.Instance.PeekNextFoe();
 
-            string des = nextFoe.Item1.AbilityDescription;
+            string description = nextFoe.Item1.AbilityDescription;
             int health = nextFoe.Item2;
 
             if (S_GameFlowManager.Instance.CurrentTrial % 9 == 8)
             {
-                monolog = $"{monolog}\n다음은 {nextFoe.Item1.Name}입니다.\n{health}의 체력에\n{des}의 권능을 부리십니다...\n부디 여신의 시련도 그대의 강한 의지로 버텨낼 수 있기를...";
+                monolog = $"{monolog}\n다음은 {nextFoe.Item1.Name}입니다.\n{health}의 체력에\n{description}의 권능을 부리십니다...\n부디 여신의 시련도 그대의 강한 의지로 버텨낼 수 있기를...";
             }
             else
             {
-                monolog = $"{monolog}\n다음 적은 {nextFoe.Item1.Name}.\n체력은 {health}며\n능력은 {des} 군요..\n그리고 여신을 알현하기까지 {8 - (S_GameFlowManager.Instance.CurrentTrial % 9)}개의 시련이 남아있습니다.";
+                monolog = $"{monolog}\n다음 적은 {nextFoe.Item1.Name}.\n체력은 {health}며\n능력은 {description} 군요..\n그리고 여신을 알현하기까지 {8 - (S_GameFlowManager.Instance.CurrentTrial % 9)}개의 시련이 남아있습니다.";
             }
         }
 
@@ -838,21 +775,20 @@ public enum S_StoreSlotEnum
 public enum S_ProductInfoEnum
 {
     None,
-    StoneOfInsight,
-    GrandBlueprint,
-    DarkRedBrush,
-    DiceOfEris,
-    AstroTool,
-    FingerOfMomus,
-    OldLoom,
-    SacredSeal,
-    CurseOfMoros,
-    EmberOfPluto,
-    OldNeedle,
-    OldScissors,
+    ThanatosBundle,
+    OldMold,
+    MeltedMold,
+    SpiritualMold,
+    BrightMold,
+    DelicateMold,
+    ErisDice,
+    GerasBlueprint,
+    HypnosBrush,
+    OneiroiChisel,
+    PlutoChisel,
 
     // 무료
     OracleBall,
-    ParallizeLight,
-    PostureCorrector,
+    WasteBasket,
+    ShellGameCup,
 }
