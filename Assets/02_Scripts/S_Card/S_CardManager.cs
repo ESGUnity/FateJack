@@ -28,18 +28,18 @@ public class S_CardManager : MonoBehaviour
     {
         List<S_Card> cardList = new();
 
-        Dictionary<S_CardTypeEnum, S_CardEffectEnum> cEList = new()
+        List<(S_CardTypeEnum, S_CardEffectEnum)> cEList = new()
         {
-            { S_CardTypeEnum.Str, S_CardEffectEnum.Str_Stimulus }, { S_CardTypeEnum.Str, S_CardEffectEnum.Str_Stimulus }, { S_CardTypeEnum.Str, S_CardEffectEnum.Str_Stimulus },
-            { S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_Focus }, { S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_Focus }, { S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_Focus },
-            { S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Chance }, { S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Chance }, { S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Chance },
-            { S_CardTypeEnum.Str, S_CardEffectEnum.Str_ZenithBreak }, { S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_DeepInsight }, { S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Disorder },
-            { S_CardTypeEnum.Str, S_CardEffectEnum.Str_WrathStrike },{ S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_PreciseStrike }, { S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_SuddenStrike },
+            (S_CardTypeEnum.Str, S_CardEffectEnum.Str_Stimulus), (S_CardTypeEnum.Str, S_CardEffectEnum.Str_Stimulus), (S_CardTypeEnum.Str, S_CardEffectEnum.Str_Stimulus),
+            (S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_Focus), (S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_Focus), (S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_Focus),
+            (S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Chance), (S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Chance), (S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Chance),
+            (S_CardTypeEnum.Str, S_CardEffectEnum.Str_ZenithBreak), (S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_DeepInsight), (S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Disorder),
+            (S_CardTypeEnum.Str, S_CardEffectEnum.Str_WrathStrike),(S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_PreciseStrike), (S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_SuddenStrike)
         };
 
-        foreach (S_CardTypeEnum cE in cEList.Keys)
+        foreach ((S_CardTypeEnum, S_CardEffectEnum) cE in cEList)
         {
-            cardList.Add(GenerateCard(cE, cEList[cE]));
+            cardList.Add(GenerateCard(cE.Item1, cE.Item2));
         }
 
         return cardList;

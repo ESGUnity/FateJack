@@ -1,24 +1,26 @@
 using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public class S_StoreInfoSystem : MonoBehaviour
 {
     [Header("프리팹")]
+    [SerializeField] GameObject prefab_Section;
     [SerializeField] GameObject prefab_ProductObj;
     [SerializeField] GameObject prefab_OptionCardObj; // 현재 옵션으로 카드 고르는 상품이 없어서 안 쓰임.
     [SerializeField] GameObject prefab_OptionTrinketObj;
     [SerializeField] GameObject prefab_ShowingCardObj;
+    GameObject instance_Section;
 
     [Header("씬 오브젝트")]
-    [SerializeField] GameObject sprite_Character_Store;
     [SerializeField] GameObject pos_FreeProductsBase;
     [SerializeField] GameObject pos_PaidProductsBase;
     [SerializeField] GameObject pos_OptionsBase;
-    [SerializeField] SpriteRenderer sprite_BlackBackgroundByStore;
 
     [Header("컴포넌트")]
     GameObject panel_RefreshAndExitBtnsBase;
@@ -32,6 +34,7 @@ public class S_StoreInfoSystem : MonoBehaviour
     Vector3 FREE_PRODUCTS_END_POS = new Vector3(3f, 0, 0);
     Vector3 PAID_PRODUCTS_START_POS = new Vector3(-5f, 0, 0);
     Vector3 PAID_PRODUCTS_END_POS = new Vector3(5f, 0, 0);
+    Vector3 PRODUCTS_SCALE_VALUE = new Vector3(0.9f, 0.9f, 0.9f);
     int refreshGold;
     int refreshGoldIncreaseValue;
     const int ORIGIN_REFRESH_GOLD = 2;
@@ -55,10 +58,14 @@ public class S_StoreInfoSystem : MonoBehaviour
     Vector2 refreshAndExitBtnsHidePos = new Vector2(0, -80);
     Vector2 refreshAndExitBtnsOriginPos = new Vector2(0, 85);
 
-    Vector3 freeProductsBaseHidePos = new Vector3(-15f, -1.6f, 0);
-    Vector3 freeProductsBaseOriginPos = new Vector3(-5f, -1.6f, 0);
-    Vector3 productsBaseHidePos = new Vector3(15f, -1.6f, 0);
-    Vector3 productsBaseOriginPos = new Vector3(5f, -1.6f, 0);
+    Vector3 FREE_PRODUCTS_BASE_HIDE_POS = new Vector3(-15f, -1.6f, 0);
+    Vector3 FREE_PRODUCTS_BASE_ORIGIN_POS = new Vector3(-5f, -1.6f, 0);
+    Vector3 PAID_PRODUCTS_BASE_HIDE_POS = new Vector3(15f, -1.6f, 0);
+    Vector3 PAID_PRODUCTS_BASE_ORIGIN_POS = new Vector3(5f, -1.6f, 0);
+
+    [Header("캐싱")]
+    SpriteRenderer sprite_Character;
+    string merchantName;
 
     // 싱글턴
     static S_StoreInfoSystem instance;
@@ -70,8 +77,8 @@ public class S_StoreInfoSystem : MonoBehaviour
         Transform[] transforms = GetComponentsInChildren<Transform>(true);
         TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
 
-        panel_RefreshAndExitBtnsBase = Array.Find(transforms, c => c.gameObject.name.Equals("Panel_RefreshAndExitBtnsBase")).gameObject;
-        text_RefreshBtn = Array.Find(texts, c => c.gameObject.name.Equals("Text_RefreshBtn"));
+        panel_RefreshAndExitBtnsBase = System.Array.Find(transforms, c => c.gameObject.name.Equals("Panel_RefreshAndExitBtnsBase")).gameObject;
+        text_RefreshBtn = System.Array.Find(texts, c => c.gameObject.name.Equals("Text_RefreshBtn"));
 
         // 싱글턴
         if (instance == null)
@@ -95,29 +102,40 @@ public class S_StoreInfoSystem : MonoBehaviour
         text_RefreshBtn.text = $"새로고침\n{refreshGold} 골드";
 
         // UI 관리
-        AppearDaedalusImage();
-        AppearProductsBase();
         AppearRefreshAndExitBtn();
-        await Task.Delay(Mathf.RoundToInt(S_GameFlowManager.PANEL_APPEAR_TIME * 1000)); // 캔버스 등장 동안 대기
+        instance_Section = Instantiate(prefab_Section);
+        instance_Section.GetComponent<S_SectionObj>().SpawnSection("Character_Store");
+        await S_GameFlowManager.WaitPanelAppearTimeAsync(); // 캔버스 등장 동안 대기
 
-        // 데달로스 상점 조우 대사
-        S_DialogInfoSystem.Instance.StartMonologByStore(S_DialogMetaData.GetMonologData("Daedalus_Intro"), 8);
+        // 상점에 들어오면 상품 등장
+        AppearProductsBase();
+
+        sprite_Character = instance_Section.GetComponent<S_SectionObj>().sprite_Character.GetComponent<SpriteRenderer>();
+        merchantName = S_DialogMetaData.GetMerchantName(S_GameFlowManager.Instance.CurrentTrial);
+
+        // 상점 조우 대사
+        S_DialogInfoSystem.Instance.StartMonolog(sprite_Character, merchantName, S_DialogMetaData.GetStoreMonologData("Store_Intro"), 8);
     }
+    public async Task StartStoreByTutorial()
+    {
+        // 상품 생성
+        GenerateNewProductsByTutorial();
 
+        // 새로고침 골드 초기화
+        refreshGold = ORIGIN_REFRESH_GOLD;
+        refreshGoldIncreaseValue = ORIGIN_REFRESH_GOLD_INCREASE_VALUE;
+        text_RefreshBtn.text = $"새로고침\n{refreshGold} 골드";
+
+        // UI 관리
+        AppearRefreshAndExitBtn();
+        instance_Section = Instantiate(prefab_Section);
+        instance_Section.GetComponent<S_SectionObj>().SpawnSection("Daedalus");
+        await S_GameFlowManager.WaitPanelAppearTimeAsync(); // 캔버스 등장 동안 대기
+
+        // 상점에 들어오면 상품 등장
+        AppearProductsBase();
+    }
     #region UI
-    public void AppearDaedalusImage()
-    {
-        sprite_Character_Store.SetActive(true);
-
-        sprite_Character_Store.GetComponent<SpriteRenderer>().DOKill();
-        sprite_Character_Store.GetComponent<SpriteRenderer>().DOFade(1f, S_GameFlowManager.PANEL_APPEAR_TIME);
-    }
-    public void DisappearDaedalusSprite()
-    {
-        sprite_Character_Store.GetComponent<SpriteRenderer>().DOKill();
-        sprite_Character_Store.GetComponent<SpriteRenderer>().DOFade(0f, S_GameFlowManager.PANEL_APPEAR_TIME)
-            .OnComplete(() => sprite_Character_Store.SetActive(false));
-    }
     public void AppearProductsBase()
     {
         pos_FreeProductsBase.SetActive(true);
@@ -126,17 +144,17 @@ public class S_StoreInfoSystem : MonoBehaviour
         pos_FreeProductsBase.transform.DOKill();
         pos_PaidProductsBase.transform.DOKill();
 
-        pos_FreeProductsBase.transform.DOLocalMove(freeProductsBaseOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-        pos_PaidProductsBase.transform.DOLocalMove(productsBaseOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        pos_FreeProductsBase.transform.DOLocalMove(FREE_PRODUCTS_BASE_ORIGIN_POS, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        pos_PaidProductsBase.transform.DOLocalMove(PAID_PRODUCTS_BASE_ORIGIN_POS, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
     }
     public void DisappearProductsBase()
     {
         pos_FreeProductsBase.transform.DOKill();
         pos_PaidProductsBase.transform.DOKill();
 
-        pos_FreeProductsBase.transform.DOLocalMove(freeProductsBaseHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
+        pos_FreeProductsBase.transform.DOLocalMove(FREE_PRODUCTS_BASE_HIDE_POS, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
             .OnComplete(() => pos_FreeProductsBase.SetActive(false));
-        pos_PaidProductsBase.transform.DOLocalMove(productsBaseHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
+        pos_PaidProductsBase.transform.DOLocalMove(PAID_PRODUCTS_BASE_HIDE_POS, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
             .OnComplete(() => pos_PaidProductsBase.SetActive(false));
     }
     public void AppearRefreshAndExitBtn()
@@ -153,38 +171,13 @@ public class S_StoreInfoSystem : MonoBehaviour
         panel_RefreshAndExitBtnsBase.GetComponent<RectTransform>().DOAnchorPos(refreshAndExitBtnsHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
             .OnComplete(() => panel_RefreshAndExitBtnsBase.SetActive(false));
     }
-    public void AppearSelectCardOrTrinketText(bool isCardInDeck)
+    public void AppearMonlogByBuiedProduct()
     {
-        int selectCount = GetSelectCount(BuiedProduct);
-
-        if (isCardInDeck)
-        {
-            text_SelectCardOrSkill.text = $"카드를 {selectCount}장 선택해주세요.";
-            text_SelectCardOrSkill.GetComponent<RectTransform>().anchoredPosition = inDeckTextPos;
-        }
-        else
-        {
-            text_SelectCardOrSkill.text = $"스킬을 {selectCount}개 선택해주세요.";
-            text_SelectCardOrSkill.GetComponent<RectTransform>().anchoredPosition = inStoreTextPos;
-        }
-
-        text_SelectCardOrSkill.DOKill();
-        text_SelectCardOrSkill.DOFade(1f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        S_DialogInfoSystem.Instance.StartMonolog(sprite_Character, merchantName, S_ProductMetaData.GetBuiedProductDescription(BuiedProduct), 9999);
     }
-    public void DisappearSelectCardOrTrinketText()
+    public void DisappearMonologByBuiedProduct()
     {
-        text_SelectCardOrSkill.DOKill();
-        text_SelectCardOrSkill.DOFade(0f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-    }
-    public void AppearBlackBackground()
-    {
-        sprite_BlackBackgroundByStore.DOKill();
-        sprite_BlackBackgroundByStore.DOFade(0.8f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-    }
-    public void DisappearBlackBackground()
-    {
-        sprite_BlackBackgroundByStore.DOKill();
-        sprite_BlackBackgroundByStore.DOFade(0f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        S_DialogInfoSystem.Instance.EndMonolog();
     }
     #endregion
     #region 상품 관련
@@ -197,7 +190,7 @@ public class S_StoreInfoSystem : MonoBehaviour
         {
             GameObject go = Instantiate(prefab_ProductObj, pos_FreeProductsBase.transform);
             go.transform.localPosition = Vector3.zero;
-            go.GetComponent<S_ProductObject>().SetProductInfo(product);
+            go.GetComponent<S_ProductObj>().SetProductInfo(product);
             freeProductObjects.Add(go);
         }
         // 상품 정렬
@@ -221,9 +214,39 @@ public class S_StoreInfoSystem : MonoBehaviour
         {
             GameObject go = Instantiate(prefab_ProductObj, pos_PaidProductsBase.transform);
             go.transform.localPosition = Vector3.zero;
-            go.GetComponent<S_ProductObject>().SetProductInfo(product);
+            go.GetComponent<S_ProductObj>().SetProductInfo(product);
             paidProductObjects.Add(go);
         }
+        // 상품 정렬
+        AlignmentPaidProducts();
+    }
+    void GenerateNewProductsByTutorial() // 상품 생성
+    {
+        // 무료 상품
+        var freeProducts = new List<S_ProductInfoEnum>() { S_ProductInfoEnum.OracleBall, S_ProductInfoEnum.WasteBasket, S_ProductInfoEnum.ShellGameCup };
+        // 상품 생성
+        foreach (S_ProductInfoEnum product in freeProducts)
+        {
+            GameObject go = Instantiate(prefab_ProductObj, pos_FreeProductsBase.transform);
+            go.transform.localPosition = Vector3.zero;
+            go.GetComponent<S_ProductObj>().SetProductInfo(product);
+            freeProductObjects.Add(go);
+        }
+        // 상품 정렬
+        AlignmentFreeProducts();
+
+        // 유료 상품
+        // 상품 생성
+        bool isFree = true; // 상품 1개만 무료로 만들기 위함.
+        for (int i = 0; i < GetProductCount(); i++)
+        {
+            GameObject go = Instantiate(prefab_ProductObj, pos_PaidProductsBase.transform);
+            go.transform.localPosition = Vector3.zero;
+            go.GetComponent<S_ProductObj>().SetProductInfo(S_ProductInfoEnum.OneiroiChisel, isFree);
+            paidProductObjects.Add(go);
+            isFree = false;
+        }
+  
         // 상품 정렬
         AlignmentPaidProducts();
     }
@@ -236,19 +259,19 @@ public class S_StoreInfoSystem : MonoBehaviour
 
         return 3;
     }
-    public bool BuyProduct(S_ProductObject product) // S_ProductObject의 구매 버튼에서 호출
+    public void BuyProduct(S_ProductObj product) // S_ProductObject의 구매 버튼에서 호출
     {
         // 쓸만한 물건이 가득 찼다면 리턴
         if (product.ProductInfo == S_ProductInfoEnum.ThanatosBundle && S_PlayerTrinket.Instance.IsFullTrinket())
         {
-            S_InGameUISystem.Instance.CreateLog("더 이상 얻을 수 없습니다.");
-            return false;
+            S_DialogInfoSystem.Instance.StartMonolog(sprite_Character, merchantName, S_DialogMetaData.GetStoreMonologData("Store_FullTrinket"), 8);
+            return;
         }
         // 제거할 물건이 없어도 리턴
         if (product.ProductInfo == S_ProductInfoEnum.WasteBasket && S_PlayerTrinket.Instance.GetPlayerOwnedTrinkets().Count <= 0)
         {
-            S_InGameUISystem.Instance.CreateLog("제거할 쓸만한 물건이 없습니다.");
-            return false;
+            S_DialogInfoSystem.Instance.StartMonolog(sprite_Character, merchantName, S_DialogMetaData.GetStoreMonologData("Store_EmptyTrinket"), 8);
+            return;
         }
 
         // 구매할만큼 골드가 있다면 구매
@@ -260,10 +283,6 @@ public class S_StoreInfoSystem : MonoBehaviour
             // 현재 구매 중인 상품 설정
             BuiedProduct = product.ProductInfo;
             S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.StoreBuying;
-
-            DisappearProductsBase();
-            DisappearRefreshAndExitBtn();
-            AppearSelectCardOrTrinketText(false); // TODO : 예지구슬 별도로 하기
 
             switch (BuiedProduct)
             {
@@ -278,18 +297,29 @@ public class S_StoreInfoSystem : MonoBehaviour
                 case S_ProductInfoEnum.HypnosBrush: StartSelectMyCards(10, S_CardTypeEnum.None); break;
                 case S_ProductInfoEnum.OneiroiChisel: StartSelectMyCards(10, S_CardTypeEnum.None); break;
                 case S_ProductInfoEnum.PlutoChisel: StartSelectFilpEngravingCards(); break;
+
+                case S_ProductInfoEnum.OracleBall: break;
                 case S_ProductInfoEnum.WasteBasket: StartSelectMyTrinkets(); break;
                 case S_ProductInfoEnum.ShellGameCup: StartSelectMyTrinkets(); break;
-                default:
-                    S_InGameUISystem.Instance.CreateLog("S_StoreInfoSystem Send : Error At BuyProduct");
-                    return false;
             }
-            return true;
+
+            if (BuiedProduct != S_ProductInfoEnum.OracleBall)
+            {
+                DisappearProductsBase();
+                DisappearRefreshAndExitBtn();
+            }
+
+            AppearMonlogByBuiedProduct(); 
+
+            // 예지구슬이면 구매가 안 되니까 None으로
+            if (BuiedProduct == S_ProductInfoEnum.OracleBall)
+            {
+                BuiedProduct = S_ProductInfoEnum.None;
+            }
         }
         else // 골드가 없다면
         {
-            S_InGameUISystem.Instance.CreateLog("골드가 부족합니다.");
-            return false;
+            S_DialogInfoSystem.Instance.StartMonolog(sprite_Character, merchantName, S_DialogMetaData.GetStoreMonologData("Store_NotEnoughGold"), 8);
         }
     }
     #endregion
@@ -408,11 +438,6 @@ public class S_StoreInfoSystem : MonoBehaviour
     #region 쓸만한 물건 선택 상품
     public void StartSelectOptionTrinkets(int count) // 옵션 능력 선택용
     {
-        // 상품 숨기기, 새로고침 숨기기 TODO : 상품 고르는 텍스틑 데달로스가 말하도록
-        DisappearProductsBase();
-        DisappearRefreshAndExitBtn();
-        AppearSelectCardOrTrinketText(false);
-
         List<S_Trinket> tris = S_TrinketList.PickRandomSkills(count);
 
         // 상품 전리품 생성
@@ -426,11 +451,6 @@ public class S_StoreInfoSystem : MonoBehaviour
     }
     public void StartSelectMyTrinkets() // 내 능력 선택용
     {
-        // 상품 숨기고 새로고침도 숨기고 검은 화면 등장
-        DisappearProductsBase();
-        DisappearRefreshAndExitBtn();
-        AppearSelectCardOrTrinketText(false);
-
         List<S_Trinket> tris = S_PlayerTrinket.Instance.GetPlayerOwnedTrinkets();
 
         // 상품 전리품 생성
@@ -452,10 +472,8 @@ public class S_StoreInfoSystem : MonoBehaviour
         // 리스트에 추가
         optionObjs.Add(go);
     }
-    public void DecideTrinketOption(S_Trinket tri) // 옵션 선택 버튼에서 호출 TODO : . 스택에 나타나게 전반적 조정 필요. 추가로 MeetCondition도.
+    public void DecideTrinketOption(S_Trinket tri) // 옵션 선택 버튼에서 호출
     {
-
-
         GameObject obj = null;
         foreach (GameObject go in optionObjs)
         {
@@ -517,17 +535,18 @@ public class S_StoreInfoSystem : MonoBehaviour
         }
         else
         {
-            S_InGameUISystem.Instance.CreateLog("골드가 부족합니다.");
+            S_DialogInfoSystem.Instance.StartMonolog(instance_Section.GetComponent<S_SectionObj>().sprite_Character.GetComponent<SpriteRenderer>(), "데달로스", S_DialogMetaData.GetStoreMonologData("Daedalus_NotEnoughGold"), 8);
         }
     }
-    public void ClickExit()
+    public async void ClickExit()
     {
         S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
-        DisappearDaedalusSprite();
+
+        // UI 연출 및 캐릭터 들어가기
         DisappearProductsBase();
         DisappearRefreshAndExitBtn();
-        DisappearSelectCardOrTrinketText();
-        DisappearBlackBackground();
+        DisappearMonologByBuiedProduct();
+        await instance_Section.GetComponent<S_SectionObj>().ExitCharacter();
 
         // 기존에 있던 상품 제거
         foreach (GameObject go in freeProductObjects)
@@ -540,10 +559,11 @@ public class S_StoreInfoSystem : MonoBehaviour
             Destroy(go);
         }
         paidProductObjects.Clear();
-
         BuiedProduct = S_ProductInfoEnum.None;
 
-        S_GameFlowManager.Instance.StartTrial();
+        // 상점 섹션 퇴장과 동시에 적 섹션 등장
+        instance_Section.GetComponent<S_SectionObj>().ExitSection();
+        S_GameFlowManager.Instance.StartTrial(); // 적 섹션 등장 포함.
     }
     #endregion
     #region 보조 함수
@@ -573,7 +593,7 @@ public class S_StoreInfoSystem : MonoBehaviour
     {
         AppearProductsBase();
         AppearRefreshAndExitBtn();
-        DisappearSelectCardOrTrinketText();
+        DisappearMonologByBuiedProduct();
 
         BuiedProduct = S_ProductInfoEnum.None;
         S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.Store;
@@ -581,6 +601,32 @@ public class S_StoreInfoSystem : MonoBehaviour
     int GetSelectCount(S_ProductInfoEnum product) // 나중에 2개 이상 선택할 게 나오면 ㄱㄱ
     {
         return 1;
+    }
+    public void GenerateMonologByHoverProduct(S_ProductInfoEnum product) // 포인터 엔터 시 독백 출력
+    {
+        StringBuilder sb = new();
+
+        // 상품 설명 추가
+        sb.Append(S_ProductMetaData.GetProductDescription(product));
+
+        // 예지 구슬이라면
+        if (product == S_ProductInfoEnum.OracleBall)
+        {
+            (S_Foe, int) nextFoe = S_FoeManager.Instance.PeekNextFoe();
+
+            int health = nextFoe.Item2;
+
+            if (S_GameFlowManager.Instance.CurrentTrial % 9 == 8)
+            {
+                sb.Append($"\n다음은 세 여신 중 한 분이신 {nextFoe.Item1.Name}이십니다. 체력은 {health}며 {S_DialogMetaData.GetStoreMonologData($"Store_{nextFoe.Item1.Name}")} 부디 여신의 시련도 그대의 강한 의지로 버텨낼 수 있기를...");
+            }
+            else
+            {
+                sb.Append($"\n다음 적은 {nextFoe.Item1.Name}입니다. 체력은 {health}며 {S_DialogMetaData.GetStoreMonologData($"Store_{nextFoe.Item1.Name}")} 그리고 다음 여신까지 {8 - (S_GameFlowManager.Instance.CurrentTrial % 9)}개의 시련이 남아있습니다.");
+            }
+        }
+
+        S_DialogInfoSystem.Instance.StartMonolog(sprite_Character, merchantName, sb.ToString(), 9999);
     }
 
     void AlignmentFreeProducts() // 상품 정렬
@@ -591,14 +637,14 @@ public class S_StoreInfoSystem : MonoBehaviour
         for (int i = 0; i < freeProductObjects.Count; i++)
         {
             // 위치 설정
-            freeProductObjects[i].GetComponent<S_ProductObject>().OriginPRS = originCardPRS1[i];
+            freeProductObjects[i].GetComponent<S_ProductObj>().OriginPRS = originCardPRS1[i];
 
             // 소팅오더 설정
-            freeProductObjects[i].GetComponent<S_ProductObject>().OriginOrder = (i + 1) * 10;
-            freeProductObjects[i].GetComponent<S_ProductObject>().SetOrder(freeProductObjects[i].GetComponent<S_ProductObject>().OriginOrder);
+            freeProductObjects[i].GetComponent<S_ProductObj>().OriginOrder = (i + 1) * 10;
+            freeProductObjects[i].GetComponent<S_ProductObj>().SetOrder(freeProductObjects[i].GetComponent<S_ProductObj>().OriginOrder);
 
-            freeProductObjects[i].transform.DOLocalMove(freeProductObjects[i].GetComponent<S_ProductObject>().OriginPRS.Pos, 0);
-            freeProductObjects[i].transform.DOScale(freeProductObjects[i].GetComponent<S_ProductObject>().OriginPRS.Scale, 0);
+            freeProductObjects[i].transform.DOLocalMove(freeProductObjects[i].GetComponent<S_ProductObj>().OriginPRS.Pos, 0);
+            freeProductObjects[i].transform.DOScale(freeProductObjects[i].GetComponent<S_ProductObj>().OriginPRS.Scale, 0);
         }
     }
     void AlignmentPaidProducts() // 상품 정렬
@@ -609,17 +655,16 @@ public class S_StoreInfoSystem : MonoBehaviour
         for (int i = 0; i < paidProductObjects.Count; i++)
         {
             // 위치 설정
-            paidProductObjects[i].GetComponent<S_ProductObject>().OriginPRS = originCardPRS2[i];
+            paidProductObjects[i].GetComponent<S_ProductObj>().OriginPRS = originCardPRS2[i];
 
             // 소팅오더 설정
-            paidProductObjects[i].GetComponent<S_ProductObject>().OriginOrder = (i + 1) * 10;
-            paidProductObjects[i].GetComponent<S_ProductObject>().SetOrder(paidProductObjects[i].GetComponent<S_ProductObject>().OriginOrder);
+            paidProductObjects[i].GetComponent<S_ProductObj>().OriginOrder = (i + 1) * 10;
+            paidProductObjects[i].GetComponent<S_ProductObj>().SetOrder(paidProductObjects[i].GetComponent<S_ProductObj>().OriginOrder);
 
-            paidProductObjects[i].transform.DOLocalMove(paidProductObjects[i].GetComponent<S_ProductObject>().OriginPRS.Pos, 0);
-            paidProductObjects[i].transform.DOScale(paidProductObjects[i].GetComponent<S_ProductObject>().OriginPRS.Scale, 0);
+            paidProductObjects[i].transform.DOLocalMove(paidProductObjects[i].GetComponent<S_ProductObj>().OriginPRS.Pos, 0);
+            paidProductObjects[i].transform.DOScale(paidProductObjects[i].GetComponent<S_ProductObj>().OriginPRS.Scale, 0);
         }
     }
-
     void AlignmentOptionTrinkets() // 쓸만한 물건 정렬
     {
         List<PRS> originCardPRS = SetObjectsPos(optionObjs.Count, OPTION_TRINKET_START_POS, OPTION_TRINKET_END_POS);
@@ -656,7 +701,6 @@ public class S_StoreInfoSystem : MonoBehaviour
             optionObjs[i].transform.DOScale(optionObjs[i].GetComponent<S_TrinketObj>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.2f).SetEase(Ease.OutQuart);
         }
     }
-
     void AlignmentOptionCards() // 카드 정렬
     {
         List<PRS> originCardPRS = SetObjectsPos(optionObjs.Count, OPTION_CARD_START_POS, OPTION_CARD_END_POS);
@@ -695,7 +739,6 @@ public class S_StoreInfoSystem : MonoBehaviour
             optionObjs[i].transform.DOScale(optionObjs[i].GetComponent<S_DeckCardObj>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime() * 0.5f).SetEase(Ease.OutQuart);
         }
     }
-
     List<PRS> SetObjectsPos(int count, Vector3 startPos, Vector3 endPos) // 위치 설정하는 메서드
     {
         if (count <= 0) return null;
@@ -726,41 +769,11 @@ public class S_StoreInfoSystem : MonoBehaviour
             Vector3 pos = Vector3.Lerp(startPos, endPos, lerps[i]);
             pos = new Vector3(pos.x, pos.y, i * STACK_Z_VALUE);
             Vector3 rot = Vector3.zero;
-            Vector3 scale = new Vector3(1, 1, 1);
+            Vector3 scale = PRODUCTS_SCALE_VALUE;
             results.Add(new PRS(pos, rot, scale));
         }
 
         return results;
-    }
-
-    public void GenerateMonologByPointerEnter(S_ProductInfoEnum product)
-    {
-        string monolog = S_DialogMetaData.GetMonologData($"Daedalus_{product}");
-
-        if (product == S_ProductInfoEnum.OracleBall)
-        {
-            (S_Foe, int) nextFoe = S_FoeManager.Instance.PeekNextFoe();
-
-            string description = nextFoe.Item1.AbilityDescription;
-            int health = nextFoe.Item2;
-
-            if (S_GameFlowManager.Instance.CurrentTrial % 9 == 8)
-            {
-                monolog = $"{monolog}\n다음은 {nextFoe.Item1.Name}입니다.\n{health}의 체력에\n{description}의 권능을 부리십니다...\n부디 여신의 시련도 그대의 강한 의지로 버텨낼 수 있기를...";
-            }
-            else
-            {
-                monolog = $"{monolog}\n다음 적은 {nextFoe.Item1.Name}.\n체력은 {health}며\n능력은 {description} 군요..\n그리고 여신을 알현하기까지 {8 - (S_GameFlowManager.Instance.CurrentTrial % 9)}개의 시련이 남아있습니다.";
-            }
-        }
-
-        S_DialogInfoSystem.Instance.StartMonologByStore(monolog, 9999);
-    }
-    public void GenerateMonologByBuyOracleBall()
-    {
-        string monolog = "그건 팔지 않습니다!\n사실 굉장히 위험한 물건이거든요..\n죄송합니다. 다른 물건은 얼마든지 가져가세요!\n대신 돈은 주시구요!";
-
-        S_DialogInfoSystem.Instance.StartMonologByStore(monolog, 9999);
     }
     #endregion
 }

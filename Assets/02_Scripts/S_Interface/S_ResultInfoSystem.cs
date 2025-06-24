@@ -101,7 +101,7 @@ public class S_ResultInfoSystem : MonoBehaviour
 
         text_FinalGoldReward.text = "0";
     }
-    public async Task CalcResultGoldAsync(int health, int determination, int omen, int greed)
+    public async Task CalcResultGoldAsync(S_Foe foe, int health, int determination, int omen, int greed)
     {
         int gold = 0;
         GameObject go1 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
@@ -111,9 +111,7 @@ public class S_ResultInfoSystem : MonoBehaviour
         ChangeGoldVFXTween(int.Parse(text_FinalGoldReward.text), gold, text_FinalGoldReward);
         await go1.transform.DOScale(Vector3.one, RESULT_VFX_TIME).SetEase(Ease.OutBounce).AsyncWaitForCompletion();
 
-        if (S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Clotho_Elite ||
-             S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Lachesis_Elite ||
-             S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Atropos_Elite)
+        if (foe.FoeType == S_FoeTypeEnum.Clotho_Elite || foe.FoeType == S_FoeTypeEnum.Lachesis_Elite || foe.FoeType == S_FoeTypeEnum.Atropos_Elite)
         {
             GameObject go2 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
             go2.GetComponent<S_ResultBase>().SetResultBase("엘리트 적 추가 골드", "5");
@@ -123,9 +121,7 @@ public class S_ResultInfoSystem : MonoBehaviour
             await go2.transform.DOScale(Vector3.one, RESULT_VFX_TIME).SetEase(Ease.OutBounce).AsyncWaitForCompletion();
         }
 
-        if (S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Clotho_Boss ||
-             S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Lachesis_Boss ||
-             S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Atropos_Boss)
+        if (foe.FoeType == S_FoeTypeEnum.Clotho_Boss || foe.FoeType == S_FoeTypeEnum.Lachesis_Boss || foe.FoeType == S_FoeTypeEnum.Atropos_Boss)
         {
             GameObject go2 = Instantiate(resultItem, layoutGroup_ResultListBase.transform);
             go2.GetComponent<S_ResultBase>().SetResultBase("보스 추가 골드", "5");

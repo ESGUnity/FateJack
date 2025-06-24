@@ -336,7 +336,7 @@ public class S_PlayerCard : MonoBehaviour
             }
         }
 
-        if (!card.IsInDeck) // 덱에 없는 카드라면 추가 표기
+        if (!card.IsInDeck) // 덱에 없는 카드라면 추가 표기하기
         {
             HashSet<S_CardEffectEnum> expectedStatIncreases = new()
             {
@@ -359,7 +359,7 @@ public class S_PlayerCard : MonoBehaviour
             }
             else if (expectedHarmValue.Contains(card.CardEffect))
             {
-                sb.Append($"\n(예상 피해량 : {card.ExpectedValue}");
+                sb.Append($"\n(예상 피해량 : {card.ExpectedValue})");
             }
         }
 

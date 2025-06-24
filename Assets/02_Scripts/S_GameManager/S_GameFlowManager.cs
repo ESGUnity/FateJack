@@ -1,10 +1,6 @@
-using DG.Tweening;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class S_GameFlowManager : MonoBehaviour
@@ -16,12 +12,6 @@ public class S_GameFlowManager : MonoBehaviour
 
     [Header("연출 관련")]
     public const float PANEL_APPEAR_TIME = 0.5f;
-    public static Vector3 InGameCameraPos { get; set; }
-    public static Vector3 InGameCameraRot { get; set; }
-    public static Vector3 DeckCameraPos { get; set; }
-    public static Vector3 DeckCameraRot { get; set; }
-    public static Vector3 StoreCameraPos { get; set; }
-    public static Vector3 StoreCameraRot { get; set; }
 
     [Header("보상 관련")]
     [HideInInspector] public int SlayFoeGold = 5;
@@ -42,13 +32,6 @@ public class S_GameFlowManager : MonoBehaviour
 
     void Awake()
     {
-        InGameCameraPos = new Vector3(0, 22.7f, -13f);
-        InGameCameraRot = new Vector3(60f, 0, 0);
-        DeckCameraPos = new Vector3(0, 27f, -10.9f);
-        DeckCameraRot = new Vector3(85f, 0, 0);
-        StoreCameraPos = new Vector3(0f, 22.9f, -3.15f);
-        StoreCameraRot = new Vector3(60, 0, 0);
-
         // 싱글턴
         if (instance == null)
         {
@@ -64,16 +47,22 @@ public class S_GameFlowManager : MonoBehaviour
         CurrentTrial = 0;
         GameFlowState = S_GameFlowStateEnum.None;
 
+        // 시련 시작 시 설정
+        S_PlayerCard.Instance.InitDeckByStartGame(); // 덱 초기화
+        S_PlayerStat.Instance.InitStatsByStartGame(); // 스탯 초기화
+        S_PlayerTrinket.Instance.InitTrinketsByStartGame(); // 초기 전리품 생성
+        S_FoeManager.Instance.GenerateFoeByStartGame(); // 모든 적 생성
+
         if (!PlayerPrefs.HasKey("TutorialCompleted"))
         {
             PlayerPrefs.SetInt("TutorialCompleted", 0);
             PlayerPrefs.Save();
 
-            S_TutorialManager.Instance.StartTutorial();
+            S_TutorialManager.Instance.StartTrialByTutorial();
         }
         else if (PlayerPrefs.GetInt("TutorialCompleted") == 0)
         {
-            S_TutorialManager.Instance.StartTutorial();
+            S_TutorialManager.Instance.StartTrialByTutorial();
         }
         else
         {
@@ -91,7 +80,7 @@ public class S_GameFlowManager : MonoBehaviour
         //}
 
         GameFlowState = S_GameFlowStateEnum.None;
- 
+
         // 시련 및 턴 설정
         CurrentTrial++;
         S_StatInfoSystem.Instance.ChangeCurrentTrialText();
@@ -99,32 +88,39 @@ public class S_GameFlowManager : MonoBehaviour
 
         // TODO : 모이라이의 다이얼로그
 
-        // 첫 시련 시 설정
-        if (CurrentTrial == 1)
-        {
-            S_PlayerCard.Instance.InitDeckByStartGame(); // 덱 초기화
-            S_PlayerStat.Instance.InitStatsByStartGame(); // 스탯 초기화
-            S_PlayerTrinket.Instance.InitTrinketsByStartGame(); // 초기 전리품 생성
-            S_FoeManager.Instance.GenerateFoeByStartGame(); // 모든 적 생성
-        }
-
-        // 피조물 생성
-        S_FoeManager.Instance.SpawnFoe();
-        S_FoeInfoSystem.Instance.AppearUIFoe();
-        S_FoeInfoSystem.Instance.AppearFoeSprite();
-        // 카메라 이동
-        Camera.main.transform.DOMove(InGameCameraPos, PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-        Camera.main.transform.DORotate(InGameCameraRot, PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-        // UI 등장 시간동안 대기
+        // 적 섹션 등장
+        S_FoeInfoSystem.Instance.StartFoeTrial();
         await WaitPanelAppearTimeAsync();
-
-        // 적의 조건 체크
-        S_FoeInfoSystem.Instance.CheckFoeMeetCondition(); // 없앨예정
 
         // 시련 시작 시 카쓸적 업데이트
         await S_PlayerCard.Instance.UpdateCardsByStartTrial();
         await S_PlayerTrinket.Instance.UpdateTrinketByStartTrial();
-        await S_FoeInfoSystem.Instance.ActivateStartTrialFoeByStartTrial();
+        await S_FoeInfoSystem.Instance.UpdateFoeByStartTrial();
+
+        // 시련 시작 시로 히스토리 저장
+        S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.StartTrial);
+
+        // 턴 시작
+        StartNewTurn();
+    }
+    public async Task StartTrialByTutorialAsync()
+    {
+        GameFlowState = S_GameFlowStateEnum.None;
+
+        // 튜토리얼은 시련이 0이다. 그리고 턴 설정
+        CurrentTrial = 0;
+        S_StatInfoSystem.Instance.ChangeCurrentTrialText();
+        CurrentTurn = 0;
+
+        // 튜토리얼 적 섹션 등장
+        S_FoeInfoSystem.Instance.StartFoeTrialByTutorial();
+        await WaitPanelAppearTimeAsync();
+
+        // 시련 시작 시 카쓸적 업데이트
+        await S_PlayerCard.Instance.UpdateCardsByStartTrial();
+        await S_PlayerTrinket.Instance.UpdateTrinketByStartTrial();
+        await S_FoeInfoSystem.Instance.UpdateFoeByStartTrial();
+        S_EffectActivator.Instance.CalcExpectedValue();
 
         // 시련 시작 시로 히스토리 저장
         S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.StartTrial);
@@ -141,7 +137,7 @@ public class S_GameFlowManager : MonoBehaviour
         // 턴 시작 시 카쓸적 업데이트
         S_PlayerCard.Instance.UpdateCardByStartNewTurn();
         S_PlayerTrinket.Instance.UpdateTrinketByStartNewTurn();
-        S_FoeInfoSystem.Instance.UpdateFoeObject(); // TODO 
+        S_FoeInfoSystem.Instance.UpdateFoeByStartNewTurn(); // TODO 
 
         // 히트 버튼 등장
         S_HitBtnSystem.Instance.AppearHitBtn();
@@ -199,15 +195,13 @@ public class S_GameFlowManager : MonoBehaviour
             // 카쓸적 조건 확인
             S_EffectActivator.Instance.CheckCardMeetCondition();
             S_EffectActivator.Instance.CheckTrinketMeetCondition(executedCard); // 쓸만한 물건엔 ~ 낼 때마다가 있기 때문에 히트한 카드를 인수로 넣어줘야한다.
-            S_FoeInfoSystem.Instance.CheckFoeMeetCondition(executedCard); // TODO
+            S_EffectActivator.Instance.CheckFoeMeetCondition(executedCard); // 적도
 
             // 카드를 냈다면 효과 발동
             if (cardOrder.Type == S_CardOrderTypeEnum.Hit || cardOrder.Type == S_CardOrderTypeEnum.Gen)
             {
                 // 카쓸적 효과 발동
-                await S_EffectActivator.Instance.ActivateCardByHit(executedCard, cardOrder.Type); // 기본적인 무게 계산을 위해 발현이 없더라도 꼭 카드를 낼 때마다 해야한다.
-                await S_EffectActivator.Instance.ActivateTrinketByHit(executedCard);
-                await S_FoeInfoSystem.Instance.ActivateReverbFoeByHitCard(executedCard);
+                await S_EffectActivator.Instance.ActivateByHit(executedCard, cardOrder.Type);
             }
 
             // 카드에 의한 히스토리 저장
@@ -218,16 +212,22 @@ public class S_GameFlowManager : MonoBehaviour
             cardOrderQueue.Dequeue();
         }
 
+        S_EffectActivator.Instance.CalcExpectedValue();
+
         // Hitting -> Hit로 변환
         GameFlowState = S_GameFlowStateEnum.Hit;
 
         // 히트 도중 피조물이 죽었다면 전투 종료
-        if (S_FoeInfoSystem.Instance.CurrentFoe.CurrentHealth <= 0)
+        if (S_FoeInfoSystem.Instance.FoeInfo.CurrentHealth <= 0)
         {
             EndTrial();
         }
     }
     public async void StartTwist()
+    {
+        await StartTwistAsync();
+    }
+    public async Task StartTwistAsync()
     {
         GameFlowState = S_GameFlowStateEnum.Twist;
 
@@ -241,7 +241,10 @@ public class S_GameFlowManager : MonoBehaviour
         // 비틀기 시 카쓸적 조건 체크
         S_EffectActivator.Instance.CheckCardMeetCondition();
         S_EffectActivator.Instance.CheckTrinketMeetCondition();
-        S_FoeInfoSystem.Instance.CheckFoeMeetCondition();
+        S_EffectActivator.Instance.CheckFoeMeetCondition();
+        S_EffectActivator.Instance.ActivateTrinketByTwist();
+        S_EffectActivator.Instance.ActivateFoeByTwist();
+        S_EffectActivator.Instance.CalcExpectedValue();
 
         // 스탯, 히스토리를 스택의 카드를 내기 전으로 되돌리기.
         S_PlayerStat.Instance.ResetStatsByTwist();
@@ -250,7 +253,7 @@ public class S_GameFlowManager : MonoBehaviour
         S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.Twist);
 
         // 피조물이 죽었다면 전투 종료
-        if (S_FoeInfoSystem.Instance.CurrentFoe.CurrentHealth <= 0)
+        if (S_FoeInfoSystem.Instance.FoeInfo.CurrentHealth <= 0)
         {
             EndTrial();
         }
@@ -261,12 +264,17 @@ public class S_GameFlowManager : MonoBehaviour
     }
     public async void StartStand()
     {
+        await StartStandAsync();
+    }
+    public async Task StartStandAsync()
+    {
         GameFlowState = S_GameFlowStateEnum.Stand;
 
         // 스탠드 시 카쓸적 효과 발동
         await S_EffectActivator.Instance.ActivatedCardByStand();
         await S_EffectActivator.Instance.ActivateTrinketByStand();
-        await S_FoeInfoSystem.Instance.ActivateStandFoeByStand();
+        await S_EffectActivator.Instance.ActivateFoeByStand();
+        S_EffectActivator.Instance.CalcExpectedValue();
 
         // 카드 및 적 체력 고정
         S_PlayerCard.Instance.FixCardsByStand();
@@ -276,7 +284,7 @@ public class S_GameFlowManager : MonoBehaviour
         S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.Stand);
 
         // 피조물 처치 여부에 따른 처리
-        if (S_FoeInfoSystem.Instance.CurrentFoe.OldHealth <= 0) // 피조물이 죽었다면 전투 종료
+        if (S_FoeInfoSystem.Instance.FoeInfo.OldHealth <= 0) // 피조물이 죽었다면 전투 종료
         {
             EndTrial();
         }
@@ -316,6 +324,7 @@ public class S_GameFlowManager : MonoBehaviour
 
         // 스탯 초기화 전 골드 계산
         int gold = CalcResultGold();
+        S_Foe defeatedFoe = S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe;
         int health = S_PlayerStat.Instance.GetCurrentHealth();
         int determination = S_PlayerStat.Instance.GetCurrentDetermination();
         int omenCount = S_PlayerCard.Instance.GetDeckCards().Where(x => x.Engraving == S_EngravingEnum.Omen).Count();
@@ -323,9 +332,8 @@ public class S_GameFlowManager : MonoBehaviour
         greedCount += S_PlayerCard.Instance.GetStackCards().Where(x => x.Engraving == S_EngravingEnum.Greed).Where(x => x.IsCursed).Count();
 
         // UI 퇴장(적과 히트 버튼)
-        S_FoeInfoSystem.Instance.DisappearUIFoe();
-        S_FoeInfoSystem.Instance.DisappearFoeSprite();
-        S_HitBtnSystem.Instance.DisappearHitBtn();
+        _ = S_FoeInfoSystem.Instance.ExitFoeByEndTrial(); // 적 퇴장
+        S_HitBtnSystem.Instance.DisappearHitBtn(); // 히트 버튼 퇴장
 
         // 스탯 초기화
         S_PlayerStat.Instance.ResetStatsByEndTrial();
@@ -338,16 +346,13 @@ public class S_GameFlowManager : MonoBehaviour
         // 보상 패널 등장
         S_ResultInfoSystem.Instance.AppearResult();
         S_ResultInfoSystem.Instance.AppearResultOKBtn();
-        await Task.Delay(Mathf.RoundToInt(PANEL_APPEAR_TIME * 1500)); // 캔버스 등장 동안 대기
+        await WaitPanelAppearTimeAsync(); // 캔버스 등장 동안 대기
 
         // 골드 계산 VFX
-        await S_ResultInfoSystem.Instance.CalcResultGoldAsync(health, determination, omenCount, greedCount);
+        await S_ResultInfoSystem.Instance.CalcResultGoldAsync(defeatedFoe, health, determination, omenCount, greedCount);
 
         // 골드 획득
         S_PlayerStat.Instance.AddOrSubtractGold(gold);
-
-        // 피조물 제거
-        S_FoeInfoSystem.Instance.DestroyFoeByEndTrial();
 
         // 시련 종료로 히스토리 저장
         S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.EndTrial);
@@ -360,15 +365,35 @@ public class S_GameFlowManager : MonoBehaviour
 
         S_ResultInfoSystem.Instance.DisappearResult();
         S_ResultInfoSystem.Instance.DisappearResultOKBtn();
-        await Task.Delay(Mathf.RoundToInt(PANEL_APPEAR_TIME * 1000)); // 보상 캔버스 퇴장 대기
+        await WaitPanelAppearTimeAsync(); // 보상 캔버스 퇴장 대기
 
-        Camera.main.transform.DOMove(StoreCameraPos, PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-        Camera.main.transform.DORotate(S_GameFlowManager.StoreCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        S_FoeInfoSystem.Instance.ExitSectionByEndTrial(); // 전장 퇴장
         await S_StoreInfoSystem.Instance.StartStore();
 
         GameFlowState = S_GameFlowStateEnum.Store;
     }
+    public async Task StartStoreByTutorialAsync()
+    {
+        // UI 퇴장(적과 히트 버튼)
+        await S_FoeInfoSystem.Instance.ExitFoeByEndTrial(); // 적 퇴장
+        S_HitBtnSystem.Instance.DisappearHitBtn(); // 히트 버튼 퇴장
 
+        // 스탯 초기화
+        S_PlayerStat.Instance.ResetStatsByEndTrial();
+        // 덱으로 모든 카드를 돌려보내기
+        S_PlayerCard.Instance.ResetCardsByEndTrial();
+        await S_StackInfoSystem.Instance.ResetCardsByEndTrialAsync();
+        // 시련 종료 시 쓸만한 물건 업데이트
+        S_PlayerTrinket.Instance.UpdateTrinketByEndTrial();
+
+        // 시련 종료로 히스토리 저장
+        S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.EndTrial);
+
+        S_FoeInfoSystem.Instance.ExitSectionByEndTrial(); // 전장 퇴장
+        await S_StoreInfoSystem.Instance.StartStoreByTutorial();
+
+        GameFlowState = S_GameFlowStateEnum.Store;
+    }
 
 
     public int GetCardOrderQueueCount()
@@ -386,17 +411,17 @@ public class S_GameFlowManager : MonoBehaviour
         int gold = SlayFoeGold;
 
         // 엘리트 적이라면 보너스 골드
-        if (S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Clotho_Elite || 
-            S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Lachesis_Elite || 
-            S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Atropos_Elite)
+        if (S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Clotho_Elite || 
+            S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Lachesis_Elite || 
+            S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Atropos_Elite)
         {
             gold += SlayEliteFoeGold; 
         }
 
         // 보스 적이라면 보너스 골드
-        if (S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Clotho_Boss ||
-            S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Lachesis_Boss ||
-            S_FoeInfoSystem.Instance.CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Atropos_Boss)
+        if (S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Clotho_Boss ||
+            S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Lachesis_Boss ||
+            S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Atropos_Boss)
         {
             gold += SlayBossFoeGold;
         }

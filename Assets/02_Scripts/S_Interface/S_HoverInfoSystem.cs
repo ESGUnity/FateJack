@@ -14,14 +14,33 @@ public class S_HoverInfoSystem : MonoBehaviour
     GameObject layoutGroup_AdditiveDescriptionBase;
 
     [Header("UI")]
-    Vector2 offsetXValue = new Vector2(60, 0);
-    Vector2 offsetCardYValue = new Vector2(0, 120);
-    Vector2 offsetYValue = new Vector2(0, 15);
-    Vector2 offsetCharacterYValue = new Vector2(0, 70);
+    Vector2 CARD_X_OFFSET_POS = new Vector2(60, 0);
+    Vector2 CARD_OFFSET_POS = new Vector2(0, 120);
+    Vector2 FOE_OFFSET_POS = new Vector2(0, 55);
+    Vector2 STACK_TRINKET_OFFSET_POS = new Vector2(0, 100);
+    Vector2 CHARACTER_OFFSET_POS = new Vector2(0, 55);
 
     [Header("설명 패널 오브젝트 리스트")]
     List<GameObject> hoverInfoBaseObjects = new();
     List<GameObject> additiveObjects = new();
+
+    [Header("포인터 연출")]
+    bool isEnter = false;
+    List<S_GameFlowStateEnum> VALID_STATES;
+
+    // 볼드 처리 글자
+    [HideInInspector] public HashSet<string> BoldTargetString = new HashSet<string>() { "저주", "버스트", "완벽", "망상", "전개", "우선", "냉혈" };
+    [HideInInspector]
+    public Dictionary<string, S_AdditiveDescriptionTargetWordEnum> BoldTargetDictionary = new()
+    {
+        { "저주", S_AdditiveDescriptionTargetWordEnum.Curse },
+        { "버스트", S_AdditiveDescriptionTargetWordEnum.Burst },
+        { "완벽", S_AdditiveDescriptionTargetWordEnum.Perfect },
+        { "망상", S_AdditiveDescriptionTargetWordEnum.Delusion },
+        { "전개", S_AdditiveDescriptionTargetWordEnum.Expansion },
+        { "우선", S_AdditiveDescriptionTargetWordEnum.First },
+        { "냉혈", S_AdditiveDescriptionTargetWordEnum.ColdBlood }
+    };
 
     // 싱글턴
     static S_HoverInfoSystem instance;
@@ -76,17 +95,6 @@ public class S_HoverInfoSystem : MonoBehaviour
     }
 
     #region 카드
-    public void ActivateHoverInfo(S_Card card, RectTransform rect) // 월드 오브젝트 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
-    {
-        FillHoverInfo(card);
-        SetPosByRectCard(rect);
-
-        // 패널 활성화
-        var panelRect = panel_HoverInfoBase.GetComponent<RectTransform>();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
-        panel_HoverInfoBase.SetActive(true);
-        LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
-    }
     public void ActivateHoverInfo(S_Card card, GameObject obj) // 월드 오브젝트 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
     {
         FillHoverInfo(card);
@@ -103,82 +111,59 @@ public class S_HoverInfoSystem : MonoBehaviour
         int hoverInfoCount = 0;
         int additiveDescriptionCount = 0;
 
-        // 문양과 숫자 영역
-        hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.Engraving, card.Num);
-        hoverInfoCount++;
-
-        // 문양과 숫자에 따른 기본 효과 영역
-        hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.StatValue, card.Num, card);
-        hoverInfoCount++;
-
-        if (card.IsCursed)
-        {
-            additiveObjects[additiveDescriptionCount].SetActive(true);
-            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription("저주받음!");
-            additiveDescriptionCount++;
-        }
-        if (card.IsGenerated)
-        {
-            additiveObjects[additiveDescriptionCount].SetActive(true);
-            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription("생성됨");
-            additiveDescriptionCount++;
-        }
-
-        // 조건
-        if (card.Engraving != S_EngravingEnum.None)
+        // 생성 및 저주
+        if (card.IsCursed || card.IsGenerated)
         {
             hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-            hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetCursedAndGenDescription(card.Engraving);
+            hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetGenAndCurseText(card);
             hoverInfoCount++;
-            additiveObjects[additiveDescriptionCount].SetActive(true);
-            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(card.Engraving);
-            additiveDescriptionCount++;
-        }
-
-        // 조건 제약
-        if (card.AdditiveCondition != S_CardAdditiveConditionEnum.None)
-        {
-            hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-            hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.AdditiveCondition, card);
-            hoverInfoCount++;
-            additiveObjects[additiveDescriptionCount].SetActive(true);
-            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(card.AdditiveCondition);
-            additiveDescriptionCount++;
-        }
-
-        // 디버프 제약
-        if (card.Debuff != S_CardDebuffConditionEnum.None)
-        {
-            hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-            hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.Debuff);
-            hoverInfoCount++;
-            additiveObjects[additiveDescriptionCount].SetActive(true);
-            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(card.Debuff);
-            additiveDescriptionCount++;
         }
 
         // 효과
-        if (card.CardEffect != S_CardEffectEnum.None)
+        hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
+        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetCardEffectDescription(card);
+        hoverInfoCount++;
+
+        // 각인
+        if (card.Engraving != S_EngravingEnum.None)
         {
             hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-            hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.CardEffect);
+            hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetEngravingDescription(card);
             hoverInfoCount++;
-            additiveObjects[additiveDescriptionCount].SetActive(true);
-            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(card.CardEffect);
-            additiveDescriptionCount++;
         }
 
-        // 추가 효과
-        if (card.AdditiveEffect != S_CardAdditiveEffectEnum.None)
+        // 추가 설명 영역
+        if (card.IsGenerated)
         {
-            hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-            hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetDescription(card.AdditiveEffect, card);
-            hoverInfoCount++;
             additiveObjects[additiveDescriptionCount].SetActive(true);
-            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(card.AdditiveEffect);
+            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(S_AdditiveDescriptionTargetWordEnum.Gen);
             additiveDescriptionCount++;
+        }
+        if (card.IsCursed)
+        {
+            additiveObjects[additiveDescriptionCount].SetActive(true);
+            additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(S_AdditiveDescriptionTargetWordEnum.Cursed);
+            additiveDescriptionCount++;
+        }
+        string cardEffectText = S_PlayerCard.Instance.GetCardEffectDescription(card);
+        foreach (string keyword in BoldTargetString)
+        {
+            if (cardEffectText.Contains(keyword))
+            {
+                additiveObjects[additiveDescriptionCount].SetActive(true);
+                additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(BoldTargetDictionary[keyword]);
+                additiveDescriptionCount++;
+            }
+        }
+        string engravingText = S_PlayerCard.Instance.GetEngravingDescription(card);
+        foreach (string keyword in BoldTargetString)
+        {
+            if (engravingText.Contains(keyword))
+            {
+                additiveObjects[additiveDescriptionCount].SetActive(true);
+                additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(BoldTargetDictionary[keyword]);
+                additiveDescriptionCount++;
+            }
         }
 
         layoutGroup_HoverInfoBase.SetActive(true);
@@ -186,62 +171,6 @@ public class S_HoverInfoSystem : MonoBehaviour
         if (additiveDescriptionCount > 0)
         {
             layoutGroup_AdditiveDescriptionBase.SetActive(true);
-        }
-    }
-    void SetPosByRectCard(RectTransform rect)
-    {
-        RectTransform panelRect = panel_HoverInfoBase.GetComponent<RectTransform>();
-        RectTransform canvasRect = GetComponent<RectTransform>();
-
-        // 1. 우측 상단 corner 구하기 (GetWorldCorners 결과: 0=좌하, 1=좌상, 2=우상, 3=우하)
-        Vector3[] worldCorners = new Vector3[4];
-        rect.GetWorldCorners(worldCorners);
-        Vector3 topRightWorldPos;
-        if (rect.transform.position.x >= 0)
-        {
-            // 카드의 왼쪽에 표시하는 경우
-            panelRect.pivot = new Vector2(1f, 1f);
-            topRightWorldPos = worldCorners[1];
-        }
-        else
-        {
-            // 카드의 오른쪽에 표시하는 경우
-            panelRect.pivot = new Vector2(0f, 1f);
-            topRightWorldPos = worldCorners[2];
-        }
-
-        // 2. 우상단 월드 좌표를 "스크린 좌표"로 변환
-        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(Camera.main, topRightWorldPos);
-
-        // 3. HoverInfo Canvas의 local position으로 변환
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRect,
-            screenPos,
-            Camera.main,
-            out Vector2 localPos
-        );
-
-        // 4. 해당 위치에 HoverInfo UI 배치
-        localPos = rect.transform.position.x >= 0 ? localPos - offsetXValue : localPos + offsetXValue;
-        panelRect.anchoredPosition = localPos;
-
-        // 추가 설명 패널 위치도 설정
-        RectTransform lrt = layoutGroup_AdditiveDescriptionBase.GetComponent<RectTransform>();
-        if (rect.transform.position.x >= 0)
-        {
-            lrt.anchorMin = new Vector2(0f, 1f);
-            lrt.anchorMax = new Vector2(0f, 1f);
-            lrt.pivot = new Vector2(1f, 1f);
-            layoutGroup_AdditiveDescriptionBase.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.UpperRight;
-            lrt.anchoredPosition = new Vector2(-10f, 0f);
-        }
-        else
-        {
-            lrt.anchorMin = new Vector2(1f, 1f);
-            lrt.anchorMax = new Vector2(1f, 1f);
-            lrt.pivot = new Vector2(0f, 1f);
-            layoutGroup_AdditiveDescriptionBase.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.UpperLeft;
-            lrt.anchoredPosition = new Vector2(10f, 0f);
         }
     }
     void SetPosByWorldObjectCard(GameObject obj) // 단순히 3D 오브젝트의 좌표를 UI 좌표로 옮긴 것. 오브젝트의 가장자리 기준으로 x좌표가 0보다 크면 카드 왼쪽에, 작으면 오른쪽의 좌표를 반환
@@ -273,8 +202,8 @@ public class S_HoverInfoSystem : MonoBehaviour
             out Vector2 localPos);
 
         // 왼쪽과 오른쪽에 따라 오프셋 더하거나 빼기
-        localPos = obj.transform.position.x >= 0 ? localPos - offsetXValue : localPos + offsetXValue;
-        localPos += offsetCardYValue;
+        localPos = obj.transform.position.x >= 0 ? localPos - CARD_X_OFFSET_POS : localPos + CARD_X_OFFSET_POS;
+        localPos += CARD_OFFSET_POS;
         panelRect.anchoredPosition = localPos;
 
         // 추가 설명 패널 위치도 설정(기본 설명 패널이 세팅이 완료된 후 해야 버그가 없다.)
@@ -298,85 +227,57 @@ public class S_HoverInfoSystem : MonoBehaviour
     }
     #endregion
     #region 능력
-    public void ActivateHoverInfo(S_Trinket skill, RectTransform rect) // 월드 오브젝트 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
+    public void ActivateHoverInfo(S_Trinket trinket, GameObject go, bool isStack = false) // 월드 오브젝트 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
     {
-        // 튜토리얼 때문에
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Dialog)
+        FillHoverInfo(trinket);
+        if (isStack)
         {
-            GetComponent<Canvas>().sortingLayerName = "Dialog";
-            GetComponent<Canvas>().sortingOrder = 2;
+            SetTrinketPosByStack(go);
         }
         else
         {
-            GetComponent<Canvas>().sortingLayerName = "UI";
-            GetComponent<Canvas>().sortingOrder = 2;
+            SetTrinketPosByOption(go);
         }
 
-        FillHoverInfo(skill);
-        SetPosByRectSkill(rect);
-
         // 패널 활성화
         var panelRect = panel_HoverInfoBase.GetComponent<RectTransform>();
         LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
         panel_HoverInfoBase.SetActive(true);
         LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
     }
-    public void ActivateHoverInfo(S_Trinket skill, GameObject go) // 월드 오브젝트 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
-    {
-        FillHoverInfo(skill);
-        SetPosByWorldObjectSkill(go);
-
-        // 패널 활성화
-        var panelRect = panel_HoverInfoBase.GetComponent<RectTransform>();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
-        panel_HoverInfoBase.SetActive(true);
-        LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
-    }
-    void FillHoverInfo(S_Trinket skill) // 능력 전용
+    void FillHoverInfo(S_Trinket trinket) // 능력 전용
     {
         int hoverInfoCount = 0;
+        int additiveDescriptionCount = 0;
 
-        // 능력 이름
+        // 쓸만한 물건 이름과 설명
         hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetTrinketName(skill);
+        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetTrinketName(trinket);
+        hoverInfoCount++;
+        hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
+        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetTrinektDescription(trinket);
         hoverInfoCount++;
 
-        // 능력 설명
-        hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
-        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetTrinektDescription(skill);
-        hoverInfoCount++;
+        // 추가 설명 영역
+        string trinketDescription = S_PlayerTrinket.Instance.GetTrinketDescription(trinket);
+        foreach (string keyword in BoldTargetString)
+        {
+            if (trinketDescription.Contains(keyword))
+            {
+                additiveObjects[additiveDescriptionCount].SetActive(true);
+                additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(BoldTargetDictionary[keyword]);
+                additiveDescriptionCount++;
+            }
+        }
 
         layoutGroup_HoverInfoBase.SetActive(true);
+
+        if (additiveDescriptionCount > 0)
+        {
+            layoutGroup_AdditiveDescriptionBase.SetActive(true);
+        }
     }
-    void SetPosByRectSkill(RectTransform rect)
-    {
-        RectTransform panelRect = panel_HoverInfoBase.GetComponent<RectTransform>();
-        RectTransform canvasRect = GetComponent<RectTransform>();
-
-        // 피벗 설정
-        panelRect.pivot = new Vector2(1f, 0f);
-
-        // 1. 우측 상단 corner 구하기 (GetWorldCorners 결과: 0=좌하, 1=좌상, 2=우상, 3=우하)
-        Vector3[] worldCorners = new Vector3[4];
-        rect.GetWorldCorners(worldCorners);
-        Vector3 topRightWorldPos = worldCorners[2]; // 우상단
-
-        // 2. 우상단 월드 좌표를 "스크린 좌표"로 변환
-        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(Camera.main, topRightWorldPos);
-
-        // 3. HoverInfo Canvas의 local position으로 변환
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRect,
-            screenPos,
-            Camera.main,
-            out Vector2 localPos
-        );
-
-        // 4. 해당 위치에 HoverInfo UI 배치
-        localPos += offsetYValue;
-        panelRect.anchoredPosition = localPos;
-    }
-    void SetPosByWorldObjectSkill(GameObject obj) // 단순히 3D 오브젝트의 좌표를 UI 좌표로 옮긴 것. 오브젝트의 가장자리 기준으로 x좌표가 0보다 크면 카드 왼쪽에, 작으면 오른쪽의 좌표를 반환
+    void SetTrinketPosByOption(GameObject obj) // 단순히 3D 오브젝트의 좌표를 UI 좌표로 옮긴 것. 오브젝트의 가장자리 기준으로 x좌표가 0보다 크면 카드 왼쪽에, 작으면 오른쪽의 좌표를 반환
     {
         Vector3 worldPos;
         Bounds bounds = obj.GetComponent<Renderer>().bounds;
@@ -405,8 +306,130 @@ public class S_HoverInfoSystem : MonoBehaviour
             out Vector2 localPos);
 
         // 왼쪽과 오른쪽에 따라 오프셋 더하거나 빼기
-        localPos = obj.transform.position.x >= 0 ? localPos - offsetXValue : localPos + offsetXValue;
+        localPos = obj.transform.position.x >= 0 ? localPos - CARD_X_OFFSET_POS : localPos + CARD_X_OFFSET_POS;
         panelRect.anchoredPosition = localPos;
+
+        RectTransform lrt = layoutGroup_AdditiveDescriptionBase.GetComponent<RectTransform>();
+        if (obj.transform.position.x >= 0)
+        {
+            lrt.anchorMin = new Vector2(0f, 1f);
+            lrt.anchorMax = new Vector2(0f, 1f);
+            lrt.pivot = new Vector2(1f, 1f);
+            layoutGroup_AdditiveDescriptionBase.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.UpperRight;
+            lrt.anchoredPosition = new Vector2(-10f, 0f);
+        }
+        else
+        {
+            lrt.anchorMin = new Vector2(1f, 1f);
+            lrt.anchorMax = new Vector2(1f, 1f);
+            lrt.pivot = new Vector2(0f, 1f);
+            layoutGroup_AdditiveDescriptionBase.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.UpperLeft;
+            lrt.anchoredPosition = new Vector2(10f, 0f);
+        }
+    }
+    void SetTrinketPosByStack(GameObject obj)
+    {
+        Vector3 worldPos;
+        Bounds bounds = obj.GetComponent<Renderer>().bounds;
+        RectTransform panelRect = panel_HoverInfoBase.GetComponent<RectTransform>();
+
+        worldPos = new Vector3(bounds.max.x, bounds.max.y, bounds.center.z);
+        panelRect.pivot = new Vector2(1f, 0f);
+
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
+
+        RectTransform canvasRect = GetComponent<RectTransform>();
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvasRect,
+            screenPos,
+            Camera.main,
+            out Vector2 localPos);
+
+        // 왼쪽과 오른쪽에 따라 오프셋 더하거나 빼기
+        localPos += STACK_TRINKET_OFFSET_POS;
+        panelRect.anchoredPosition = localPos;
+
+        RectTransform lrt = layoutGroup_AdditiveDescriptionBase.GetComponent<RectTransform>();
+        lrt.anchorMin = new Vector2(0f, 1f);
+        lrt.anchorMax = new Vector2(0f, 1f);
+        lrt.pivot = new Vector2(1f, 1f);
+        layoutGroup_AdditiveDescriptionBase.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.UpperRight;
+        lrt.anchoredPosition = new Vector2(-10f, 0f);
+    }
+    #endregion
+    #region 적
+    public void ActivateHoverInfo(S_Foe foe, GameObject obj) // 월드 오브젝트 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
+    {
+        FillHoverInfo(foe);
+        SetPosByFoe(obj);
+
+        // 패널 활성화
+        var rect = panel_HoverInfoBase.GetComponent<RectTransform>();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
+        panel_HoverInfoBase.SetActive(true);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
+    }
+    void FillHoverInfo(S_Foe foe) // 적 전용
+    {
+        int hoverInfoCount = 0;
+        int additiveDescriptionCount = 0;
+
+        // 쓸만한 물건 이름과 설명
+        hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
+        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetFoeName(foe);
+        hoverInfoCount++;
+        hoverInfoBaseObjects[hoverInfoCount].SetActive(true);
+        hoverInfoBaseObjects[hoverInfoCount].GetComponent<S_AdditiveDescription>().SetFoeDescription(foe);
+        hoverInfoCount++;
+
+        // 추가 설명 영역
+        string trinketDescription = S_FoeInfoSystem.Instance.GetFoeDescription(foe);
+        foreach (string keyword in BoldTargetString)
+        {
+            if (trinketDescription.Contains(keyword))
+            {
+                additiveObjects[additiveDescriptionCount].SetActive(true);
+                additiveObjects[additiveDescriptionCount].GetComponent<S_AdditiveDescription>().SetAdditiveDescription(BoldTargetDictionary[keyword]);
+                additiveDescriptionCount++;
+            }
+        }
+
+        layoutGroup_HoverInfoBase.SetActive(true);
+
+        if (additiveDescriptionCount > 0)
+        {
+            layoutGroup_AdditiveDescriptionBase.SetActive(true);
+        }
+    }
+    void SetPosByFoe(GameObject obj) // 단순히 3D 오브젝트의 좌표를 UI 좌표로 옮긴 것. 오브젝트의 가장자리 기준으로 x좌표가 0보다 크면 카드 왼쪽에, 작으면 오른쪽의 좌표를 반환
+    {
+        Vector3 worldPos;
+        Bounds bounds = obj.GetComponent<Renderer>().bounds;
+        RectTransform panelRect = panel_HoverInfoBase.GetComponent<RectTransform>();
+
+        worldPos = new Vector3(bounds.max.x, bounds.max.y, bounds.center.z);
+        panelRect.pivot = new Vector2(0f, 1f);
+
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
+
+        RectTransform canvasRect = GetComponent<RectTransform>();
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvasRect,
+            screenPos,
+            Camera.main,
+            out Vector2 localPos);
+
+        // 왼쪽과 오른쪽에 따라 오프셋 더하거나 빼기
+        localPos += FOE_OFFSET_POS;
+        panelRect.anchoredPosition = localPos;
+
+        // 추가 설명 패널 위치도 설정(기본 설명 패널이 세팅이 완료된 후 해야 버그가 없다.)
+        RectTransform lrt = layoutGroup_AdditiveDescriptionBase.GetComponent<RectTransform>();
+        lrt.anchorMin = new Vector2(1f, 1f);
+        lrt.anchorMax = new Vector2(1f, 1f);
+        lrt.pivot = new Vector2(0f, 1f);
+        layoutGroup_AdditiveDescriptionBase.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.UpperLeft;
+        lrt.anchoredPosition = new Vector2(10f, 0f);
     }
     #endregion
     public void DeactiveHoverInfo()
@@ -430,38 +453,12 @@ public class S_HoverInfoSystem : MonoBehaviour
     }
 
     #region 다이얼로그
-    // 다이얼로그는 무조건 캐릭터의 아래에 위치하게 된다.
-    public void SetPosByRectCharacter(RectTransform characterRect, RectTransform targetRect, RectTransform targetCanvasRect)
-    {
-        // 피벗 설정
-        targetRect.pivot = new Vector2(0.5f, 1f);
-
-        // 1. 우측 상단 corner 구하기 (GetWorldCorners 결과: 0=좌하, 1=좌상, 2=우상, 3=우하)
-        Vector3[] worldCorners = new Vector3[4];
-        characterRect.GetWorldCorners(worldCorners);
-        Vector3 bottomCenterWorldPos = (worldCorners[0] + worldCorners[3]) * 0.5f;
-
-        // 2. 우상단 월드 좌표를 "스크린 좌표"로 변환
-        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(Camera.main, bottomCenterWorldPos);
-
-        // 3. HoverInfo Canvas의 local position으로 변환
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            targetCanvasRect,
-            screenPos,
-            Camera.main,
-            out Vector2 localPos
-        );
-
-        // 4. 해당 위치에 배치
-        localPos -= offsetYValue;
-        targetRect.anchoredPosition = localPos;
-    }
-    public  void SetPosByWorldObjectCharacter(Renderer renderer, RectTransform targetRect, RectTransform targetCanvasRect)
+    public void SetPosByCharacterOrFoe(Renderer renderer, RectTransform targetRect, RectTransform targetCanvasRect)
     {
         Bounds bounds = renderer.bounds;
 
-        Vector3 worldPos = new Vector3(bounds.center.x, bounds.min.y, bounds.center.z);
-        targetRect.pivot = new Vector2(0.5f, 1f);
+        Vector3 worldPos = new Vector3(bounds.max.x, bounds.max.y, bounds.center.z);
+        targetRect.pivot = new Vector2(0f, 1f);
 
         Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
 
@@ -472,31 +469,132 @@ public class S_HoverInfoSystem : MonoBehaviour
             out Vector2 localPos);
 
         // 오프셋 먹이기
-        localPos -= offsetCharacterYValue;
+        localPos -= CHARACTER_OFFSET_POS;
         targetRect.anchoredPosition = localPos;
     }
     #endregion
 }
 
 
-
-//string BoldText(string text)
+//public void ActivateHoverInfo(S_Card card, RectTransform rect) // UI 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
 //{
-//    text = Regex.Replace(text, @"\((.*?)\)", match =>
-//    {
-//        string inner = match.Groups[1].Value;
-//        return $"<b>({inner})</b>";
-//    });
+//    FillHoverInfo(card);
+//    SetPosByRectCard(rect);
 
-//    foreach (string word in conditionWords)
-//    {
-//        text = Regex.Replace(text, word, $"<b>{word}</b>");
-//    }
-
-//    foreach (string word in typeWords)
-//    {
-//        text = Regex.Replace(text, word, $"<b>{word}</b>");
-//    }
-
-//    return text;
+//    // 패널 활성화
+//    var panelRect = panel_HoverInfoBase.GetComponent<RectTransform>();
+//    LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+//    panel_HoverInfoBase.SetActive(true);
+//    LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
 //}
+//void SetPosByRectCard(RectTransform rect)
+//{
+//    RectTransform panelRect = panel_HoverInfoBase.GetComponent<RectTransform>();
+//    RectTransform canvasRect = GetComponent<RectTransform>();
+
+//    // 1. 우측 상단 corner 구하기 (GetWorldCorners 결과: 0=좌하, 1=좌상, 2=우상, 3=우하)
+//    Vector3[] worldCorners = new Vector3[4];
+//    rect.GetWorldCorners(worldCorners);
+//    Vector3 topRightWorldPos;
+//    if (rect.transform.position.x >= 0)
+//    {
+//        // 카드의 왼쪽에 표시하는 경우
+//        panelRect.pivot = new Vector2(1f, 1f);
+//        topRightWorldPos = worldCorners[1];
+//    }
+//    else
+//    {
+//        // 카드의 오른쪽에 표시하는 경우
+//        panelRect.pivot = new Vector2(0f, 1f);
+//        topRightWorldPos = worldCorners[2];
+//    }
+
+//    // 2. 우상단 월드 좌표를 "스크린 좌표"로 변환
+//    Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(Camera.main, topRightWorldPos);
+
+//    // 3. HoverInfo Canvas의 local position으로 변환
+//    RectTransformUtility.ScreenPointToLocalPointInRectangle(
+//        canvasRect,
+//        screenPos,
+//        Camera.main,
+//        out Vector2 localPos
+//    );
+
+//    // 4. 해당 위치에 HoverInfo UI 배치
+//    localPos = rect.transform.position.x >= 0 ? localPos - offsetXValue : localPos + offsetXValue;
+//    panelRect.anchoredPosition = localPos;
+
+//    // 추가 설명 패널 위치도 설정
+//    RectTransform lrt = layoutGroup_AdditiveDescriptionBase.GetComponent<RectTransform>();
+//    if (rect.transform.position.x >= 0)
+//    {
+//        lrt.anchorMin = new Vector2(0f, 1f);
+//        lrt.anchorMax = new Vector2(0f, 1f);
+//        lrt.pivot = new Vector2(1f, 1f);
+//        layoutGroup_AdditiveDescriptionBase.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.UpperRight;
+//        lrt.anchoredPosition = new Vector2(-10f, 0f);
+//    }
+//    else
+//    {
+//        lrt.anchorMin = new Vector2(1f, 1f);
+//        lrt.anchorMax = new Vector2(1f, 1f);
+//        lrt.pivot = new Vector2(0f, 1f);
+//        layoutGroup_AdditiveDescriptionBase.GetComponent<VerticalLayoutGroup>().childAlignment = TextAnchor.UpperLeft;
+//        lrt.anchoredPosition = new Vector2(10f, 0f);
+//    }
+//}
+
+
+//public void ActivateHoverInfo(S_Trinket skill, RectTransform rect) // 월드 오브젝트 카드 호버링 시 호출(S_StackCard, S_DeckCard, S_StoreCard 등)
+//{
+//    // 튜토리얼 때문에
+//    if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Dialog)
+//    {
+//        GetComponent<Canvas>().sortingLayerName = "Dialog";
+//        GetComponent<Canvas>().sortingOrder = 2;
+//    }
+//    else
+//    {
+//        GetComponent<Canvas>().sortingLayerName = "UI";
+//        GetComponent<Canvas>().sortingOrder = 2;
+//    }
+
+//    FillHoverInfo(skill);
+//    SetPosByRectSkill(rect);
+
+//    // 패널 활성화
+//    var panelRect = panel_HoverInfoBase.GetComponent<RectTransform>();
+//    LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+//    panel_HoverInfoBase.SetActive(true);
+//    LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+//}
+//void SetPosByRectSkill(RectTransform rect)
+//{
+//    RectTransform panelRect = panel_HoverInfoBase.GetComponent<RectTransform>();
+//    RectTransform canvasRect = GetComponent<RectTransform>();
+
+//    // 피벗 설정
+//    panelRect.pivot = new Vector2(1f, 0f);
+
+//    // 1. 우측 상단 corner 구하기 (GetWorldCorners 결과: 0=좌하, 1=좌상, 2=우상, 3=우하)
+//    Vector3[] worldCorners = new Vector3[4];
+//    rect.GetWorldCorners(worldCorners);
+//    Vector3 topRightWorldPos = worldCorners[2]; // 우상단
+
+//    // 2. 우상단 월드 좌표를 "스크린 좌표"로 변환
+//    Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(Camera.main, topRightWorldPos);
+
+//    // 3. HoverInfo Canvas의 local position으로 변환
+//    RectTransformUtility.ScreenPointToLocalPointInRectangle(
+//        canvasRect,
+//        screenPos,
+//        Camera.main,
+//        out Vector2 localPos
+//    );
+
+//    // 4. 해당 위치에 HoverInfo UI 배치
+//    localPos += offsetYValue;
+//    panelRect.anchoredPosition = localPos;
+//}
+
+

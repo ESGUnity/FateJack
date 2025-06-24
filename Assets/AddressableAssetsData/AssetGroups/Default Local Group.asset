@@ -15,58 +15,8 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: fba06f433c8869840907e935e3b511ec
   m_SerializeEntries:
-  - m_GUID: 004f13f036e21a4438b17f893473a418
-    m_Address: Sprite_S_Substitute
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 031570927b2b70148b1f72e0298cc657
-    m_Address: Sprite_Card_CloverSuit
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0325a5c14f6714b44867e76f851eb5cb
-    m_Address: Sprite_L_ChaosEssence
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0359cc913b085674cac46d1c2ce8d8a9
-    m_Address: Sprite_S_EdgeOfSplittedNight
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 03a8523195e59ea4eb6c2482f639b755
-    m_Address: Sprite_L_OldJewel
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 040f5fda02be76a4d8179f300fa49192
-    m_Address: Sprite_N_RedhotIron
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 04ca221a14b712549ba3d02886ea6ed6
-    m_Address: Sprite_L_WardenTreeNeedle
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 084e2f5e6b7278b479cb6c6569426993
-    m_Address: Sprite_L_LuminousStone
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0851b4ecbbbcb1543b19c96013a3f13b
-    m_Address: Sprite_L_TwilightOrderBladehand
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0862989ffe6c24f429b266ed02e93768
-    m_Address: Sprite_S_RaiseTheSails
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 08f9455ebbd87e0438f1ab10d9ac96cf
-    m_Address: Sprite_BasicEffect_Harm_Luck
+  - m_GUID: 064d04b127152214e8a118f4f9cf728c
+    m_Address: Sprite_CardEffect_Common_Realization
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -80,18 +30,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0b6204b82de7edd459b9833c32d2b2d8
-    m_Address: Sprite_L_Madness
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0bfc9ba0332f7ca4ba35c5c93c67a64f
-    m_Address: Sprite_S_AreaSecured
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0cb3a0c19c8cc91448290a6374c0c91b
-    m_Address: Sprite_AdditiveCondition_AllOutOffensive
+  - m_GUID: 0c905b4ada653a84883699d08f9ff31e
+    m_Address: Sprite_CardEffect_Luck_SilentDomination
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -100,8 +40,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 0e513a4fff49bae449964e3cc30745e5
-    m_Address: Sprite_AdditiveEffect_Reflux_Chaos
+  - m_GUID: 0dd5a3546851a5b4c8102943c29dec5e
+    m_Address: Sprite_CardEffect_Common_Inspiration
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0e05d4fe062297b47b2e5960f0579bf1
+    m_Address: Sprite_Character_AtroposTheReaper
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -110,58 +55,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 10e600b87553f044f9f77f3272cf1311
-    m_Address: Sprite_Skill_SavageStrike
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 110f7a5abf76a1741bb8c62a11c45605
-    m_Address: Sprite_AdditiveEffect_Reflux_Curse
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 12209f2f8054ac649a5763e31281503d
-    m_Address: Sprite_L_GoddessChalice
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 12d98a62179abb641a58a4535eeea162
-    m_Address: Sprite_BasicEffect_Manipulation_CardNumber
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 12e46fe3c9eb1954eb2fac8926db39f5
-    m_Address: Sprite_BasicEffect_Creation_SameNumber
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 13e8f47d5a5a91645b9491f029c8b099
-    m_Address: Sprite_AdditiveCondition_Precision_PlethoraNumber
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1412ffa52113a354ba30e79a072591dd
-    m_Address: Sprite_L_NightWatcherArmor
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 15845b4fe63acdb43a4794f2887d7037
-    m_Address: Sprite_S_ConquerorVanguard
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 160a2ad433d63aa4caa1e8189c54e551
-    m_Address: Sprite_S_SwiftDescent
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 161e47de394c77049a7dd9a1f0d0469a
-    m_Address: Sprite_L_BrokenDawnSpear
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 18664d3a6f61ba14ca83f53a27f2fb59
-    m_Address: Sprite_L_Silence
+  - m_GUID: 0f14452e8cdff2442894ca96e9fb4799
+    m_Address: Sprite_Character_LachesisTheDecider
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -170,33 +65,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 193fe6bd939a8c245b0c65fe1e5a6faf
-    m_Address: Sprite_L_OmenOfGreatChaos
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 19738e8aa00f95842a98405af9c0e0f4
-    m_Address: Sprite_L_GreedyThread
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 198b187094b184b4da4a51e77d163471
-    m_Address: Sprite_OriginCardBase
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1a4ea91423cdbcc45a6f7af51999cdd7
-    m_Address: Sprite_L_NightWeaverKnot
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1af835ae5e6b32043ade155df52c4309
-    m_Address: Sprite_BasicEffect_Break_RandomStat
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1c096a2415bbde74fa35f7e18e7f820b
     m_Address: Sprite_PlayerVFX_Subtract_Strength
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1c63fa895c2947940beafa17fc83e9c3
+    m_Address: Sprite_CardEffect_Mind_Split
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -210,53 +85,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1f333f90f66a88241b946237a8600c73
-    m_Address: Sprite_S_TeaTime
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1fa13ddf245b6db4fbba0c08a35ffc26
     m_Address: Sprite_PlayerVFX_Add_Mind
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1fac177bc56e01d4880ed74d89427ba5
-    m_Address: Sprite_BasicEffect_Harm_Carnage
+  - m_GUID: 2406477dacdb40e4da31b1b4d586b084
+    m_Address: Sprite_CardEffect_Luck_Shake
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 20c0bf1c2f077024fab8396f4307022a
-    m_Address: Sprite_BasicEffect_Growth_Luck
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 20cf9a3fa0b9dd14b9cad149eb53e37e
-    m_Address: Sprite_L_DreamVoyagerMiracle
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 219fcb2d02cf3bc48b31cf4b2e99e9ad
-    m_Address: Sprite_AdditiveCondition_GrandChaos_Anarchy
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 21c4480598080c5438362470a5dc8d65
-    m_Address: Sprite_L_PowerOfGreatChaos
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 21f658c4a3b5f7c47aca429a4c10d440
-    m_Address: Sprite_BasicCondition_Resolve
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 22162300bf5e0e84990f9c0d245169c4
-    m_Address: Sprite_S_MindDiscipline
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 25dead72251aae842b2f24013f6e20b3
-    m_Address: Sprite_N_Leaf
+  - m_GUID: 25eb2c4609940204ea3abb56e97a8b50
+    m_Address: Sprite_CardEffect_Mind_PreciseStrike
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -265,38 +105,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 28bb39c56b8889f4c85b661b0f544532
-    m_Address: Sprite_L_BlackStitch
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 28c8d0a37c576804083405ab2d409e41
-    m_Address: Sprite_R_FuryOfConqueror
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 28dd1db4fb1bdad4d9fd64dacaa90162
     m_Address: GetDamageMPVFXPrefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 299a177735b386748b807b9d39e12f5b
-    m_Address: Sprite_AdditiveCondition_Chaos
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 29cca44111417ef43be1a8f531086359
-    m_Address: Sprite_BasicEffect_Growth_Mind
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2a2354d85fbf82440bb6aaf614eef06a
-    m_Address: Sprite_BasicCondition_Unleash
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2a5656153c6bc9249adc30bcf9f265e9
-    m_Address: Sprite_S_MoonLightVeil
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -305,33 +115,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2b2aac6d16ddada49b3c330517867e3c
-    m_Address: Sprite_BasicEffect_Harm_StrengthAndLuck
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2b633392f8ea09b4e97dba4d91981494
-    m_Address: Sprite_S_AfterShock
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2b66f5f290b70ae4cbafad6930b27b70
     m_Address: Sprite_PlayerVFX_Subtract_Determination
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2b88b47c3ddb9be41a9cb5d79a3cbfec
-    m_Address: Sprite_S_Bluff
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2e16f57937f514d47a1ba54f552193f8
-    m_Address: Sprite_L_DawnDew
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2e177bca881f2a744a3ff241051d20c4
-    m_Address: Sprite_S_MaceOfJudgement
+  - m_GUID: 2c02ef7e5dab6794e90ddfdbac82b900
+    m_Address: Sprite_CardEffect_Common_Imitate
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -340,53 +130,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2ea662fd9ecff1f4cbf496b15c340390
-    m_Address: Sprite_L_AbandonedFate
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2ec4f33a617a9a04cab7f8916b504185
-    m_Address: Sprite_S_SurgingFate
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2f7b5ace7a71a8b4b9c5a7cb5c54b2bd
-    m_Address: Sprite_Debuff_Spell
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 30742b2dd266b4d4e944ad75893b8498
-    m_Address: Sprite_Debuff_Delusion
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3085d9d6fbad06f44a87fb645194b9a0
-    m_Address: Sprite_L_BrokenLight
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 30bb3186cf03f89418bf61cb4363f3f8
-    m_Address: Sprite_L_TwistedRootCharge
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 30ca530989799a84693cd9a7e27f2533
-    m_Address: Sprite_L_LachesisGreatNeedle
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 317c011b7fd495e46bd72065a6bb4fa3
-    m_Address: Sprite_S_SuddenAcceleration
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3185846774c42274d912796c7381c556
-    m_Address: Sprite_L_Bundle
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 319e7701ebe1ec84796852c0c6450a81
-    m_Address: Sprite_BasicEffect_Break_MostStat
+  - m_GUID: 2fa12240b840804439ad620d449f5f82
+    m_Address: Sprite_CardEffect_Str_SinisterImpulse
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -400,28 +145,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 34508a3e5e105594a9c70e79943bb208
-    m_Address: Sprite_AdditiveEffect_Reflux_Stack
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 34ce59e0575f1124bb28a7f909046ff4
     m_Address: Sprite_PlayerVFX_Harm_Carnage
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 36625880c2f8f66458f6005771a29d52
-    m_Address: Sprite_L_NightWatcherCloak
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3718d138a941c8d48a4f6e6b3f963ce7
-    m_Address: Sprite_L_Singularity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 372f8d594e263ae4bbfd5470a1d35bab
-    m_Address: Sprite_L_NightWatcherHorn
+  - m_GUID: 381224cddbf90114b9fb12f366cd2826
+    m_Address: Sprite_CardEffect_Luck_Chance
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -430,58 +160,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 39376f95766a93a4cac3ac6671f86f39
-    m_Address: Sprite_L_ShardHurl
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 39522140ba870504bb8bd1e8ac01c102
-    m_Address: Sprite_Foe_AtroposTheReaper
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 39d0f550a26c6d4448ea9943f1223b07
-    m_Address: Sprite_L_Contraband
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3b5f418efa848244dbc9dc3d6cd7983a
     m_Address: Sprite_PlayerVFX_Subtract_Limit
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3baeb7cfea623a5408a97b19e8ff4d9a
-    m_Address: Sprite_L_RitualBlood
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3c19ca586d0b55e40a6daa5020026819
-    m_Address: Sprite_L_AzureMoonTrumpet
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3d4e4083bc59d984d824706d14fa55f3
-    m_Address: Sprite_BasicEffect_Resistance
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3d8ce59f375296247a0457c7b23b8520
-    m_Address: Sprite_Skill_ReadyToBattle
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3e9bae56f2ed3bc4998184758cc5f1ac
-    m_Address: Sprite_BasicEffect_Guidance_LeastNumber
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3ed589605e402224cae10845f473e720
-    m_Address: Sprite_AdditiveCondition_Reverb_PlethoraNumber
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 400af0c515172ec448bd922470a9371a
-    m_Address: Sprite_L_BoundSoul
+  - m_GUID: 3bb2e0129690fb5469ddc9c164a38d73
+    m_Address: Sprite_CardEffect_Str_UnjustSacrifice
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -490,23 +175,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 42e74a1a651c408438052689a44cb643
-    m_Address: Sprite_L_AshOfTwilight
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 43822efa75bcf644aa375ea35e4eb291
     m_Address: Sprite_PlayerVFX_Creation
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 43dc05ccaa89c784d82c2f3734f0bf74
-    m_Address: Sprite_BasicEffect_Creation_PlethoraNumber
+  - m_GUID: 43b18fce17837ff44be9630322b19b7e
+    m_Address: Sprite_CardEffect_Str_Stimulus
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 44f82e90f1a0f3843ae446cbee92368f
-    m_Address: Sprite_AdditiveCondition_Legion_SameSuit
+  - m_GUID: 43cddb2072cbe3940b31b695421dfcec
+    m_Address: Sprite_CardEffect_Luck_Artifice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4426b88a8d60f8648b15cef6004fe4dd
+    m_Address: Sprite_CardFrame_Mind
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 455ad091f5a81e64f86fb910e893f9db
+    m_Address: Sprite_CardEffect_Mind_SharpCut
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -520,28 +210,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 45e24c63c2cff9c4e871abeeb3a9ca9a
-    m_Address: Sprite_L_Library
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4616f543a967a334b9b5b1d4ff5ec86d
-    m_Address: Sprite_AdditiveCondition_HyperPrecision_SameNumber
+  - m_GUID: 45fd145bc33c00e46b877ef5ee3a2d7a
+    m_Address: Sprite_CardEffect_Common_Adventure
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 477e03b3ed6371d4c81ca2c22fe8b745
     m_Address: Sprite_DarkRedBrush
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 47fdd0e5d6691fb44a619a4a103d9bae
-    m_Address: Sprite_L_DawnCallVoice
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 493d1536cd42a2040b705779b2a49b58
-    m_Address: Sprite_L_SoulSand
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -565,28 +240,33 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4d5e4ed9a4739c743b51f2207fcd4c18
-    m_Address: Sprite_S_PhantomSnatch
+  - m_GUID: 4dd9a5cdff2bb1249ab6dd5be06885c8
+    m_Address: Sprite_CardEffect_Mind_Drain
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4fbc024feb1c78746ab834596e1353c8
-    m_Address: Sprite_BasicEffect_Guidance_LeastSuit
+  - m_GUID: 4e1744569510fe44c8c9035346e3da7c
+    m_Address: Sprite_CardEffect_Str_Grudge
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4fc7def52332f9f44a104d9c6ed7d498
-    m_Address: Sprite_S_FalseIdol
+  - m_GUID: 51ba99e2aee813a4aa1cc4de46e3c7a5
+    m_Address: Sprite_CardEffect_Luck_Disorder
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 51232b9cb7dc4fa4685525c711ea6dff
-    m_Address: Sprite_AdditiveCondition_HyperPrecision_SameSuit
+  - m_GUID: 527dea77450026043a2688838e1dbdbe
+    m_Address: Sprite_CardEffect_Luck_Composure
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 52da3b0363786fe48b10d6dbb039c64f
-    m_Address: Sprite_S_Moksha
+  - m_GUID: 53dfc01139df41d44bfdc9d4a5d7b7ae
+    m_Address: Sprite_CardEffect_Mind_DeepInsight
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 55fbb6e81ba29c24baa1aba4f970e274
+    m_Address: Sprite_CardEffect_Str_UntappedPower
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -595,88 +275,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 59038779eadd30e40a2c6260e8f6c6f8
-    m_Address: Sprite_Skill_Abracadabra
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 59117b7d76291b945bddaade8898cdd4
-    m_Address: Sprite_AdditiveEffect_Reflux_Subtle
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 596333255af222d4ab13fce16952bb2d
-    m_Address: Sprite_L_AzureThread
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5a021faea63fb5d4c8034187751014ca
-    m_Address: Sprite_L_TwilightStorm
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5a43928bb43f23a48ae021d6e05f5d6c
-    m_Address: Sprite_Debuff_Breakdown
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5ab895dc33fcdba4db2587393550b593
-    m_Address: Sprite_Debuff_Rebel
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5ac5fdfeefd7fd344a3ca7354f54af86
-    m_Address: Sprite_AdditiveCondition_Reverb_SameSuit
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5b292f56736f53d4684d72fa2f6e8daf
-    m_Address: Sprite_Skill_FocusBreath
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5c1de8321ef431b408f07647e597b030
-    m_Address: Sprite_AdditiveEffect_Reflux_Offensive
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5c2c4f88a7126514db4c5293f54e6b18
-    m_Address: Sprite_L_NightWeaverHand
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5c69e2f77dba44a4d8bdf769e14d48a6
-    m_Address: Sprite_AdditiveCondition_Precision_SameSuit
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5da8e9415ab825543add0b5555d6d3a1
-    m_Address: Sprite_N_Metal
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5e5e295e6d97fd94f9e522ba58d0b21e
-    m_Address: Sprite_BasicEffect_Resistance_CardNumber
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5f0dc3dcf9e99c64b99a7363a1901a77
-    m_Address: Sprite_S_MoonStalkerOath
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 60b29704f1bf8d84fb3d5cd568c9abeb
-    m_Address: Sprite_L_DawnLight
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 636f870d38d1ee0479b50fa5c611c5cc
-    m_Address: Sprite_L_NightCleave
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 639dc952c0780b049b4123927501804c
-    m_Address: Sprite_BasicEffect_First_SameSuit
+  - m_GUID: 5cfa73ebc5a9fb04482118bd995543a5
+    m_Address: Sprite_CardEffect_Luck_CriticalBlow
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -685,38 +285,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 65eebc034a88c5743bbf80beabb009d0
-    m_Address: Sprite_L_TreeGiantRoot
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 66cfaa8928f974f4c8b786debd8b4f63
-    m_Address: Sprite_AdditiveEffect_Reflux_Overdrive
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 67043608911ce9848ab6c53dba6b39e0
-    m_Address: Sprite_BasicEffect_First_SameNumber
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 684fa903f33180e46a6a54e461d21eb7
-    m_Address: Sprite_Foe_AtroposTwillightFate
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 687b22e739a5e5047ad0e8bf4d649a43
-    m_Address: Sprite_S_Perfection
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 68d6fdd3952f80f488c7bb4c8e3a145f
-    m_Address: Sprite_L_Club
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 69adcd5a846bc9e47bc4c0ce1f97e3b9
-    m_Address: Sprite_L_ResonantBranch
+  - m_GUID: 67d31338aa23e444fb370da5b2ce23d7
+    m_Address: Sprite_CardEffect_Str_BindingForce
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -725,63 +295,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6a82859f257a55044b75aa69e98202a4
-    m_Address: Sprite_AdditiveCondition_Reverb_SameNumber
+  - m_GUID: 6c2c619213726ab45a4bae9fe54610b5
+    m_Address: Sprite_CardEffect_Str_WrathStrike
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6ab803f35fdf13c499bbefdcdf4e978f
-    m_Address: Sprite_S_RageIsMyAlly
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6b933769e602c174ebdbdd2e5c229bae
-    m_Address: Sprite_S_TwilightRiders
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6b9f7c19f4bc52b4899069372bde4709
-    m_Address: Sprite_Skill_Overwhelm
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6d10fbcb7eaf4884abd998f0f1ca5cfa
-    m_Address: Sprite_BasicEffect_Harm_Mind
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6dcfc6ca03b5fba4d976e22fcf7cc6fa
-    m_Address: Sprite_CursedEffect
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6e0c32e295e87144aaa12632f734e4d3
-    m_Address: Sprite_L_DawnThread
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6e81c223a4f1cfe41b6f9eba7f728064
-    m_Address: Sprite_BasicEffect_Harm_MindAndLuck
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6efc54779b816dc488f8bbc80944ae0f
-    m_Address: Sprite_L_ChaosThread
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6f459f64306eb9e43b77f90e31219ff9
-    m_Address: Sprite_L_TomeOfGreatChaos
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 70020994185aea44ca75bfcf314b8ed1
-    m_Address: Sprite_AdditiveCondition_GreatLegion_SameSuit
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 707315667b5639443808966067d2df53
-    m_Address: Sprite_AdditiveCondition_Chaos_Anarchy
+  - m_GUID: 6de8ff5a58c2d6642937ad8c06cdcc37
+    m_Address: Sprite_CardEffect_Common_Trinity
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -790,53 +310,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 70938331f49bea849b95666a23bf3a83
-    m_Address: Sprite_S_NightWeaverTouch
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 70dfef88f0428dc4a8c592d4a960844f
-    m_Address: Sprite_BasicEffect_Growth_AllStat
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 71a813d5df60f114999f62350f97a950
-    m_Address: Sprite_L_NightmareVisage
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 71dea0b347842b1469ed944cca201625
-    m_Address: Sprite_S_Robber
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 71e2bafc038070d4a8396492af609a67
-    m_Address: Sprite_S_DesperateStruggle
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 72579dead840de148aaa5385dc60d60b
     m_Address: Sprite_PlayerVFX_Subtract_Weight
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7299b14bbd3a815478c9f2a447ca9309
-    m_Address: Sprite_S_LightOfHope
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7468fe43acb7d0348a055d33f147b523
-    m_Address: Sprite_L_ClothoGreatLoom
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 747a958ee3e8c0149983005d6541b5dd
-    m_Address: Sprite_L_PieceOfNight
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7568bb2e3351f4f47b9b14a04663bea8
-    m_Address: Sprite_N_OldBook
+  - m_GUID: 73f1b533b3e88e74bbb38fc20f69d689
+    m_Address: Sprite_CardEffect_Mind_Focus
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -845,48 +325,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7620526d14eaffc4699808a5edbc9df7
-    m_Address: Sprite_L_Bite
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 77559df62ba3edd428a1ef6b917786f2
-    m_Address: Sprite_S_AzureWeaverConviction
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 775b27d27a77643498b4060872972435
-    m_Address: Sprite_AdditiveEffect_Greed
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 791061d3a5042e2469c09b6e105096e1
-    m_Address: Sprite_R_MoonStalkerShield
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 796b27e82477ef14e9b5f964951bbce4
-    m_Address: Sprite_BasicEffect_Undertow
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 79711d9dc9ea4f54584d6cb1655e55dd
-    m_Address: Sprite_AdditiveEffect_Omen
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 797328defb79cb34d8acc74e952a9738
-    m_Address: Sprite_L_NightWatcherHunting
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7a47628e93e65864f873a63998d1de22
-    m_Address: Sprite_AdditiveCondition_AllOutOffensive_SameSuit
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7af6ae836edab714b9b46b688f5cdc27
-    m_Address: Sprite_L_Infinity
+  - m_GUID: 787f091fd00db4641b015e2c1d4de474
+    m_Address: Sprite_CardEffect_Common_Carnage
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -895,23 +335,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7b25a96014b77de46a2a2a0201d5e666
-    m_Address: Sprite_S_WildCard
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7c52f0f34e36c0e4885971dbdf35069a
-    m_Address: Sprite_S_GoddessGrace
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7cb1503ddb30bcb42baa46b9433b4371
-    m_Address: Sprite_S_FateExecution
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7d33701fdd60e824582551d3f385891b
-    m_Address: Sprite_AdditiveCondition_Overflow
+  - m_GUID: 7cea82c77547576418c56e623918fa45
+    m_Address: Sprite_CardEffect_Common_Undertow
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -925,28 +350,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8083a64967dd1db4784d840638219f40
-    m_Address: Sprite_L_TomeOfEternity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 820e66360df538d4a87bf95665a7de3e
-    m_Address: Sprite_L_DreamVoyagerHarpoon
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 82152a514fba1af48b450a1cbf711cab
-    m_Address: Sprite_S_SweetTempting
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 822cda916059b5246bd7eacc73554f5e
     m_Address: PlayerPanelPrefab
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 82594bf6dd32e044f9ee2730308b2579
-    m_Address: Sprite_S_MysideBias
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -955,58 +360,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 83207b53221974b439ce3812378a855b
-    m_Address: Sprite_AdditiveEffect_Robbery
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 83713472b392b7148855208e60f9a6c2
     m_Address: Sprite_PlayerVFX_Cursed
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 84ad19bb1479cf447af20543640eebf1
-    m_Address: Sprite_L_AzureBlood
+  - m_GUID: 86dff9252948aa94e8fd4f8b818e42b2
+    m_Address: Sprite_Trinket_BrokenBowl
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 85254821200cd954db03b976051b0648
-    m_Address: Sprite_S_LurkingDarkness
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 858cfe1d2d96c904c935e8257f57a20f
-    m_Address: Sprite_S_RuthlessSevering
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 85e75bf4192313c4c83774add7cf3a23
-    m_Address: Sprite_L_NightWatcherMark
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 86770c70a799db04fbb823adb2ce3e0c
-    m_Address: Sprite_S_KingOfCurse
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 86fa4ebd84c5f7b4a9d4ca6172a88dbb
-    m_Address: Sprite_S_EnemyIsNear
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8704bb3978037284186ba9f510910139
-    m_Address: Sprite_AdditiveEffect_Reflux_Deck
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 872736626a4d9b041ab7cec2e95c879f
-    m_Address: Sprite_L_NightSplitterVisage
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 87dd98f371a92a246b58250397d8023c
-    m_Address: Sprite_BasicEffect_Manipulation
+  - m_GUID: 86fca5a4c87b3234ea0620cb9090ca27
+    m_Address: Sprite_CardEffect_Common_Balance
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1020,53 +385,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 891dd8e13db08a947b36aafe68345283
-    m_Address: Sprite_Card_HeartSuit
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 89230469adde7004cab94c14423acf27
-    m_Address: Sprite_S_SoulReaversSecret
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 897e77ca4e14fd640ac32bfc7b886802
-    m_Address: Sprite_S_Stigma
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8a58c261adc7a1e46a4a9db137fe8f73
-    m_Address: Sprite_S_FocusedBarrage
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8adcf5cb2b108974ab35038130982069
-    m_Address: Sprite_S_TrappedSoul
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8b20973b0de100b4193602878c3c742e
-    m_Address: Sprite_L_Following
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8b606c5663eb6e94297734c6c9ef975c
-    m_Address: Sprite_AdditiveCondition_Offensive_Overflow
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8bc8883c4cc136146af2e59debf1029e
-    m_Address: Sprite_L_GoddessMercy
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8bf50f4826009944289545657c5286c6
-    m_Address: Sprite_AdditiveEffect_Reflux_Shatter
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8d2ff7fc55dbb0e4f90a418bc37923a6
-    m_Address: Sprite_BasicEffect_Tempering
+  - m_GUID: 8b8767e32fb92fd479d2f85b12306e5d
+    m_Address: Sprite_CardEffect_Common_Blasphemy
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1075,63 +395,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8e36481e47678494a92987bc3392a19f
-    m_Address: Sprite_L_ConquerorThread
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8e3b26afb3a60db4688f336afd61167f
-    m_Address: Sprite_AdditiveCondition_Reverb_CursedCard
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8ef912cff72f6564c9c39c3a097ee26a
-    m_Address: Sprite_BasicEffect_First_LeastSuit
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9047e9f212888dd469810dc0748570ef
-    m_Address: Sprite_AdditiveEffect_Reflux_Violent
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 910ff52bbe6564b47aa8350e08e8b9f7
-    m_Address: Sprite_L_GoddessBless
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 91574ede18c22d0478b06a91bac2722d
-    m_Address: Sprite_L_Malice
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9167305ea7b4e6347a7deddc8877b55b
     m_Address: Sprite_OldScissors
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 92052807336157a45a765090bad34aab
-    m_Address: Sprite_L_TwilightWeaverScissors
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 92505ad57f30c9146b7e11240caedc5c
-    m_Address: Sprite_BasicEffect_Plunder
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 92abfbcde766be64d8bd1d025f5e1f38
-    m_Address: Sprite_S_UnholySacrifice
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 92fd906b8c6af3848837b5f18a8108c3
-    m_Address: Sprite_S_CutDownMyOwn
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9351b0c10e3de0c459eac8860bb6738b
-    m_Address: Sprite_S_TreePurification
+  - m_GUID: 9172731cd1529464fb3ec31192ae6a6e
+    m_Address: Sprite_CardEffect_Common_Plunder
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1140,18 +410,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 944ec08dd9b0e1140ab94c7a7234f6de
-    m_Address: Sprite_BasicCondition_Reverb
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 950a11e30a155064696b847dcd3ab628
-    m_Address: Sprite_L_AzureMoonEssence
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 960180399a00eda4a851605580fc6713
-    m_Address: Sprite_AdditiveEffect_Reflux_PlethoraNumber
+  - m_GUID: 953317666aea3104aa43b85aea2c3054
+    m_Address: Sprite_CardEffect_Common_Resistance
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1160,8 +420,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9664cb1d851780445a652761c4936727
-    m_Address: Sprite_Skill_Pummel
+  - m_GUID: 963b362f461dd604f81d34dc48bc2328
+    m_Address: Sprite_CardEffect_Common_LastStruggle
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9640f8c6d1e4f5042bcb34b7f9af5f92
+    m_Address: Sprite_CardEffect_Luck_SuddenStrike
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1170,18 +435,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 97938a39f6b28a74988373e7df4c894c
-    m_Address: Sprite_Foe_LachesisTheDecider
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 97d9b8b7f1236a846b946d533786c769
-    m_Address: Sprite_L_AzureMoonHeart
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9934811e537264f4084183142b8c4f9d
-    m_Address: Sprite_Skill_UnstableFusion
+  - m_GUID: 9970cc8eb3b6a6940b049f6d2d1ab661
+    m_Address: Sprite_CardEffect_Str_EngulflnFlames
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1190,28 +445,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 99ca685c99d570d4e9163770cbbdfe3f
-    m_Address: Sprite_L_Ravage
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 99e8d116b80a9d8429d1d2dbe2303c51
-    m_Address: Sprite_S_DeathToTraitors
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 99f6f5385f0c21a45a1249a8fce41756
-    m_Address: Sprite_L_AzureMoonVeil
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9a741cc0cab8c4843b1f1c6fc65d5d6e
-    m_Address: Sprite_S_NightSplitterTalisman
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9b6b6eff656d45c458096897fb2c4d46
-    m_Address: Sprite_L_BrokenHeart
+  - m_GUID: 9aa7344b04c2120428cea0fd983380d6
+    m_Address: Sprite_CardFrame_Luck
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1220,58 +455,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9ca1b05469b3ef04ba7cba0c35d02cfb
-    m_Address: Sprite_S_RamAttack
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9d11e7c8508263f488b3304b69221cc4
-    m_Address: Sprite_AdditiveCondition_Finale_Climax
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9d5b832cef2124541b8849ff6fe83660
-    m_Address: Sprite_S_WardenTreeRite
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9d6e6fe2ca83b2343aeb7344f12ddc02
-    m_Address: Sprite_N_None
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9d9460f8f354d184c9bf624a88b89e6e
-    m_Address: Sprite_L_DawnWeaverNeedle
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9db230564c22970408ebed546a5938fd
-    m_Address: Sprite_M_MoonSwallowingSun
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 9e0a968d2eee2ef4494d043708dc0bc2
-    m_Address: Sprite_L_NightStitchNeedle
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a0e68b124dc1c9b43809ef970be2cad4
-    m_Address: Sprite_BasicEffect_Creation_Random
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a10e0319c45ac444f8ea3a12833941bf
-    m_Address: Sprite_AdditiveCondition_HyperPrecision_PlethoraNumber
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a1f0dd7cc6bd12e4d9bd0c246ef6bcb7
-    m_Address: Sprite_S_Resonant
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a29294d0075e38344b2aebc76a2da6bb
-    m_Address: Sprite_S_BlazingDawn
+  - m_GUID: 9fe6b0674dcf85d4bb67a78f68bdce6c
+    m_Address: Sprite_CardEffect_Luck_AllForOne
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1280,33 +465,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a2bc5163e7025294197a9c15094ca246
-    m_Address: Sprite_S_NightRain
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a5b2f4b340ae8d4418c6532f973b7aec
-    m_Address: Sprite_S_BlazingFlameOfEnvy
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a79073dadaa728644b457cfa5393e3da
-    m_Address: Sprite_S_BaitHunt
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a7a166929a56eb04ca09d0c826dbb3a4
     m_Address: Sprite_PlayerVFX_Subtract_Luck
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a929a88541e65d64da1709c01da94f76
-    m_Address: Sprite_L_ShardOfDarknessEater
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: aabd4e83a03b97d4495e0a82d7caae6f
-    m_Address: Sprite_Foe_LachesisFreedomFate
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1315,63 +475,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: abf35be5b7bd3e240a0d7d2fbc8eb18e
-    m_Address: Sprite_S_Camouflage
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ace673e0ad61f0c4bb9365f48224c206
     m_Address: Sprite_PostureCorrector
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ae73eba71fda4f7428091ab95d6be7bd
-    m_Address: Sprite_L_VioletBlood
+  - m_GUID: ada7df71dcabe0f4eae941c9d9e0cf04
+    m_Address: Sprite_CardEffect_Str_ZenithBreak
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: af335a29df0c5aa47b45def1fadbef9f
-    m_Address: Sprite_S_FadeTwilight
+  - m_GUID: ae863cd1dbeb32c45bda9e11913fc094
+    m_Address: Sprite_CardFrame_Common
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: af72bbf80224f80479cccbfc94e59fb1
-    m_Address: Sprite_BasicEffect_Manipulation_CleanHit
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: af776f9c33203e940baf31f5c5c72638
-    m_Address: Sprite_Skill_RoarCry
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b01c04839239f094486dd24394aa9eed
-    m_Address: Sprite_L_WornThreadspool
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b1129c2b3afb5de49b3db8b439cef546
-    m_Address: Sprite_L_DiaryOfNightSplitter
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b169a8ffe4c757d4d92fb8bc5647dacc
-    m_Address: Sprite_S_ViciousNightmare
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b1b8d0ce3f7e8cf448484b128c751acf
-    m_Address: Sprite_M_DireStraits
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b26e978afaee7404792f1e9e15feb7e7
-    m_Address: Sprite_S_ConquerorOverwhelm
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b311deeeb23039a4cbdb500b3aae081e
-    m_Address: Sprite_L_Bond
+  - m_GUID: b1552b0cb9966d64d929090147ff3710
+    m_Address: Sprite_CardEffect_Str_FlowingSin
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1380,18 +500,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b53064dd7c1d46d4b9cf75e5aa8c61d8
-    m_Address: Sprite_S_ChargeOrder
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b5bce1b68a4c9104188f188519f4c37f
-    m_Address: Sprite_S_Updraft
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b67fac3963d4e0d42beaca7b5139cbad
-    m_Address: Sprite_L_AzureWeaverHand
+  - m_GUID: b3b900c8f4332384ab1319231d31ef50
+    m_Address: Sprite_CardEffect_Common_Berserk
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1400,58 +510,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b81b8bb4c95ab54459b9c495639615e3
-    m_Address: Sprite_AdditiveCondition_Unity_Drastic
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b844354cbc37fc14283419aca4d57d8b
-    m_Address: Sprite_S_MoonLightEruption
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b847b9989424f8d4e98bb7b5f5155e1f
-    m_Address: Sprite_S_CorruptionSwamp
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b8da7ad098670ca43b8844222c052ef7
-    m_Address: Sprite_L_AzureWeaverNeedle
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ba4b406665a25be4c9e48eb9354df30b
-    m_Address: Sprite_L_CharredWardenTree
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: badcebd818d4eb442823b38574b544f6
-    m_Address: Sprite_BasicEffect_Expansion
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bb127492ad7b8ba458db2adaee10acd2
-    m_Address: Sprite_S_MaceOfFate
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bb27a094965ba3c4fa952599348df1f3
-    m_Address: Sprite_AdditiveEffect_Reflux_Exclusion
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bb328fc12db477a4caca53fc04e9c750
-    m_Address: Sprite_L_CurseOfGreatChaosPriest
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bb5d5c3871f227145811387c1a7a0d2a
-    m_Address: Sprite_N_Focus
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bc7b455ebadb064408bc41d4f486ba58
-    m_Address: Sprite_Skill_Cull
+  - m_GUID: ba7668f484d9a414397c8254b08f5ac5
+    m_Address: Sprite_CardEffect_Str_CalamityApproaches
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1460,68 +520,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bd20bf2978a896a4fb98675f1f27d628
-    m_Address: Sprite_L_Wedge
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bd37d8daab34aa3438625361e2f12a91
-    m_Address: Sprite_L_DawnResistanceMark
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bd52bc2c4a0a48945b8006ddb50f7387
-    m_Address: Sprite_L_DreamVoyagerAnchor
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bd5ddbf95279a584bab654814c2bc9fa
-    m_Address: Sprite_S_PowerPlay
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: be727463da157b44582dacef17401128
-    m_Address: Sprite_L_Omen
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: be8d90830d3ddd24ea37715656aab919
-    m_Address: Sprite_L_TwilightEssence
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bf2f5628fc1410746ac034239f4beb28
-    m_Address: Sprite_S_CourageAnthem
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c034b9a084422e548b5b282e952f8099
-    m_Address: Sprite_Character_Daedalus
+    m_Address: Sprite_Character_GateKeeper
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c08ecdb2fbc58c545be3a01fec07ba97
-    m_Address: Sprite_L_ChaosStorm
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c2ee26f837bbd9f42af68e73e1fda91f
-    m_Address: Sprite_L_MoonLullaby
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c331d5c42a5f31249b10fdaf01891c7f
-    m_Address: Sprite_AdditiveCondition_Finale
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c4fa1c445a00d094f92d990815e3d2c5
-    m_Address: Sprite_S_CutAnchor
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c51d0a3ef2b4e80479496e2fde34372f
-    m_Address: Sprite_S_ColdJustice
+  - m_GUID: c394580c996a40947b760267e358e5b2
+    m_Address: Sprite_CardEffect_Mind_Awakening
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1530,113 +535,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c6241f79a6334104da4f91d659a89603
-    m_Address: Sprite_AdditiveEffect_ColdBlood
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c8119b4e1ebe80f4a9bc64d2f25f0e37
-    m_Address: Sprite_L_NightWeaverNeedle
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c90f9d3acbc83cf4a93061a82ab481bf
-    m_Address: Sprite_L_TwilightThread
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c99aa1a168b28234a9e649f328ce0928
-    m_Address: Sprite_L_Destruction
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c9d7ba2b1a5610545a886a89a9843a66
-    m_Address: Sprite_L_NightLetter
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ca7e330ea87b19244b0057e3ac3d008c
-    m_Address: Sprite_L_DoomStrike
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: caca2cc75c4531349b5a98e287863271
-    m_Address: Sprite_BasicEffect_Plunder_Break
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cb4f137ed89bc814cbdf57f7ed6994c0
-    m_Address: Sprite_BasicEffect_First_CleanHitNumber
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cd63a0cef24655f4a9cf68e0f5bce2c0
-    m_Address: Sprite_L_NightmareScissors
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ced934dfda5740043b526355779f599a
-    m_Address: Sprite_L_WardenTreeWand
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cf11cfd19c24b0344919cfe819f436aa
     m_Address: Sprite_Foe_HypnosSleepWaker
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cf279db12ff2f124d9d82ec854aba6a0
-    m_Address: Sprite_Card_DiamondSuit
+  - m_GUID: cf1bd870a0c79b246b52270ab9dd44c1
+    m_Address: Sprite_CardEffect_Luck_Grill
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cf4618cc949a3ee4f8c8b2c19e0db33e
-    m_Address: Sprite_L_MayflyWing
+  - m_GUID: d15947261d2ada641895b0ffa17bd5ce
+    m_Address: Sprite_CardEffect_Mind_Accept
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d00049bec2f7c8741b38d8b94c8af928
-    m_Address: Sprite_S_MercyBlade
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d055ced0cad25ad41993093de140de8d
-    m_Address: Sprite_L_AzureMoonTear
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d056aa8e569f0c740ba8ae59de9c8e70
-    m_Address: Sprite_AdditiveCondition_Offensive_SameSuit
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d116cd38c4adaf945886f10a9260f50e
-    m_Address: Sprite_AdditiveEffect_Immunity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d139b14f78b4c204f88b8ce305ffe834
-    m_Address: Sprite_S_DivineShield
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d21a3611cc0e78543853493e701192b5
-    m_Address: Sprite_L_SoulReaverMark
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d320fb0f20ee9a045aa5725155de90ae
-    m_Address: Sprite_IllusionCardBase
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d32351070c1593049bac640589d074df
-    m_Address: Sprite_L_NightWatcherMask
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d3c2160e7593ff445ac8d6474d44f9d4
-    m_Address: Sprite_R_MoonStalkerColiblade
+  - m_GUID: d40fd3b69dcf6fd45be5aebe36475592
+    m_Address: Sprite_CardEffect_Mind_WingsOfFreedom
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1645,18 +560,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d469edff88b37304f8c3aa1324822414
-    m_Address: Sprite_AdditiveCondition_Precision_SameNumber
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d473a4f260c9c564b950222f447ebccb
     m_Address: Sprite_Foe_ThanatosTheRest
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d58907b16e7a5b34aa0639fad662148e
-    m_Address: Sprite_AdditiveCondition_Unity
+  - m_GUID: d68b06e1468029c4fa00fa7b6b9a624d
+    m_Address: Sprite_CardEffect_Common_Corrupt
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1665,28 +575,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d86ad91c7819dd340910941d521cd8c3
-    m_Address: Sprite_S_Ambush
+  - m_GUID: d8b5c72044d1c884baa21db4c4cf1bdc
+    m_Address: Sprite_CardEffect_Luck_FatalBlow
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d9460ce08df77e842a3846912230bb2a
-    m_Address: Sprite_Card_SpadeSuit
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d946d3e0475cef344ba1e49ffe33ac9e
-    m_Address: Sprite_S_TwilightBreath
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d9a905538d3dc924bb9d561f9adff886
-    m_Address: Sprite_L_TwilightOrderGuillotine
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d9ad23a05ad9ee746a9096154b329d38
-    m_Address: Sprite_BasicEffect_Creation_SameSuit
+  - m_GUID: d91e96d5c8e404e49a0b3fd7b3378668
+    m_Address: Sprite_CardEffect_Str_FinishingStrike
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1695,53 +590,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dc11f9bc1e6ed2641bb6268964d0dbdc
-    m_Address: Sprite_L_Nebula
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dca7dfd3c49d7134b85c769cb848cb3d
-    m_Address: Sprite_Skill_PowerBuild
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dd24b051db2137844a135c72415d9878
-    m_Address: Sprite_L_Meditation
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ddcf1378ccd92ae44ab02e40e63a6c3b
-    m_Address: Sprite_L_FateChalice
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dfcb44de1a631b347be1768dc9759cb2
-    m_Address: Sprite_AdditiveCondition_Offensive
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dfdb9602a966658408a56e0a435f56af
-    m_Address: Sprite_L_TwilightOrderThornShield
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dff4765075916ff4f8b814d84fc45390
-    m_Address: Sprite_S_IntoTheDeepLight
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e108a72abc998d844b20703f962902b5
-    m_Address: Sprite_BasicEffect_Growth_Strength
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e1bc7e5c5e5a0404cbdff7041f8f82f8
-    m_Address: Sprite_BasicEffect_Harm_StrengthAndMind
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e22902f94af4e26449922d772ccc6896
-    m_Address: Sprite_L_AzureMoonEye
+  - m_GUID: dc9f0cf56f9232849a6b764fc1201548
+    m_Address: Sprite_Character_ClothoFateWeaver
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1750,63 +600,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e2704f99a91086c499322fce16f3d6bd
-    m_Address: Sprite_S_Narcissism
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e36da66aea471bd44b2b98bba9be37a0
-    m_Address: Sprite_Foe_ClothoFateWeaver
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e70fb9124b28e984fbdcd7f62455d9af
-    m_Address: Sprite_L_RitualDagger
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e7f8a1b8aab3d6046810baecba9b46ff
-    m_Address: Sprite_S_Motivation
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e81eac4cdce3459438024e3f3d2a9bd8
-    m_Address: Sprite_L_ChaosTrumpet
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e857d54f1803f794188353ca09d8f584
-    m_Address: Sprite_BasicEffect_Harm_Strength
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e87b013ab7c9db4408efcf095c167f39
-    m_Address: Sprite_S_PunishTraitor
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e88025a4ae373c749a690a91879e6a95
-    m_Address: Sprite_L_MakeshiftKnot
+  - m_GUID: e2fd0f32c5bde5a4c947c8bdd00ef9d7
+    m_Address: Sprite_CardEffect_Mind_PerfectForm
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: eb4696d59ecebf64ca5277ac14dcf5cf
     m_Address: Sprite_PlayerVFX_Harm_Mind_Luck
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ed3d78b041e1ce54293522cc093f68d7
-    m_Address: Sprite_L_Grave
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: eda794cfbf002964e911d863d654d122
-    m_Address: Sprite_L_DreamVoyagerWaveCall
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ef34a8440fe9c08449f52c292b10da2c
-    m_Address: Sprite_S_AzureMoonBallad
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1825,8 +625,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f129715a926d663408e92e184b743de4
-    m_Address: Sprite_S_GrimNightmare
+  - m_GUID: f0c5811c60b12264da4e824d8d3ed510
+    m_Address: Sprite_CardEffect_Mind_Dissolute
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1835,53 +635,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f201a733275f27f41bb7125739abb841
-    m_Address: Sprite_L_WraithOfWarFallen
+  - m_GUID: f4055f15d9e065c4a8dfb9083870872c
+    m_Address: Sprite_Character_Store
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f2b3997bcae81f740a45941e1a96a39e
-    m_Address: Sprite_L_AzureMoonStorm
+  - m_GUID: f50bdfffb30385b44b9e555a2181d0c5
+    m_Address: Sprite_CardEffect_Mind_Unshackle
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f3039016c94f7a5489c6f74db956d507
-    m_Address: Sprite_S_SoulBargain
+  - m_GUID: f633a5101c14d5144a2fa9cb0e020fce
+    m_Address: Sprite_CardFrame_Str
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f401a2476be8a1f41a0c2e80c8632119
-    m_Address: Sprite_L_TwilightShade
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f462b9a9b5dd2e64790b66c172370dec
-    m_Address: Sprite_Skill_QuadBlade
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f4a532ede24a50d46aa218625aadf0d8
-    m_Address: Sprite_L_GatekeepersEye
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f52a8920fed3e1442a2fbb21b4137357
-    m_Address: Sprite_L_SoulReaverGreaves
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f5fd8cf2668d941458f13494b5f41f9b
-    m_Address: Sprite_N_Heredity
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f7276a7c38e4e514c9443cc32050da1d
-    m_Address: Sprite_S_ChaosFlame
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f8170cb86c742be4b9ae811d212ba89c
-    m_Address: Sprite_L_GatekeepersFragment
+  - m_GUID: f78ff81c5ba59f541bf41f115982655c
+    m_Address: Sprite_CardEffect_Luck_ForcedTake
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -1890,33 +660,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fafd884ade6c0d1468b611e246dfaea5
-    m_Address: Sprite_L_EndlessChalice
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fb8d9ec9eed050842a60a6908827bf7b
     m_Address: StackPlusVFXPrefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fca442a6a80d8454eb8b762e910bc5a5
-    m_Address: Sprite_Foe_ClothoBeginningFate
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fdcfaa34cac305847887c9b06328fdf4
     m_Address: Sprite_PlayerVFX_ResistanceCurse
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fe02c502178833440b0c19efb1f80cc4
-    m_Address: Sprite_AdditiveCondition_Chaos_Overflow
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fe43c543e537a574084426c22b961f6b
-    m_Address: Sprite_L_TomeOfAncientLore
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

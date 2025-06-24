@@ -26,10 +26,10 @@ public class S_StackInfoSystem : MonoBehaviour
 
     Vector3 STACK_BASE_START_POS = new Vector3(-8.5f, 0, 0);
     Vector3 STACK_BASE_END_POS = new Vector3(8.5f, 0, 0);
-    Vector3 STACK_CARD_ORIGIN_SCALE = new Vector3(1.7f, 1.7f, 1.7f);
+    Vector3 STACK_CARD_ORIGIN_SCALE = new Vector3(1.35f, 1.35f, 1.35f);
     const float STACK_Z_VALUE = -0.02f;
-    const float LEAN_VALUE = 4f;
-    const float CARD_POS_OFFSET = 3f;
+    const float LEAN_VALUE = 3.5f;
+    const float CARD_POS_OFFSET = 0.02f;
     const int MAX_CARD_COUNT = 15; // 고정 격차로 배치되는 최대 카드 개수
 
     public const float EXCLUSION_SCALE_AMOUNT = 1.2f;
@@ -104,7 +104,7 @@ public class S_StackInfoSystem : MonoBehaviour
             Vector3 pos = Vector3.Lerp(STACK_BASE_START_POS, STACK_BASE_END_POS, interval * i);
             pos = new Vector3(pos.x + Random.Range(-CARD_POS_OFFSET, CARD_POS_OFFSET), pos.y + Random.Range(-CARD_POS_OFFSET, CARD_POS_OFFSET), i * STACK_Z_VALUE);
 
-            Vector3 rot = new Vector3(0, 0, Random.Range(-LEAN_VALUE, LEAN_VALUE));
+            Vector3 rot = new Vector3(0, 0, 0);
 
             Vector3 scale = STACK_CARD_ORIGIN_SCALE;
 

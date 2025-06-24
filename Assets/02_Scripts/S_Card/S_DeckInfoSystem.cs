@@ -5,17 +5,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class S_DeckInfoSystem : MonoBehaviour
 {
     [Header("프리팹")]
-    [SerializeField] GameObject deckCard;
+    [SerializeField] GameObject prefab_DeckCard;
+    [SerializeField] Material mat_Origin;
+    [SerializeField] Material mat_GrayEffect;
 
     [Header("씬 오브젝트")]
     [SerializeField] GameObject pos_DeckBase;
     [SerializeField] GameObject text_DeckCount;
-    [SerializeField] SpriteRenderer sprite_BlackBackgroundByDeckInfo;
-    [SerializeField] GameObject sprite_ViewDeck;
+    [SerializeField] GameObject obj_ViewDeck;
 
     [Header("컴포넌트")]
     GameObject panel_DeckBtnBase;
@@ -32,9 +34,9 @@ public class S_DeckInfoSystem : MonoBehaviour
     Vector3 DECK_BASE_START_POS = new Vector3(-8.2f, 0, 0);
     Vector3 DECK_BASE_END_POS = new Vector3(8.2f, 0, 0);
     const float STACK_Z_VALUE = -0.02f;
-    Vector3 STACK_CARD_ORIGIN_SCALE = new Vector3(1.7f, 1.7f, 1.7f);
+    Vector3 STACK_CARD_ORIGIN_SCALE = new Vector3(1.35f, 1.35f, 1.35f);
 
-    S_OrderStateEnum orderState = S_OrderStateEnum.GetOrder;
+    S_OrderStateEnum orderState;
 
     // 싱글턴
     static S_DeckInfoSystem instance;
@@ -53,6 +55,9 @@ public class S_DeckInfoSystem : MonoBehaviour
         text_DeckCount.GetComponent<MeshRenderer>().sortingOrder = 0;
         text_DeckCount.GetComponent<TMP_Text>().raycastTarget = false;
 
+        prevState = S_GameFlowStateEnum.None;
+        orderState = S_OrderStateEnum.GetOrder;
+
         // 싱글턴
         if (instance == null)
         {
@@ -62,14 +67,23 @@ public class S_DeckInfoSystem : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        // 섹션의 스프라이트에 포인터 엔터 바인딩하기.
+        EventTrigger spriteTrigger = obj_ViewDeck.GetComponent<EventTrigger>();
+        EventTrigger.Entry spritePointerEnterEntry = spriteTrigger.triggers.Find(e => e.eventID == EventTriggerType.PointerEnter);
+        EventTrigger.Entry spritePointerExitEntry = spriteTrigger.triggers.Find(e => e.eventID == EventTriggerType.PointerExit);
+        EventTrigger.Entry spritePointerClickEntry = spriteTrigger.triggers.Find(e => e.eventID == EventTriggerType.PointerClick);
+        // 바인딩
+        spritePointerEnterEntry.callback.AddListener((eventData) => { PointerEnterViewDeckObj((PointerEventData)eventData); });
+        spritePointerExitEntry.callback.AddListener((eventData) => { PointerExitViewDeckObj((PointerEventData)eventData); });
+        spritePointerClickEntry.callback.AddListener((eventData) => { ClickViewDeckObj((PointerEventData)eventData); });
     }
 
     public void AddDeck(S_Card card) // 덱에 카드 추가하기
     {
-        GameObject go = Instantiate(deckCard); // 덱 카드 프리팹 생성
-
+        GameObject go = Instantiate(prefab_DeckCard, pos_DeckBase.transform, false); // 덱 카드 프리팹 생성
         go.GetComponent<S_DeckCardObj>().SetCardInfo(card); // 카드 정보 설정
-        deckCardObjs.Add(go); // 스택 카드 오브젝트에 추가
+        deckCardObjs.Add(go); // 덱 카드 오브젝트에 추가
 
         AlignmentDeckCards();
     }
@@ -176,85 +190,86 @@ public class S_DeckInfoSystem : MonoBehaviour
         AlignmentDeckCards();
     }
     #region 버튼 함수
-    public async void ClickViewDeckSprite() // 덱 보기 스프라이트 클릭 시
+    public async void ClickViewDeckObj(PointerEventData eventData) // 덱 보기 스프라이트 클릭 시
     {
-        if (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.Hit))
+        // Dialog 시스템 전용. 다이얼로그에서 GameFlowState를 Hit으로 바꿔줘야한다.
+        S_DialogInfoSystem.Instance.ClickNextBtn();
+
+        if (!S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.Deck)) // 덱이 아니라면 덱 열기
         {
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+            if (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.Hit))
+            {
+                S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
 
-            // 인게임 인터페이스를 숨기기(히트 버튼)
-            S_HitBtnSystem.Instance.DisappearHitBtn();
+                S_HitBtnSystem.Instance.DisappearHitBtn();
 
-            await OpenDeckInfoCommonProperty(S_GameFlowStateEnum.Hit);
+                await OpenDeckInfoCommonProperty(S_GameFlowStateEnum.Hit);
+            }
+            else if (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.Store))
+            {
+                S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+
+                S_StoreInfoSystem.Instance.DisappearRefreshAndExitBtn();
+
+                await OpenDeckInfoCommonProperty(S_GameFlowStateEnum.Store);
+            }
+            else if (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.StoreBuying))
+            {
+                S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+
+                S_StoreInfoSystem.Instance.DisappearRefreshAndExitBtn();
+                S_StoreInfoSystem.Instance.DisappearMonologByBuiedProduct();
+
+                await OpenDeckInfoCommonProperty(S_GameFlowStateEnum.StoreBuying);
+            }
         }
-        else if (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.Store))
+        else // 덱이라면 덱 닫기
         {
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+            if (prevState == S_GameFlowStateEnum.Hit)
+            {
+                S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
 
-            // Store UI 퇴장
-            S_StoreInfoSystem.Instance.DisappearRefreshAndExitBtn();
+                // 시련 중인 UI 재등장(히트 버튼)
+                S_HitBtnSystem.Instance.AppearHitBtn();
 
-            // 덱 열기
-            await OpenDeckInfoCommonProperty(S_GameFlowStateEnum.Store);
-        }
-        else if (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.StoreBuying))
-        {
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+                // 덱 정보 닫기
+                await CloseDeckInfoCommonProperty();
+            }
+            else if (prevState == S_GameFlowStateEnum.Store)
+            {
+                S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
 
-            // Store UI 퇴장
-            S_StoreInfoSystem.Instance.DisappearRefreshAndExitBtn();
-            S_StoreInfoSystem.Instance.DisappearSelectCardOrTrinketText();
-            S_StoreInfoSystem.Instance.DisappearBlackBackground();
+                // 상점 UI 재등장
+                S_StoreInfoSystem.Instance.AppearRefreshAndExitBtn();
 
-            // 덱 열기
-            await OpenDeckInfoCommonProperty(S_GameFlowStateEnum.StoreBuying);
+                // 덱 정보 닫기
+                await CloseDeckInfoCommonProperty();
+            }
+            else if (prevState == S_GameFlowStateEnum.StoreBuying)
+            {
+                S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+
+                // 상점 UI 재등장
+                S_StoreInfoSystem.Instance.AppearRefreshAndExitBtn();
+                S_StoreInfoSystem.Instance.AppearMonlogByBuiedProduct();
+
+                // 덱 정보 닫기
+                await CloseDeckInfoCommonProperty();
+            }
         }
     }
-    public async void ClickCloseDeckInfoBtn() // 덱 보기 닫을 때 호출
+    public void PointerEnterViewDeckObj(PointerEventData eventData)
     {
-        if (prevState == S_GameFlowStateEnum.Hit)
+        foreach (Transform t in obj_ViewDeck.transform)
         {
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
-
-            // 시련 중인 UI 재등장(히트 버튼)
-            S_HitBtnSystem.Instance.AppearHitBtn();
-
-            // 카메라 이동
-            Camera.main.transform.DOMove(S_GameFlowManager.InGameCameraPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-            Camera.main.transform.DORotate(S_GameFlowManager.InGameCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-
-            // 덱 정보 닫기
-            await CloseDeckInfoCommonProperty();
+            t.GetComponent<SpriteRenderer>().material = mat_Origin;
         }
-        else if (prevState == S_GameFlowStateEnum.Store)
+    }
+    public void PointerExitViewDeckObj(PointerEventData eventData)
+    {
+        foreach (Transform t in obj_ViewDeck.transform)
         {
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
-
-            // 상점 UI 재등장
-            S_StoreInfoSystem.Instance.AppearRefreshAndExitBtn();
-
-            // 카메라 이동
-            Camera.main.transform.DOMove(S_GameFlowManager.StoreCameraPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-            Camera.main.transform.DORotate(S_GameFlowManager.StoreCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-
-            // 덱 정보 닫기
-            await CloseDeckInfoCommonProperty();
-        }
-        else if (prevState == S_GameFlowStateEnum.StoreBuying)
-        {
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
-
-            // 상점 UI 재등장
-            S_StoreInfoSystem.Instance.AppearRefreshAndExitBtn();
-            S_StoreInfoSystem.Instance.AppearSelectCardOrTrinketText(false);
-            S_StoreInfoSystem.Instance.AppearBlackBackground();
-
-            // 카메라 이동
-            Camera.main.transform.DOMove(S_GameFlowManager.StoreCameraPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-            Camera.main.transform.DORotate(S_GameFlowManager.StoreCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-
-            // 덱 정보 닫기
-            await CloseDeckInfoCommonProperty();
+            t.GetComponent<SpriteRenderer>().material = mat_GrayEffect;
         }
     }
     public void ClickGetOrderBtn() // 획득 순 정렬
@@ -287,8 +302,6 @@ public class S_DeckInfoSystem : MonoBehaviour
 
         // 텍스트 업데이트
         text_DeckCount.GetComponent<TMP_Text>().text = $"{S_PlayerCard.Instance.GetDeckCards().Count} / {S_PlayerCard.Instance.GetOriginPlayerDeckCards().Count}";
-
-        AlignmentDeckCards();
     }
     public void SetDeckCardInfo() // 상점 전용 업데이트
     {
@@ -314,13 +327,8 @@ public class S_DeckInfoSystem : MonoBehaviour
         panel_DeckBtnBase.GetComponent<RectTransform>().DOKill();
         panel_DeckBtnBase.GetComponent<RectTransform>().DOAnchorPos(DECK_BTN_ORIGIN_POS, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
 
-        // 살짝 어두워지게 만드는 효과
-        sprite_BlackBackgroundByDeckInfo.DOKill();
-        sprite_BlackBackgroundByDeckInfo.DOFade(0.51f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-
         // 카메라 이동
-        Camera.main.transform.DOMove(S_GameFlowManager.DeckCameraPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-        Camera.main.transform.DORotate(S_GameFlowManager.DeckCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        S_CameraManager.Instance.MoveToPosition(S_CameraManager.DeckCameraPos, S_CameraManager.DeckCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME);
 
         // 카메라 이동 대기
         await S_GameFlowManager.WaitPanelAppearTimeAsync();
@@ -336,9 +344,8 @@ public class S_DeckInfoSystem : MonoBehaviour
         panel_DeckBtnBase.GetComponent<RectTransform>().DOAnchorPos(DECK_BTN_HIDE_POS, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
             .OnComplete(() => panel_DeckBtnBase.SetActive(false));
 
-        // 어두워진걸 다시 풀어주기
-        sprite_BlackBackgroundByDeckInfo.DOKill();
-        sprite_BlackBackgroundByDeckInfo.DOFade(0f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        // 카메라 이동
+        S_CameraManager.Instance.MoveToPosition(S_CameraManager.InGameCameraPos, S_CameraManager.InGameCameraRot, S_GameFlowManager.PANEL_APPEAR_TIME);
 
         // UI 연출 대기
         await S_GameFlowManager.WaitPanelAppearTimeAsync();

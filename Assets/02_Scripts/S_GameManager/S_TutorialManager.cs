@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -22,120 +23,82 @@ public class S_TutorialManager : MonoBehaviour
         }
     }
 
-    public async void StartTutorial()
+    public async void StartTrialByTutorial()
     {
-        // StartTrial 넣기
-        await StartTutorialAsync();
+        Queue<DialogData> dialogs = new Queue<DialogData>();
+        List<DialogData> dialogList = new();
+
+        // 시련 시작
+        await S_GameFlowManager.Instance.StartTrialByTutorialAsync();
+
+        // 말하는 캐릭터의 소팅오더를 보이도록 조절
+        SpriteRenderer dialogPos = S_FoeInfoSystem.Instance.Instance_Section.GetComponent<S_SectionObj>().sprite_Character.GetComponent<SpriteRenderer>();
+        dialogPos.sortingLayerName = "Dialog";
+        dialogPos.sortingOrder = 1;
+
+        // 다이얼로그 : 튜토리얼 인트로
+        await StartTutorialDialog(S_DialogMetaData.GetDialogsByPrefix("Tutorial_Intro"), dialogPos);
+
+        // 다이얼로그 : 튜토리얼 카드 내기
+        await StartTutorialDialog(S_DialogMetaData.GetDialogsByPrefix("Tutorial_Hit"), dialogPos);
+
+        // 카드 내기 시작
+        await S_HitBtnSystem.Instance.StartHitCardAsync();
+        // 온전히 카드를 낼 때까지 대기
+        while (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.HittingCard) || S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.None))
+        {
+            await Task.Yield();
+        }
+
+        // 다이얼로그 : 튜토리얼 카드에 대하여
+        await StartTutorialDialog(S_DialogMetaData.GetDialogsByPrefix("Tutorial_Card"), dialogPos);
+
+        // 덱 보기
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
+        S_HitBtnSystem.Instance.DisappearHitBtn();
+        await S_DeckInfoSystem.Instance.OpenDeckInfoCommonProperty(S_GameFlowStateEnum.Hit);
+        // 덱에서 스택으로 넘어올 때까지 대기
+        while (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.Deck) || S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.None))
+        {
+            await Task.Yield();
+        }
+
+        // 다이얼로그 : 튜토리얼 비틀기
+        await StartTutorialDialog(S_DialogMetaData.GetDialogsByPrefix("Tutorial_Twist"), dialogPos);
+
+        // 되돌리기 시작
+        await S_GameFlowManager.Instance.StartTwistAsync();
+
+        // 다이얼로그 : 튜토리얼 스탠드
+        await StartTutorialDialog(S_DialogMetaData.GetDialogsByPrefix("Tutorial_Stand"), dialogPos);
+
+        // 다이얼로그 : 튜토리얼 쓸만한 물건
+        await StartTutorialDialog(S_DialogMetaData.GetDialogsByPrefix("Tutorial_Trinket"), dialogPos);
+
+        // 다이얼로그 : 튜토리얼 아웃트로
+        await StartTutorialDialog(S_DialogMetaData.GetDialogsByPrefix("Tutorial_Outro"), dialogPos);
+
+        // 튜토리얼 완료
+        // 캐릭터 소팅 재조절
+        dialogPos.sortingLayerName = "WorldObject";
+        dialogPos.sortingOrder = 1;
+
+        PlayerPrefs.SetInt("TutorialCompleted", 1); // 튜토리얼 완수했음을 알리는 로직
+        PlayerPrefs.Save();
+
+        // 상점으로 넘어가기
+        await S_GameFlowManager.Instance.StartStoreByTutorialAsync();
     }
-    async Task StartTutorialAsync()
+
+    async Task StartTutorialDialog(List<DialogData> dialogList, SpriteRenderer dialogPos)
     {
         Queue<DialogData> dialogs = new Queue<DialogData>();
 
-        // 튜토리얼 인트로
-        List<DialogData> dialogList = S_DialogMetaData.GetDialogsByPrefix("Tutorial_Intro");
         for (int i = 0; i < dialogList.Count; i++)
         {
             dialogs.Enqueue(dialogList[i]);
         }
-        await S_DialogInfoSystem.Instance.StartDialogByInGame(dialogs);
-        // 히트 시작
-        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
-        S_Card hitCard = S_PlayerCard.Instance.DrawRandomCard(1)[0];
-        // 카드 내기
-        await S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(hitCard, S_CardOrderTypeEnum.Hit);
-        // 우선이 있었다면 해제
-        if (S_PlayerStat.Instance.IsFirst) await S_EffectActivator.Instance.AppliedFirstAsync();
-        // 히트 카드 진행
-        if (S_GameFlowManager.Instance.GetCardOrderQueueCount() <= 1)
-        {
-            await S_GameFlowManager.Instance.StartHittingCard();
-        }
 
-        // 튜토리얼 히트, 의지 히트, 비틀기, 스탠드
-        dialogList = S_DialogMetaData.GetDialogsByPrefix("Tutorial_Action");
-        for (int i = 0; i < dialogList.Count; i++)
-        {
-            dialogs.Enqueue(dialogList[i]);
-        }
-        await S_DialogInfoSystem.Instance.StartDialogByInGame(dialogs);
-        // 비틀기
-        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
-        S_PlayerStat.Instance.UseDetermination();
-        // 카드 제외 및 제외된 카드 복구. 이하 3개 메서드는 반드시 붙어다녀야한다.
-        S_PlayerCard.Instance.ResetCardsByTwist(out List<S_Card> stacks, out List<S_Card> exclusions);
-        await S_StackInfoSystem.Instance.ReturnCardsByTwistAsync(stacks);
-        await S_ShowingCardEffecter.Instance.ReturnExclusionCardsByTwistAsync(exclusions);
-        // 적의 조건 체크
-        S_FoeInfoSystem.Instance.CheckFoeMeetCondition();
-        // 스탯, 히스토리를 스택의 카드를 내기 전으로 되돌리기.
-        S_PlayerStat.Instance.ResetStatsByTwist();
-        // 비틀기로 히스토리 저장
-        S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.Twist);
-        // 피조물이 죽었다면 전투 종료
-        if (S_FoeInfoSystem.Instance.CurrentFoe.CurrentHealth <= 0)
-        {
-            S_GameFlowManager.Instance.EndTrial();
-        }
-        else // 아니라면 히트 다시 시작
-        {
-            S_GameFlowManager.Instance.StartNewTurn();
-        }
-
-        // 튜토리얼 카드
-        dialogList = S_DialogMetaData.GetDialogsByPrefix("Tutorial_Card");
-        for (int i = 0; i < dialogList.Count; i++)
-        {
-            dialogs.Enqueue(dialogList[i]);
-        }
-        await S_DialogInfoSystem.Instance.StartDialogByInGame(dialogs);
-        // 스탠드
-        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
-        // 카드의 결의 효과 발동
-        await S_EffectActivator.Instance.ActivatedCardByStand();
-        // 능력 발동
-        await S_PlayerTrinket.Instance.ActivateStandSkillsByStand();
-        // 적 발동
-        await S_FoeInfoSystem.Instance.ActivateStandFoeByStand();
-        // 카드오더큐가 1개라면, 즉 시련 시작 시 혹은 스탠드 시에 창조되었다면, 카드에 의해 창조된게 아니라면
-        if (S_GameFlowManager.Instance.GetCardOrderQueueCount() >= 1)
-        {
-            await S_GameFlowManager.Instance.StartHittingCard();
-        }
-        // 카드 고정. IsCurrentHit을 false로 만드는 과정
-        S_PlayerCard.Instance.FixCardsByStand();
-        // 더 이상 데미지가 되돌아가지 않는다.
-        S_FoeInfoSystem.Instance.FixHealthByStand();
-        // 스탠드로 히스토리 저장
-        S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.Stand);
-        // 피조물 처치 여부에 따른 처리
-        if (S_FoeInfoSystem.Instance.CurrentFoe.OldHealth <= 0) // 피조물이 죽었다면 전투 종료
-        {
-            S_GameFlowManager.Instance.EndTrial();
-        }
-        else // 살았다면 피조물이 플레이어를 공격
-        {
-            // 플레이어 공격
-            await S_FoeInfoSystem.Instance.AttackPlayer();
-
-            // 공격받고 나서 스택 합을 0으로 만들고 클린히트, 버스트 초기화하자.
-            S_PlayerStat.Instance.ResetStackSum();
-            S_PlayerStat.Instance.CheckBurstAndPerfect();
-            S_StatInfoSystem.Instance.UpdateSpecialAbility();
-
-            // 히트 다시 시작
-            S_GameFlowManager.Instance.StartNewTurn();
-        }
-
-        // 튜토리얼 능력
-        dialogList = S_DialogMetaData.GetDialogsByPrefix("Tutorial_Skill");
-        for (int i = 0; i < dialogList.Count; i++)
-        {
-            dialogs.Enqueue(dialogList[i]);
-        }
-        await S_DialogInfoSystem.Instance.StartDialogByInGame(dialogs);
-
-        // 튜토리얼 완료
-        PlayerPrefs.SetInt("TutorialCompleted", 1); // 튜토리얼 완수했음을 알리는 로직
-        PlayerPrefs.Save();
+        await S_DialogInfoSystem.Instance.StartDialog(dialogPos, dialogs);
     }
 }

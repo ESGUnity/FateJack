@@ -16,8 +16,7 @@ public class S_RedAmulet : S_Trinket
         S_BattleStatEnum.Mind_Luck,
         false,
         false
-    )
-    { }
+    ) { }
 
     public override S_Trinket Clone()
     {

@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 
 public class S_EffectActivator : MonoBehaviour
 {
-    [SerializeField] GameObject sprite_Foe;
-
     [Header("프리팹")]
     [SerializeField] GameObject prefab_EffectLog;
 
@@ -56,7 +53,10 @@ public class S_EffectActivator : MonoBehaviour
     #region 토탈 효과 발동
     public async Task ActivateByHit(S_Card hitCard, S_CardOrderTypeEnum type)
     {
-
+        await ActivateCalcWeightByHit(hitCard, type);
+        await ActivateTrinketByHit(hitCard);
+        await ActivateFoeByHit(hitCard);
+        await ActivateCardByHit(hitCard, type);
     }
     #endregion
     #region 카드 효과 발동 관련
@@ -78,7 +78,7 @@ public class S_EffectActivator : MonoBehaviour
             switch (card.Engraving)
             {
                 case S_EngravingEnum.Legion:
-                    count = checker.GetSumInPreStack();
+                    count = checker.GetSumInStack();
                     card.ActivatedCount = count;
                     if (count >= 30)
                     {
@@ -92,7 +92,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Legion_Flip:
-                    count = checker.GetSumInPreStack();
+                    count = checker.GetSumInStack();
                     card.ActivatedCount = count;
                     if (count >= 50)
                     {
@@ -106,7 +106,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.AllOut:
-                    count = checker.GetSumInPreStack();
+                    count = checker.GetSumInStack();
                     card.ActivatedCount = count;
                     if (count >= 15)
                     {
@@ -118,7 +118,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.AllOut_Flip:
-                    count = checker.GetSumInPreStack();
+                    count = checker.GetSumInStack();
                     card.ActivatedCount = count;
                     if (count >= 20)
                     {
@@ -130,7 +130,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Delicacy:
-                    count = checker.GetCardsInPreStack().Count;
+                    count = checker.GetCardsInStack().Count;
                     card.ActivatedCount = count;
                     if (count % 3 == 0)
                     {
@@ -144,7 +144,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Delicacy_Flip:
-                    count = checker.GetCardsInPreStack().Count;
+                    count = checker.GetCardsInStack().Count;
                     card.ActivatedCount = count;
                     if (count % 6 == 0)
                     {
@@ -158,7 +158,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Precision:
-                    count = checker.GetCardsInPreStack().Count;
+                    count = checker.GetCardsInStack().Count;
                     card.ActivatedCount = count;
                     if (count % 3 == 0)
                     {
@@ -170,7 +170,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Precision_Flip:
-                    count = checker.GetCardsInPreStack().Count;
+                    count = checker.GetCardsInStack().Count;
                     card.ActivatedCount = count;
                     if (count % 6 == 0)
                     {
@@ -182,7 +182,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Resection:
-                    count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                    count = checker.GetCardsInStackInCurrentTurn().Count;
                     card.ActivatedCount = count;
                     if (count <= 4)
                     {
@@ -196,7 +196,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Resection_Flip:
-                    count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                    count = checker.GetCardsInStackInCurrentTurn().Count;
                     card.ActivatedCount = count;
                     if (count <= 3)
                     {
@@ -210,7 +210,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Patience:
-                    count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                    count = checker.GetCardsInStackInCurrentTurn().Count;
                     card.ActivatedCount = count;
                     if (count <= 4)
                     {
@@ -222,7 +222,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Patience_Flip:
-                    count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                    count = checker.GetCardsInStackInCurrentTurn().Count;
                     card.ActivatedCount = count;
                     if (count <= 3)
                     {
@@ -234,7 +234,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Overflow:
-                    count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                    count = checker.GetCardsInStackInCurrentTurn().Count;
                     card.ActivatedCount = count;
                     if (count >= 5)
                     {
@@ -248,7 +248,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Overflow_Flip:
-                    count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                    count = checker.GetCardsInStackInCurrentTurn().Count;
                     card.ActivatedCount = count;
                     if (count >= 6)
                     {
@@ -262,7 +262,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Fierce:
-                    count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                    count = checker.GetCardsInStackInCurrentTurn().Count;
                     card.ActivatedCount = count;
                     if (count >= 5)
                     {
@@ -274,7 +274,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Fierce_Flip:
-                    count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                    count = checker.GetCardsInStackInCurrentTurn().Count;
                     card.ActivatedCount = count;
                     if (count >= 6)
                     {
@@ -286,7 +286,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.GrandChaos:
-                    count = checker.GetGrandChaosInPreStackInCurrentTurn(1).Count;
+                    count = checker.GetGrandChaosInStackInCurrentTurn(1).Count;
                     card.ActivatedCount = count;
                     if (count >= 4)
                     {
@@ -300,7 +300,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.GrandChaos_Flip:
-                    count = checker.GetGrandChaosInPreStackInCurrentTurn(2).Count;
+                    count = checker.GetGrandChaosInStackInCurrentTurn(2).Count;
                     card.ActivatedCount = count;
                     if (count >= 4)
                     {
@@ -314,7 +314,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Crush:
-                    count = checker.GetGrandChaosInPreStackInCurrentTurn(1).Count;
+                    count = checker.GetGrandChaosInStackInCurrentTurn(1).Count;
                     card.ActivatedCount = count;
                     if (count >= 4)
                     {
@@ -326,7 +326,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_EngravingEnum.Crush_Flip:
-                    count = checker.GetGrandChaosInPreStackInCurrentTurn(2).Count;
+                    count = checker.GetGrandChaosInStackInCurrentTurn(2).Count;
                     card.ActivatedCount = count;
                     if (count >= 4)
                     {
@@ -390,8 +390,7 @@ public class S_EffectActivator : MonoBehaviour
 
         S_StackInfoSystem.Instance.UpdateStackCardState();
     }
-
-    public async Task ActivateCardByHit(S_Card hitCard, S_CardOrderTypeEnum type) // 카드를 낼 때 무게 및 발현 각인이 있는 카드 발동
+    async Task ActivateCalcWeightByHit(S_Card hitCard, S_CardOrderTypeEnum type)
     {
         if (pStat.IsDelusion) // 망상일 경우 저주하기
         {
@@ -406,11 +405,78 @@ public class S_EffectActivator : MonoBehaviour
             GenerateEffectLog("망상 해제됨!");
             await WaitEffectLifeTimeAsync();
         }
-        if (pTrinket.IsPlayerHavePassive(S_TrinketPassiveEnum.CurseStr, out S_Trinket tri1)) // 힘 카드 낼 때마다 저주하는 쓸만한 물건이 있다면
+
+        // 힘, 정신력, 행운, 공통 카드 낼 때마다 저주하는 쓸만한 물건 패시브
+        if (pTrinket.IsPlayerHavePassive(S_TrinketPassiveEnum.CurseStr, out S_Trinket tri1))
         {
             if (hitCard.CardType == S_CardTypeEnum.Str)
             {
                 S_TrinketInfoSystem.Instance.BouncingTrinketObjVFX(tri1);
+
+                await CurseCard(hitCard, null);
+            }
+        }
+        if (pTrinket.IsPlayerHavePassive(S_TrinketPassiveEnum.CurseMind, out S_Trinket tri2))
+        {
+            if (hitCard.CardType == S_CardTypeEnum.Mind)
+            {
+                S_TrinketInfoSystem.Instance.BouncingTrinketObjVFX(tri2);
+
+                await CurseCard(hitCard, null);
+            }
+        }
+        if (pTrinket.IsPlayerHavePassive(S_TrinketPassiveEnum.CurseLuck, out S_Trinket tri3)) 
+        {
+            if (hitCard.CardType == S_CardTypeEnum.Luck)
+            {
+                S_TrinketInfoSystem.Instance.BouncingTrinketObjVFX(tri3);
+
+                await CurseCard(hitCard, null);
+            }
+        }
+        if (pTrinket.IsPlayerHavePassive(S_TrinketPassiveEnum.CurseCommon, out S_Trinket tri4)) 
+        {
+            if (hitCard.CardType == S_CardTypeEnum.Common)
+            {
+                S_TrinketInfoSystem.Instance.BouncingTrinketObjVFX(tri4);
+
+                await CurseCard(hitCard, null);
+            }
+        }
+
+        // 힘, 정신력, 행운, 공통 카드 낼 때마다 저주하는 적 패시브
+        if (S_FoeInfoSystem.Instance.IsFoeHavePassive(S_TrinketPassiveEnum.CurseStr))
+        {
+            if (hitCard.CardType == S_CardTypeEnum.Str)
+            {
+                S_FoeInfoSystem.Instance.FoeBouncingVFX();
+
+                await CurseCard(hitCard, null);
+            }
+        }
+        if (S_FoeInfoSystem.Instance.IsFoeHavePassive(S_TrinketPassiveEnum.CurseMind))
+        {
+            if (hitCard.CardType == S_CardTypeEnum.Mind)
+            {
+                S_FoeInfoSystem.Instance.FoeBouncingVFX();
+
+                await CurseCard(hitCard, null);
+            }
+        }
+        if (S_FoeInfoSystem.Instance.IsFoeHavePassive(S_TrinketPassiveEnum.CurseLuck))
+        {
+            if (hitCard.CardType == S_CardTypeEnum.Luck)
+            {
+                S_FoeInfoSystem.Instance.FoeBouncingVFX();
+
+                await CurseCard(hitCard, null);
+            }
+        }
+        if (S_FoeInfoSystem.Instance.IsFoeHavePassive(S_TrinketPassiveEnum.CurseCommon))
+        {
+            if (hitCard.CardType == S_CardTypeEnum.Common)
+            {
+                S_FoeInfoSystem.Instance.FoeBouncingVFX();
 
                 await CurseCard(hitCard, null);
             }
@@ -440,7 +506,9 @@ public class S_EffectActivator : MonoBehaviour
         {
             await AddOrSubtractWeight(hitCard, hitCard.Num);
         }
-
+    }
+    async Task ActivateCardByHit(S_Card hitCard, S_CardOrderTypeEnum type) // 발현 각인이 있는 카드 발동
+    {
         if (hitCard.Engraving == S_EngravingEnum.Unleash) // 발현 각인이 있다면 효과 발동
         {
             if (hitCard.IsCursed) // 저주받은 카드는 패스
@@ -457,7 +525,7 @@ public class S_EffectActivator : MonoBehaviour
             await ActivateCardEffectByEngraving(hitCard);
         }
 
-        // 쓸만한 물건 패시브에 의한 효과 발동
+        // 쓸만한 물건 패시브에 의한 효과 발동(발현)
         if (pTrinket.IsPlayerHavePassive(S_TrinketPassiveEnum.LuckPerUnleashTrig, out S_Trinket tri2))
         {
             float criticalBlowFloat = pStat.CurrentLuck * 0.01f;
@@ -469,31 +537,35 @@ public class S_EffectActivator : MonoBehaviour
             }
         }
     }
+
     public async Task ActivatedCardByStand() // 스탠드 시 카드 효과 발동
     {
         // 수레바퀴 패시브 효과 발동(쓸물)
         if (pTrinket.IsPlayerHavePassive(S_TrinketPassiveEnum.FirstCard2Trig, out S_Trinket tri1))
         {
-            List<S_Card> cards = checker.GetCardsInPreStackInCurrentTurn();
+            List<S_Card> cards = checker.GetCardsInStackInCurrentTurn();
             if (cards.Count > 0)
             {
                 S_TrinketInfoSystem.Instance.BouncingTrinketObjVFX(tri1);
 
-                await ActivateCardEffectByEngraving(cards[0]);
-                await ActivateCardEffectByEngraving(cards[0]);
+                await ActivateCardEffectByEngraving(cards.First());
+                await ActivateCardEffectByEngraving(cards.First());
             }
         }
 
         int index = 0;
         while (index < pCard.GetStackCards().Count)
         {
+
             if (pCard.GetStackCards()[index].IsCursed) // 저주받은 카드는 패스
             {
                 await ActivateCursedCardEffect(pCard.GetStackCards()[index]);
+                index++;
                 continue;
             }
             if (!pCard.GetStackCards()[index].IsMeetCondition) // 조건 충족이 안된 카드도 패스
             {
+                index++;
                 continue;
             }
 
@@ -535,6 +607,8 @@ public class S_EffectActivator : MonoBehaviour
 
                 await ActivateCardEffectByEngraving(pCard.GetStackCards()[index]);
             }
+
+            index++;
         }
     }
     async Task OnlyActivateCardEffect(S_Card card) // 카드 효과만 발동하기
@@ -601,7 +675,7 @@ public class S_EffectActivator : MonoBehaviour
                 }
                 break;
             case S_CardEffectEnum.Str_Grudge:
-                if (S_FoeInfoSystem.Instance.CurrentFoe.CurrentHealth >= S_FoeInfoSystem.Instance.CurrentFoe.MaxHealth * 0.75f)
+                if (S_FoeInfoSystem.Instance.FoeInfo.CurrentHealth >= S_FoeInfoSystem.Instance.FoeInfo.MaxHealth * 0.75f)
                 {
                     await HarmFoe(card, S_BattleStatEnum.Str_Mind, 1);
                 }
@@ -897,19 +971,19 @@ public class S_EffectActivator : MonoBehaviour
             case S_EngravingEnum.None:
                 break;
             case S_EngravingEnum.AllOut:
-                for (int i = 0; i < checker.GetSumInPreStack() / 15; i++)
+                for (int i = 0; i < checker.GetSumInStack() / 15; i++)
                 {
                     await OnlyActivateCardEffect(card);
                 }
                 break;
             case S_EngravingEnum.AllOut_Flip:
-                for (int i = 0; i < checker.GetSumInPreStack() / 20; i++)
+                for (int i = 0; i < checker.GetSumInStack() / 20; i++)
                 {
                     await OnlyActivateCardEffect(card);
                 }
                 break;
             case S_EngravingEnum.Precision:
-                count = checker.GetCardsInPreStack().Count;
+                count = checker.GetCardsInStack().Count;
                 if (count % 3 == 0)
                 {
                     for (int i = 0; i < 2; i++)
@@ -919,7 +993,7 @@ public class S_EffectActivator : MonoBehaviour
                 }
                 break;
             case S_EngravingEnum.Precision_Flip:
-                count = checker.GetCardsInPreStack().Count;
+                count = checker.GetCardsInStack().Count;
                 if (count % 6 == 0)
                 {
                     for (int i = 0; i < 2; i++)
@@ -929,7 +1003,7 @@ public class S_EffectActivator : MonoBehaviour
                 }
                 break;
             case S_EngravingEnum.Patience:
-                count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                count = checker.GetCardsInStackInCurrentTurn().Count;
                 if (count <= 4)
                 {
                     for (int i = 0; i < 2; i++)
@@ -939,7 +1013,7 @@ public class S_EffectActivator : MonoBehaviour
                 }
                 break;
             case S_EngravingEnum.Patience_Flip:
-                count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                count = checker.GetCardsInStackInCurrentTurn().Count;
                 if (count <= 3)
                 {
                     for (int i = 0; i < 2; i++)
@@ -949,7 +1023,7 @@ public class S_EffectActivator : MonoBehaviour
                 }
                 break;
             case S_EngravingEnum.Fierce:
-                count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                count = checker.GetCardsInStackInCurrentTurn().Count;
                 if (count >= 5)
                 {
                     for (int i = 0; i < 2; i++)
@@ -959,7 +1033,7 @@ public class S_EffectActivator : MonoBehaviour
                 }
                 break;
             case S_EngravingEnum.Fierce_Flip:
-                count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                count = checker.GetCardsInStackInCurrentTurn().Count;
                 if (count >= 6)
                 {
                     for (int i = 0; i < 2; i++)
@@ -969,7 +1043,7 @@ public class S_EffectActivator : MonoBehaviour
                 }
                 break;
             case S_EngravingEnum.Crush:
-                count = checker.GetGrandChaosInPreStackInCurrentTurn(1).Count;
+                count = checker.GetGrandChaosInStackInCurrentTurn(1).Count;
                 if (count >= 4)
                 {
                     for (int i = 0; i < 2; i++)
@@ -979,7 +1053,7 @@ public class S_EffectActivator : MonoBehaviour
                 }
                 break;
             case S_EngravingEnum.Crush_Flip:
-                count = checker.GetGrandChaosInPreStackInCurrentTurn(2).Count;
+                count = checker.GetGrandChaosInStackInCurrentTurn(2).Count;
                 if (count >= 4)
                 {
                     for (int i = 0; i < 4; i++)
@@ -1007,7 +1081,7 @@ public class S_EffectActivator : MonoBehaviour
                 }
                 break;
             case S_EngravingEnum.Spell:
-                List<S_Card> curseTarget = checker.GetCardsInPreStack().Where(x => !x.IsCursed).ToList();
+                List<S_Card> curseTarget = checker.GetCardsInStack().Where(x => !x.IsCursed).ToList();
                 if (curseTarget.Count > 0)
                 {
                     await CurseCard(curseTarget.OrderBy(x => Random.value).Take(1).First(), card);
@@ -1144,8 +1218,8 @@ public class S_EffectActivator : MonoBehaviour
                     card.ExpectedValue = temp;
                     break;
                 case S_CardEffectEnum.Str_Grudge:
-                    int foeHp = S_FoeInfoSystem.Instance.CurrentFoe.CurrentHealth - accHarm;
-                    if (foeHp >= S_FoeInfoSystem.Instance.CurrentFoe.MaxHealth * 0.75f)
+                    int foeHp = S_FoeInfoSystem.Instance.FoeInfo.CurrentHealth - accHarm;
+                    if (foeHp >= S_FoeInfoSystem.Instance.FoeInfo.MaxHealth * 0.75f)
                     {
                         temp = expStr * expMind;
                     }
@@ -1487,7 +1561,7 @@ public class S_EffectActivator : MonoBehaviour
                             temp *= 3;
                             break;
                         case S_TrinketConditionEnum.Legion_Twenty:
-                            temp *= checker.GetSumInPreStack() / 20 * 2;
+                            temp *= checker.GetSumInStack() / 20 * 2;
                             break;
                         case S_TrinketConditionEnum.Resection_Three:
                             temp *= 3;
@@ -1553,7 +1627,7 @@ public class S_EffectActivator : MonoBehaviour
     }
     #endregion
     #region 쓸만한 물건 효과 발동 관련
-    public void CheckTrinketMeetCondition(S_Card hitCard = null) // 시련 시작 시, 카드 낼 때, 비틀기, 효과 발동 시 틈틈이
+    public void CheckTrinketMeetCondition(S_Card hitCard = null) // 시련 시작 시, 카드 낼 때, 비틀기, 효과 발동 시 틈틈이. 낼 때마다 조건이 있기에 매개변수 필요
     {
         int count;
         int mod;
@@ -1632,7 +1706,7 @@ public class S_EffectActivator : MonoBehaviour
                     {
                         case S_TrinketModifyEnum.None: Debug.Log("S_EffectActivator Send : Modify None Trinket Exist"); break;
                         case S_TrinketModifyEnum.Any:
-                            count = checker.GetCardsInPreStack().Count;
+                            count = checker.GetCardsInStack().Count;
                             CheckReverbAFewTrinket(tri, count, 2);
                             break;
                         case S_TrinketModifyEnum.Str:
@@ -1663,7 +1737,7 @@ public class S_EffectActivator : MonoBehaviour
                     {
                         case S_TrinketModifyEnum.None: Debug.Log("S_EffectActivator Send : Modify None Trinket Exist"); break;
                         case S_TrinketModifyEnum.Any:
-                            count = checker.GetCardsInPreStack().Count;
+                            count = checker.GetCardsInStack().Count;
                             CheckReverbAFewTrinket(tri, count, 3);
                             break;
                         case S_TrinketModifyEnum.Str:
@@ -1689,7 +1763,7 @@ public class S_EffectActivator : MonoBehaviour
                     {
                         case S_TrinketModifyEnum.None: Debug.Log("S_EffectActivator Send : Modify None Trinket Exist"); break;
                         case S_TrinketModifyEnum.Str:
-                            if (checker.GetGrandChaosInPreStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInPreStackInCurrentTurn(1)[0] == S_CardTypeEnum.Str)
+                            if (checker.GetGrandChaosInStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInStackInCurrentTurn(1)[0] == S_CardTypeEnum.Str)
                             {
                                 tri.IsMeetCondition = true;
                             }
@@ -1699,7 +1773,7 @@ public class S_EffectActivator : MonoBehaviour
                             }
                             break;
                         case S_TrinketModifyEnum.Mind:
-                            if (checker.GetGrandChaosInPreStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInPreStackInCurrentTurn(1)[0] == S_CardTypeEnum.Mind)
+                            if (checker.GetGrandChaosInStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInStackInCurrentTurn(1)[0] == S_CardTypeEnum.Mind)
                             {
                                 tri.IsMeetCondition = true;
                             }
@@ -1709,7 +1783,7 @@ public class S_EffectActivator : MonoBehaviour
                             }
                             break;
                         case S_TrinketModifyEnum.Luck:
-                            if (checker.GetGrandChaosInPreStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInPreStackInCurrentTurn(1)[0] == S_CardTypeEnum.Luck)
+                            if (checker.GetGrandChaosInStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInStackInCurrentTurn(1)[0] == S_CardTypeEnum.Luck)
                             {
                                 tri.IsMeetCondition = true;
                             }
@@ -1719,7 +1793,7 @@ public class S_EffectActivator : MonoBehaviour
                             }
                             break;
                         case S_TrinketModifyEnum.Common:
-                            if (checker.GetGrandChaosInPreStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInPreStackInCurrentTurn(1)[0] == S_CardTypeEnum.Common)
+                            if (checker.GetGrandChaosInStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInStackInCurrentTurn(1)[0] == S_CardTypeEnum.Common)
                             {
                                 tri.IsMeetCondition = true;
                             }
@@ -1731,7 +1805,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_TrinketConditionEnum.Precision_Six:
-                    count = checker.GetCardsInPreStack().Count;
+                    count = checker.GetCardsInStack().Count;
 
                     if (count == 0)
                     {
@@ -1745,7 +1819,7 @@ public class S_EffectActivator : MonoBehaviour
                     tri.IsMeetCondition = mod == 0;
                     break;
                 case S_TrinketConditionEnum.Legion_Twenty:
-                    count = checker.GetSumInPreStack();
+                    count = checker.GetSumInStack();
 
                     tri.ActivatedCount = count;
                     if (count >= 20)
@@ -1758,7 +1832,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_TrinketConditionEnum.Resection_Three:
-                    count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                    count = checker.GetCardsInStackInCurrentTurn().Count;
 
                     tri.ActivatedCount = count;
                     if (count <= 3)
@@ -1771,7 +1845,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_TrinketConditionEnum.Overflow_Six:
-                    count = checker.GetCardsInPreStackInCurrentTurn().Count;
+                    count = checker.GetCardsInStackInCurrentTurn().Count;
 
                     tri.ActivatedCount = count;
                     if (count >= 6)
@@ -1784,7 +1858,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_TrinketConditionEnum.GrandChaos_One:
-                    if (checker.GetGrandChaosInPreStackInCurrentTurn(1).Count >= 4)
+                    if (checker.GetGrandChaosInStackInCurrentTurn(1).Count >= 4)
                     {
                         tri.IsMeetCondition = true;
                     }
@@ -1794,7 +1868,7 @@ public class S_EffectActivator : MonoBehaviour
                     }
                     break;
                 case S_TrinketConditionEnum.GrandChaos_Two:
-                    if (checker.GetGrandChaosInPreStackInCurrentTurn(2).Count >= 4)
+                    if (checker.GetGrandChaosInStackInCurrentTurn(2).Count >= 4)
                     {
                         tri.IsMeetCondition = true;
                     }
@@ -1811,7 +1885,6 @@ public class S_EffectActivator : MonoBehaviour
     }
     public void CheckReverbAFewTrinket(S_Trinket tri, int count, int reverbAmount) // ~장 낼 때마다의 조건을 지닌 쓸만한 물건에 대한 보조 메서드
     {
-        int mod;
         if (count == 0)
         {
             tri.ActivatedCount = 0;
@@ -1819,8 +1892,9 @@ public class S_EffectActivator : MonoBehaviour
             return;
         }
 
+        int mod;
         mod = count % reverbAmount;
-        tri.ActivatedCount = mod == 0 ? reverbAmount : mod;
+        tri.ActivatedCount = mod == 0 ? 0 : mod;
         tri.IsMeetCondition = mod == 0;
 
         if (tri.IsAccumulate)
@@ -1855,6 +1929,23 @@ public class S_EffectActivator : MonoBehaviour
                 }
             }
         }
+
+        // ActivatedCount와 IsMeetCondition 체크
+        S_TrinketInfoSystem.Instance.UpdateTrinketObjState();
+    }
+    public void ActivateTrinketByTwist()
+    {
+        foreach (S_Trinket tri in S_PlayerTrinket.Instance.GetPlayerOwnedTrinkets())
+        {
+            if (tri.Condition == S_TrinketConditionEnum.Reverb_One || tri.Condition == S_TrinketConditionEnum.Reverb_Two || tri.Condition == S_TrinketConditionEnum.Reverb_Three)
+            {
+                tri.ActivatedCount = 0;
+                tri.IsMeetCondition = false;
+            }
+        }
+
+        // ActivatedCount와 IsMeetCondition 체크
+        S_TrinketInfoSystem.Instance.UpdateTrinketObjState();
     }
     public async Task ActivateTrinketByStand()
     {
@@ -1865,6 +1956,9 @@ public class S_EffectActivator : MonoBehaviour
                 await ActivateTrinket(tri); // 효과 발동
             }
         }
+
+        // ActivatedCount와 IsMeetCondition 체크
+        S_TrinketInfoSystem.Instance.UpdateTrinketObjState();
     }
     public async Task ActivateTrinket(S_Trinket tri, S_Card hitCard = null) // 쓸만한 물건 효과 발동
     {
@@ -1882,32 +1976,19 @@ public class S_EffectActivator : MonoBehaviour
             case S_TrinketEffectEnum.None: break;
             case S_TrinketEffectEnum.Harm:
                 value = tri.IntValue <= 0 ? 1 : tri.IntValue;
-                switch (tri.Condition)
-                {
-                    case S_TrinketConditionEnum.Always:
-                        break;
-                    case S_TrinketConditionEnum.Precision_Six:
-                        value = 3;
-                        break;
-                    case S_TrinketConditionEnum.Legion_Twenty:
-                        value = checker.GetSumInPreStack() / 20 * 2;
-                        break;
-                    case S_TrinketConditionEnum.Resection_Three:
-                        value = 3;
-                        break;
-                    case S_TrinketConditionEnum.Overflow_Six:
-                        value = 3;
-                        break;
-                }
                 await HarmFoe(hitCard, tri.Stat, value);
                 break;
             case S_TrinketEffectEnum.Harm_TwoStat_Random:
                 value = tri.IntValue <= 0 ? 1 : tri.IntValue;
+                if (tri.Condition == S_TrinketConditionEnum.Legion_Twenty)
+                {
+                    value *= checker.GetSumInStack() / 20;
+                }
                 await HarmFoe(hitCard, tri.Stat, value);
                 break;
             case S_TrinketEffectEnum.Harm_AllStat:
                 value = tri.IntValue <= 0 ? 1 : tri.IntValue;
-                await HarmFoe(hitCard, tri.Stat, value);
+                await HarmFoe(hitCard, S_BattleStatEnum.AllStat, value);
                 break;
             case S_TrinketEffectEnum.Stat:
                 await AddOrSubtractBattleStat(hitCard, tri.Stat, tri.IntValue);
@@ -1919,7 +2000,12 @@ public class S_EffectActivator : MonoBehaviour
                 await AddOrSubtractWeight(hitCard, tri.IntValue);
                 break;
             case S_TrinketEffectEnum.Limit:
-                await AddOrSubtractLimit(hitCard, tri.IntValue);
+                value = tri.IntValue;
+                if (tri.Condition == S_TrinketConditionEnum.Legion_Twenty)
+                {
+                    value *= checker.GetSumInStack() / 20;
+                }
+                await AddOrSubtractLimit(hitCard, value);
                 break;
             case S_TrinketEffectEnum.Expansion:
                 await GetExpansion(hitCard);
@@ -1944,7 +2030,7 @@ public class S_EffectActivator : MonoBehaviour
                 }
                 break;
             case S_TrinketEffectEnum.Retrigger_CurrentTurn:
-                List<S_Card> cards = checker.GetCardsInPreStackInCurrentTurn();
+                List<S_Card> cards = checker.GetCardsInStackInCurrentTurn();
                 foreach (S_Card card in cards)
                 {
                     await RetriggerCard(hitCard, card);
@@ -1953,6 +2039,368 @@ public class S_EffectActivator : MonoBehaviour
             case S_TrinketEffectEnum.Health:
                 await AddOrSubtractHealth(hitCard, tri.IntValue);
                 break;
+        }
+    }
+    #endregion
+    #region 적 효과 발동 관련
+    public void CheckFoeMeetCondition(S_Card hitCard = null) // 시련 시작 시, 카드 낼 때, 비틀기, 효과 발동 시 틈틈이. 낼 때마다 조건이 있기에 매개변수 필요
+    {
+        int count;
+        int mod;
+
+        S_Foe foe = S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe;
+        switch (foe.Condition)
+        {
+            case S_TrinketConditionEnum.None:
+                foe.IsMeetCondition = false;
+                break;
+            case S_TrinketConditionEnum.StartTrial:
+                foe.IsMeetCondition = false;
+                break;
+            case S_TrinketConditionEnum.Always:
+                foe.IsMeetCondition = true;
+                break;
+            case S_TrinketConditionEnum.Reverb_One:
+                if (hitCard == null)
+                {
+                    break;
+                }
+                switch (foe.Modify)
+                {
+                    case S_TrinketModifyEnum.None: Debug.Log("S_EffectActivator Send : Modify None Trinket Exist"); break;
+                    case S_TrinketModifyEnum.Any: foe.IsMeetCondition = true; break;
+                    case S_TrinketModifyEnum.Str:
+                        if (hitCard.CardType == S_CardTypeEnum.Str)
+                        {
+                            foe.IsMeetCondition = true;
+                        }
+                        else
+                        {
+                            foe.IsMeetCondition = false;
+                        }
+                        break;
+                    case S_TrinketModifyEnum.Mind:
+                        if (hitCard.CardType == S_CardTypeEnum.Mind)
+                        {
+                            foe.IsMeetCondition = true;
+                        }
+                        else
+                        {
+                            foe.IsMeetCondition = false;
+                        }
+                        break;
+                    case S_TrinketModifyEnum.Luck:
+                        if (hitCard.CardType == S_CardTypeEnum.Luck)
+                        {
+                            foe.IsMeetCondition = true;
+                        }
+                        else
+                        {
+                            foe.IsMeetCondition = false;
+                        }
+                        break;
+                    case S_TrinketModifyEnum.Common:
+                        if (hitCard.CardType == S_CardTypeEnum.Common)
+                        {
+                            foe.IsMeetCondition = true;
+                        }
+                        else
+                        {
+                            foe.IsMeetCondition = false;
+                        }
+                        break;
+                }
+                break;
+            case S_TrinketConditionEnum.Reverb_Two:
+                if (hitCard == null)
+                {
+                    break;
+                }
+                switch (foe.Modify)
+                {
+                    case S_TrinketModifyEnum.None: Debug.Log("S_EffectActivator Send : Modify None Trinket Exist"); break;
+                    case S_TrinketModifyEnum.Any:
+                        count = checker.GetCardsInStack().Count;
+                        CheckReverbAFewFoe(foe, count, 2);
+                        break;
+                    case S_TrinketModifyEnum.Str:
+                        count = checker.GetSameTypeCardsInStack(S_CardTypeEnum.Str).Count;
+                        CheckReverbAFewFoe(foe, count, 2);
+                        break;
+                    case S_TrinketModifyEnum.Mind:
+                        count = checker.GetSameTypeCardsInStack(S_CardTypeEnum.Mind).Count;
+                        CheckReverbAFewFoe(foe, count, 2);
+                        break;
+                    case S_TrinketModifyEnum.Luck:
+                        count = checker.GetSameTypeCardsInStack(S_CardTypeEnum.Luck).Count;
+                        CheckReverbAFewFoe(foe, count, 2);
+                        break;
+                    case S_TrinketModifyEnum.Common:
+                        count = checker.GetSameTypeCardsInStack(S_CardTypeEnum.Common).Count;
+                        CheckReverbAFewFoe(foe, count, 2);
+                        break;
+                }
+                break;
+            case S_TrinketConditionEnum.Reverb_Three:
+                if (hitCard == null)
+                {
+                    break;
+                }
+                switch (foe.Modify)
+                {
+                    case S_TrinketModifyEnum.None: Debug.Log("S_EffectActivator Send : Modify None Trinket Exist"); break;
+                    case S_TrinketModifyEnum.Any:
+                        count = checker.GetCardsInStack().Count;
+                        CheckReverbAFewFoe(foe, count, 3);
+                        break;
+                    case S_TrinketModifyEnum.Str:
+                        count = checker.GetSameTypeCardsInStack(S_CardTypeEnum.Str).Count;
+                        CheckReverbAFewFoe(foe, count, 3);
+                        break;
+                    case S_TrinketModifyEnum.Mind:
+                        count = checker.GetSameTypeCardsInStack(S_CardTypeEnum.Mind).Count;
+                        CheckReverbAFewFoe(foe, count, 3);
+                        break;
+                    case S_TrinketModifyEnum.Luck:
+                        count = checker.GetSameTypeCardsInStack(S_CardTypeEnum.Luck).Count;
+                        CheckReverbAFewFoe(foe, count, 3);
+                        break;
+                    case S_TrinketModifyEnum.Common:
+                        count = checker.GetSameTypeCardsInStack(S_CardTypeEnum.Common).Count;
+                        CheckReverbAFewFoe(foe, count, 3);
+                        break;
+                }
+                break;
+            case S_TrinketConditionEnum.Only:
+                switch (foe.Modify)
+                {
+                    case S_TrinketModifyEnum.None: Debug.Log("S_EffectActivator Send : Modify None Trinket Exist"); break;
+                    case S_TrinketModifyEnum.Str:
+                        if (checker.GetGrandChaosInStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInStackInCurrentTurn(1).First() == S_CardTypeEnum.Str)
+                        {
+                            foe.IsMeetCondition = true;
+                        }
+                        else
+                        {
+                            foe.IsMeetCondition = false;
+                        }
+                        break;
+                    case S_TrinketModifyEnum.Mind:
+                        if (checker.GetGrandChaosInStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInStackInCurrentTurn(1).First() == S_CardTypeEnum.Mind)
+                        {
+                            foe.IsMeetCondition = true;
+                        }
+                        else
+                        {
+                            foe.IsMeetCondition = false;
+                        }
+                        break;
+                    case S_TrinketModifyEnum.Luck:
+                        if (checker.GetGrandChaosInStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInStackInCurrentTurn(1).First() == S_CardTypeEnum.Luck)
+                        {
+                            foe.IsMeetCondition = true;
+                        }
+                        else
+                        {
+                            foe.IsMeetCondition = false;
+                        }
+                        break;
+                    case S_TrinketModifyEnum.Common:
+                        if (checker.GetGrandChaosInStackInCurrentTurn(1).Count == 1 && checker.GetGrandChaosInStackInCurrentTurn(1).First() == S_CardTypeEnum.Common)
+                        {
+                            foe.IsMeetCondition = true;
+                        }
+                        else
+                        {
+                            foe.IsMeetCondition = false;
+                        }
+                        break;
+                }
+                break;
+            case S_TrinketConditionEnum.Precision_Six:
+                count = checker.GetCardsInStack().Count;
+
+                if (count == 0)
+                {
+                    foe.ActivatedCount = 0;
+                    foe.IsMeetCondition = false;
+                    break;
+                }
+
+                mod = count % 6;
+                foe.ActivatedCount = mod == 0 ? 6 : mod;
+                foe.IsMeetCondition = mod == 0;
+                break;
+            case S_TrinketConditionEnum.Legion_Twenty:
+                count = checker.GetSumInStack();
+
+                foe.ActivatedCount = count;
+                if (count >= 20)
+                {
+                    foe.IsMeetCondition = true;
+                }
+                else
+                {
+                    foe.IsMeetCondition = false;
+                }
+                break;
+            case S_TrinketConditionEnum.Resection_Three:
+                count = checker.GetCardsInStackInCurrentTurn().Count;
+
+                foe.ActivatedCount = count;
+                if (count <= 3)
+                {
+                    foe.IsMeetCondition = true;
+                }
+                else
+                {
+                    foe.IsMeetCondition = false;
+                }
+                break;
+            case S_TrinketConditionEnum.Overflow_Six:
+                count = checker.GetCardsInStackInCurrentTurn().Count;
+
+                foe.ActivatedCount = count;
+                if (count >= 6)
+                {
+                    foe.IsMeetCondition = true;
+                }
+                else
+                {
+                    foe.IsMeetCondition = false;
+                }
+                break;
+            case S_TrinketConditionEnum.GrandChaos_One:
+                if (checker.GetGrandChaosInStackInCurrentTurn(1).Count >= 4)
+                {
+                    foe.IsMeetCondition = true;
+                }
+                else
+                {
+                    foe.IsMeetCondition = false;
+                }
+                break;
+            case S_TrinketConditionEnum.GrandChaos_Two:
+                if (checker.GetGrandChaosInStackInCurrentTurn(2).Count >= 4)
+                {
+                    foe.IsMeetCondition = true;
+                }
+                else
+                {
+                    foe.IsMeetCondition = false;
+                }
+                break;
+            case S_TrinketConditionEnum.GrandChaos_One_Flip:
+                if (checker.GetGrandChaosInStackInCurrentTurn(1).Count >= 4)
+                {
+                    foe.IsMeetCondition = false;
+                }
+                else
+                {
+                    foe.IsMeetCondition = true;
+                }
+                break;
+        }
+
+        // ActivatedCount와 IsMeetCondition 체크
+        S_FoeInfoSystem.Instance.UpdateFoeObject();
+    }
+    public void CheckReverbAFewFoe(S_Foe foe, int count, int reverbAmount) // ~장 낼 때마다의 조건을 지닌 적에 대한 보조 메서드
+    {
+        if (count == 0)
+        {
+            foe.ActivatedCount = 0;
+            foe.IsMeetCondition = false;
+            return;
+        }
+
+        int mod;
+        mod = count % reverbAmount;
+        foe.ActivatedCount = mod == 0 ? reverbAmount : mod;
+        foe.IsMeetCondition = mod == 0;
+    }
+
+    public async Task ActivateFoeByStartTrial()
+    {
+        S_Foe foe = S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe;
+        if (foe.Condition == S_TrinketConditionEnum.StartTrial) // 시련 시작 시 효과를 발동한다.
+        {
+            await ActivateFoe(foe);
+        }
+    }
+    public async Task ActivateFoeByHit(S_Card hitCard) // 조건을 충족한 쓸만한 물건의 효과 발동(카드를 내거나 스탠드 할 때)
+    {
+        S_Foe foe = S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe;
+
+        if (foe.IsMeetCondition && (foe.Condition == S_TrinketConditionEnum.Reverb_One || foe.Condition == S_TrinketConditionEnum.Reverb_Two || foe.Condition == S_TrinketConditionEnum.Reverb_Three))
+        {
+            await ActivateFoe(foe, hitCard); // 효과 발동
+
+            // ~낼 때마다의 효과 발동을 했다면 ActivatedCount = 0, MeetCondition도 false로
+            if (foe.Condition == S_TrinketConditionEnum.Reverb_One || foe.Condition == S_TrinketConditionEnum.Reverb_Two || foe.Condition == S_TrinketConditionEnum.Reverb_Three)
+            {
+                foe.ActivatedCount = 0;
+                foe.IsMeetCondition = false;
+            }
+        }
+    }
+    public void ActivateFoeByTwist()
+    {
+        S_Foe foe = S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe;
+
+        if (foe.Condition == S_TrinketConditionEnum.Reverb_One || foe.Condition == S_TrinketConditionEnum.Reverb_Two || foe.Condition == S_TrinketConditionEnum.Reverb_Three)
+        {
+            foe.ActivatedCount = 0;
+            foe.IsMeetCondition = false;
+        }
+
+        // ActivatedCount와 IsMeetCondition 체크
+        S_TrinketInfoSystem.Instance.UpdateTrinketObjState();
+    }
+    public async Task ActivateFoeByStand()
+    {
+        S_Foe foe = S_FoeInfoSystem.Instance.FoeInfo.CurrentFoe;
+
+        if (foe.IsMeetCondition && foe.Condition != S_TrinketConditionEnum.Reverb_One && foe.Condition != S_TrinketConditionEnum.Reverb_Two && foe.Condition != S_TrinketConditionEnum.Reverb_Three)
+        {
+            await ActivateFoe(foe); // 효과 발동
+        }
+    }
+    public async Task ActivateFoe(S_Foe foe, S_Card hitCard = null) // 적 효과 발동
+    {
+        // 적의 바운싱 VFX
+        if (foe.Effect != S_TrinketEffectEnum.None)
+        {
+            S_FoeInfoSystem.Instance.FoeBouncingVFX();
+        }
+
+        // 적의 효과 발동
+        switch (foe.Effect)
+        {
+            case S_TrinketEffectEnum.None: break;
+            case S_TrinketEffectEnum.Stat:
+                await AddOrSubtractBattleStat(hitCard, foe.Stat, foe.IntValue);
+                break;
+            case S_TrinketEffectEnum.Stat_Multi:
+                await MultiBattleStat(hitCard, foe.Stat, foe.FloatValue);
+                break;
+            case S_TrinketEffectEnum.Weight:
+                await AddOrSubtractWeight(hitCard, foe.IntValue);
+                break;
+            case S_TrinketEffectEnum.Limit:
+                await AddOrSubtractLimit(hitCard, foe.IntValue);
+                break;
+            case S_TrinketEffectEnum.CurseCurrentTurn:
+                List<S_Card> cursedCards = checker.GetCardsInStackInCurrentTurn();
+                foreach (S_Card cursedCard in cursedCards)
+                {
+                    await CurseCard(cursedCard, hitCard);
+                }
+                break;
+            case S_TrinketEffectEnum.Delusion:
+                await GetDelusion(hitCard);
+                break;
+
         }
     }
     #endregion
@@ -2515,15 +2963,15 @@ public class S_EffectActivator : MonoBehaviour
         }
 
         // 데미지에 따라 카메라 쉐이킹(하스스톤)
-        if (value >= S_FoeInfoSystem.Instance.CurrentFoe.MaxHealth)
+        if (value >= S_FoeInfoSystem.Instance.FoeInfo.MaxHealth)
         {
             ShakeCamera(1.2f);
         }
-        else if (value >= S_FoeInfoSystem.Instance.CurrentFoe.MaxHealth * 0.5f)
+        else if (value >= S_FoeInfoSystem.Instance.FoeInfo.MaxHealth * 0.5f)
         {
             ShakeCamera(0.9f);
         }
-        else if (value >= S_FoeInfoSystem.Instance.CurrentFoe.MaxHealth * 0.3f)
+        else if (value >= S_FoeInfoSystem.Instance.FoeInfo.MaxHealth * 0.3f)
         {
             ShakeCamera(0.6f);
         }
@@ -2535,13 +2983,13 @@ public class S_EffectActivator : MonoBehaviour
         // 피해 VFX
         switch(stat)
         {
-            case S_BattleStatEnum.Str: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength, sprite_Foe); break;
-            case S_BattleStatEnum.Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind, sprite_Foe); break;
-            case S_BattleStatEnum.Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Luck, sprite_Foe); break;
-            case S_BattleStatEnum.Str_Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Mind, sprite_Foe); break;
-            case S_BattleStatEnum.Str_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Luck, sprite_Foe); break;
-            case S_BattleStatEnum.Mind_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind_Luck, sprite_Foe); break;
-            case S_BattleStatEnum.AllStat: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Carnage, sprite_Foe); break;
+            case S_BattleStatEnum.Str: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength); break;
+            case S_BattleStatEnum.Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind); break;
+            case S_BattleStatEnum.Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Luck); break;
+            case S_BattleStatEnum.Str_Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Mind); break;
+            case S_BattleStatEnum.Str_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Luck); break;
+            case S_BattleStatEnum.Mind_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind_Luck); break;
+            case S_BattleStatEnum.AllStat: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Carnage); break;
         }
     }
     async Task HarmFoeByFloat(S_Card triggerCard, S_BattleStatEnum stat, float multi)
@@ -2579,6 +3027,22 @@ public class S_EffectActivator : MonoBehaviour
             value = Mathf.RoundToInt(value * 2f);
         }
 
+        // 적 패시브 효과
+        if (S_FoeInfoSystem.Instance.IsFoeHavePassive(S_TrinketPassiveEnum.Ignore25PerHarm))
+        {
+            if (value >= Mathf.RoundToInt(S_FoeInfoSystem.Instance.FoeInfo.MaxHealth * 0.25f))
+            {
+                value = Mathf.RoundToInt(S_FoeInfoSystem.Instance.FoeInfo.MaxHealth * 0.25f);
+            }
+        }
+        if (S_FoeInfoSystem.Instance.IsFoeHavePassive(S_TrinketPassiveEnum.Immunity30PerHarm))
+        {
+            if (value < Mathf.RoundToInt(S_FoeInfoSystem.Instance.FoeInfo.MaxHealth * 0.3f))
+            {
+                value = 0;
+            }
+        }
+
         // 적에게 피해주기
         S_FoeInfoSystem.Instance.DamagedByHarm(value);
 
@@ -2603,15 +3067,15 @@ public class S_EffectActivator : MonoBehaviour
         }
 
         // 데미지에 따라 카메라 쉐이킹(하스스톤)
-        if (value >= S_FoeInfoSystem.Instance.CurrentFoe.MaxHealth)
+        if (value >= S_FoeInfoSystem.Instance.FoeInfo.MaxHealth)
         {
             ShakeCamera(1.2f);
         }
-        else if (value >= S_FoeInfoSystem.Instance.CurrentFoe.MaxHealth * 0.5f)
+        else if (value >= S_FoeInfoSystem.Instance.FoeInfo.MaxHealth * 0.5f)
         {
             ShakeCamera(0.9f);
         }
-        else if (value >= S_FoeInfoSystem.Instance.CurrentFoe.MaxHealth * 0.3f)
+        else if (value >= S_FoeInfoSystem.Instance.FoeInfo.MaxHealth * 0.3f)
         {
             ShakeCamera(0.6f);
         }
@@ -2623,13 +3087,13 @@ public class S_EffectActivator : MonoBehaviour
         // 피해 VFX
         switch (stat)
         {
-            case S_BattleStatEnum.Str: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength, sprite_Foe); break;
-            case S_BattleStatEnum.Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind, sprite_Foe); break;
-            case S_BattleStatEnum.Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Luck, sprite_Foe); break;
-            case S_BattleStatEnum.Str_Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Mind, sprite_Foe); break;
-            case S_BattleStatEnum.Str_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Luck, sprite_Foe); break;
-            case S_BattleStatEnum.Mind_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind_Luck, sprite_Foe); break;
-            case S_BattleStatEnum.AllStat: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Carnage, sprite_Foe); break;
+            case S_BattleStatEnum.Str: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength); break;
+            case S_BattleStatEnum.Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind); break;
+            case S_BattleStatEnum.Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Luck); break;
+            case S_BattleStatEnum.Str_Mind: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Mind); break;
+            case S_BattleStatEnum.Str_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Strength_Luck); break;
+            case S_BattleStatEnum.Mind_Luck: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Mind_Luck); break;
+            case S_BattleStatEnum.AllStat: await S_PlayerInfoSystem.Instance.HarmVFXAsync(S_PlayerVFXEnum.Harm_Carnage); break;
         }
     }
     async Task GenCard(S_Card triggerCard, S_Card targetCard = null, S_CardTypeEnum type = default)
@@ -2823,12 +3287,6 @@ public class S_EffectActivator : MonoBehaviour
                 await CurseCard(cursedCard, triggerCard);
             }
         }
-    }
-    #endregion
-    #region 적 효과
-    public async Task CurseRandomCards(S_Foe foe, int count, S_CardTypeEnum suit = S_EngravingEnum.None, int num = -1, bool inDeck = true, bool inStack = false, S_Card triggerCards = null) // 저주
-    {
-        S_FoeInfoSystem.Instance.FoeSpriteBouncingVFX();
     }
     #endregion
     #region VFX 보조

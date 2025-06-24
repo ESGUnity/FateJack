@@ -86,7 +86,7 @@ public class S_FoeManager : MonoBehaviour
 
         return result;
     }
-    public void SpawnFoe()
+    public S_FoeInfo GetFoeInfo()
     {
         (S_Foe, int) info = allFoeQueue.Dequeue();
 
@@ -94,8 +94,26 @@ public class S_FoeManager : MonoBehaviour
         S_FoeInfo foeInfo = new S_FoeInfo();
         foeInfo.SetFoeInfoInfo(info.Item1, info.Item2);
 
-        // UI 세팅
-        S_FoeInfoSystem.Instance.SetFoe(foeInfo);
+        return foeInfo;
+    }
+    public S_FoeInfo GetTutorialCharacterInfo()
+    {
+        Queue<(S_Foe, int)> tempQueue = new(allFoeQueue);
+
+        (S_Foe, int) info;
+        while (true)
+        {
+            info = tempQueue.Dequeue();
+
+            if (info.Item1.Key == "LachesisTheDecider" || info.Item1.Key == "LachesisFreedomFate")
+            {
+                break;
+            }
+        }
+        S_FoeInfo foeInfo = new S_FoeInfo();
+        foeInfo.SetFoeInfoInfo(info.Item1, info.Item2); // 라케시스 소환
+
+        return foeInfo;
     }
     public (S_Foe, int) PeekNextFoe()
     {

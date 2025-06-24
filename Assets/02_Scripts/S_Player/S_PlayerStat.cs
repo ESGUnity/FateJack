@@ -16,7 +16,7 @@ public class S_PlayerStat : MonoBehaviour
     [Header("시작 능력치 값")]
     const int START_MAX_HEALTH = 3;
     const int START_MAX_DETERMINATION = 3;
-    const int START_GOLD = 3;
+    const int START_GOLD = 0;
 
     [Header("체력")] // 체력의 standDamagedHealth는 시련 시련 내에 절대 변하지 않는다.(비틀기 영향 X) 그래서 히스토리아에 저장하지 않습니다.
     [HideInInspector] public int MaxHealth { get; private set; }
@@ -48,16 +48,15 @@ public class S_PlayerStat : MonoBehaviour
 
     [Header("히스토리")]
     [HideInInspector] public int h_HitCardCount { get; private set; } // 이번 게임에서 히트한 카드 개수만큼 활성화
-    [HideInInspector] public int h_SpadeHitCardCount { get; private set; } // 이번 게임에서 히트한 스페이드 문양 카드 개수만큼 활성화
-    [HideInInspector] public int h_HeartHitCardCount { get; private set; } // 이번 게임에서 히트한 하트 문양 카드 개수만큼 활성화
-    [HideInInspector] public int h_DiamondHitCardCount { get; private set; } // 이번 게임에서 히트한 다이아몬드 문양 카드 개수만큼 활성화
-    [HideInInspector] public int h_CloverHitCardCount { get; private set; } // 이번 게임에서 히트한 클로버 문양 카드 개수만큼 활성화
+    [HideInInspector] public int h_StrCardCount { get; private set; } // 이번 게임에서 히트한 스페이드 문양 카드 개수만큼 활성화
+    [HideInInspector] public int h_MindCardCount { get; private set; } // 이번 게임에서 히트한 하트 문양 카드 개수만큼 활성화
+    [HideInInspector] public int h_LuckCardCount { get; private set; } // 이번 게임에서 히트한 다이아몬드 문양 카드 개수만큼 활성화
+    [HideInInspector] public int h_CommonCardCount { get; private set; } // 이번 게임에서 히트한 클로버 문양 카드 개수만큼 활성화
     [HideInInspector] public int h_HitCardSum { get; private set; } // 이번 게임에서 히트한 카드 숫자만큼 활성화
-    [HideInInspector] public int h_SpadeHitCardSum { get; private set; } // 이번 게임에서 히트한 스페이드 문양 카드의 숫자만큼 활성화
-    [HideInInspector] public int h_HeartHitCardSum { get; private set; } // 이번 게임에서 히트한 하트 문양 카드의 숫자만큼 활성화
-    [HideInInspector] public int h_DiamondHitCardSum { get; private set; } // 이번 게임에서 히트한 다이아몬드 문양 카드의 숫자만큼 활성화
-    [HideInInspector] public int h_CloverHitCardSum { get; private set; } // 이번 게임에서 히트한 클로버 문양 카드의 숫자만큼 활성화
-    [HideInInspector] public int h_DisengageCount { get; private set; } // 이번 게임에서 제외된 카드 개수만큼 활성화
+    [HideInInspector] public int h_StrCardSum { get; private set; } // 이번 게임에서 히트한 스페이드 문양 카드의 숫자만큼 활성화
+    [HideInInspector] public int h_MindCardSum { get; private set; } // 이번 게임에서 히트한 하트 문양 카드의 숫자만큼 활성화
+    [HideInInspector] public int h_LuckCardSum { get; private set; } // 이번 게임에서 히트한 다이아몬드 문양 카드의 숫자만큼 활성화
+    [HideInInspector] public int h_CommonCardSum { get; private set; } // 이번 게임에서 히트한 클로버 문양 카드의 숫자만큼 활성화
     Stack<S_StatHistory> statHistoryStack = new();
 
     // 싱글턴
@@ -115,29 +114,29 @@ public class S_PlayerStat : MonoBehaviour
             // 문양에 따른 히스토리 추가
             h_HitCardCount++;
             h_HitCardSum += hitCard.Num;
-            switch (hitCard.Engraving)
+            switch (hitCard.CardType)
             {
-                case S_EngravingEnum.Circle:
-                    h_SpadeHitCardCount++;
-                    h_SpadeHitCardSum += hitCard.Num;
+                case S_CardTypeEnum.Str:
+                    h_StrCardCount++;
+                    h_StrCardSum += hitCard.Num;
                     break;
-                case S_EngravingEnum.Tri:
-                    h_HeartHitCardCount++;
-                    h_HeartHitCardSum += hitCard.Num;
+                case S_CardTypeEnum.Mind:
+                    h_MindCardCount++;
+                    h_MindCardSum += hitCard.Num;
                     break;
-                case S_EngravingEnum.Quad:
-                    h_DiamondHitCardCount++;
-                    h_DiamondHitCardSum += hitCard.Num;
+                case S_CardTypeEnum.Luck:
+                    h_LuckCardCount++;
+                    h_LuckCardSum += hitCard.Num;
                     break;
-                case S_EngravingEnum.Star:
-                    h_CloverHitCardCount++;
-                    h_CloverHitCardSum += hitCard.Num;
+                case S_CardTypeEnum.Common:
+                    h_CommonCardCount++;
+                    h_CommonCardSum += hitCard.Num;
                     break;
             }
         }
         else if (type == S_CardOrderTypeEnum.Exclusion)
         {
-            h_DisengageCount++;
+
         }
     }
     public void SaveStatHistory(S_Card hitCard, S_StatHistoryTriggerEnum trigger) // 히스토리 저장
@@ -163,18 +162,16 @@ public class S_PlayerStat : MonoBehaviour
             IsColdBlood = IsColdBlood,
 
             H_HitCardCount = h_HitCardCount, // 히스토리
-            H_SpadeHitCardCount = h_SpadeHitCardCount,
-            H_HeartHitCardCount = h_HeartHitCardCount,
-            H_DiamondHitCardCount = h_DiamondHitCardCount,
-            H_CloverHitCardCount = h_CloverHitCardCount,
+            H_StrCardCount = h_StrCardCount,
+            H_MindCardCount = h_MindCardCount,
+            H_LuckCardCount = h_LuckCardCount,
+            H_CommonCardCount = h_CommonCardCount,
 
             H_HitCardSum = h_HitCardSum,
-            H_SpadeHitCardSum = h_SpadeHitCardSum,
-            H_HeartHitCardSum = h_HeartHitCardSum,
-            H_DiamondHitCardSum = h_DiamondHitCardSum,
-            H_CloverHitCardSum = h_CloverHitCardSum,
-
-            H_DisengageCount = h_DisengageCount
+            H_StrCardSum = h_StrCardSum,
+            H_MindCardSum = h_MindCardSum,
+            H_LuckCardSum = h_LuckCardSum,
+            H_CommonCardSum = h_CommonCardSum,
         };
 
         statHistoryStack.Push(newHistory);
@@ -192,16 +189,15 @@ public class S_PlayerStat : MonoBehaviour
 
         // 히스토리 되돌리기
         h_HitCardCount = h.H_HitCardCount;
-        h_SpadeHitCardCount = h.H_SpadeHitCardCount;
-        h_HeartHitCardCount = h.H_HeartHitCardCount;
-        h_DiamondHitCardCount = h.H_DiamondHitCardCount;
-        h_CloverHitCardCount = h.H_CloverHitCardCount;
+        h_StrCardCount = h.H_StrCardCount;
+        h_MindCardCount = h.H_MindCardCount;
+        h_LuckCardCount = h.H_LuckCardCount;
+        h_CommonCardCount = h.H_CommonCardCount;
         h_HitCardSum = h.H_HitCardSum;
-        h_SpadeHitCardSum = h.H_SpadeHitCardSum;
-        h_HeartHitCardSum = h.H_HeartHitCardSum;
-        h_DiamondHitCardSum = h.H_DiamondHitCardSum;
-        h_CloverHitCardSum = h.H_CloverHitCardSum;
-        h_DisengageCount = h.H_DisengageCount;
+        h_StrCardSum = h.H_StrCardSum;
+        h_MindCardSum = h.H_MindCardSum;
+        h_LuckCardSum = h.H_LuckCardSum;
+        h_CommonCardSum = h.H_CommonCardSum;
 
         // 피조물 체력 되돌리기
         S_FoeInfoSystem.Instance.ResetHealthByTwist();
@@ -284,7 +280,7 @@ public class S_PlayerStat : MonoBehaviour
         S_EffectActivator.Instance.GenerateEffectLog($"체력 -{value}");
 
         // 플레이어 이미지 VFX
-        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Add_Health);
+        await S_PlayerInfoSystem.Instance.PlayerVFXAsync(S_PlayerVFXEnum.Subtract_Health);
     }
     public void CheckStatsMinMaxValue() // 각종 스탯 MinMax 제한
     {
@@ -443,18 +439,16 @@ public struct S_StatHistory // 비틀기를 위한 각종 능력치 및 특수 �
 
     // 역사
     public int H_HitCardCount;
-    public int H_SpadeHitCardCount;
-    public int H_HeartHitCardCount;
-    public int H_DiamondHitCardCount;
-    public int H_CloverHitCardCount;
+    public int H_StrCardCount;
+    public int H_MindCardCount;
+    public int H_LuckCardCount;
+    public int H_CommonCardCount;
 
     public int H_HitCardSum;
-    public int H_SpadeHitCardSum;
-    public int H_HeartHitCardSum;
-    public int H_DiamondHitCardSum;
-    public int H_CloverHitCardSum;
-
-    public int H_DisengageCount;
+    public int H_StrCardSum;
+    public int H_MindCardSum;
+    public int H_LuckCardSum;
+    public int H_CommonCardSum;
 }
 public enum S_StatHistoryTriggerEnum
 {

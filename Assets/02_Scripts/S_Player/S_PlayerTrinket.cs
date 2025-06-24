@@ -8,7 +8,7 @@ public class S_PlayerTrinket : MonoBehaviour
 {
     [Header("주요 정보")]
     [HideInInspector] public List<S_Trinket> OwnedTrinketList = new();
-    public const int MAX_Trinket = 6;
+    public const int MAX_Trinket = 5;
 
     [Header("컴포넌트")]
     S_PlayerCard pCard;
@@ -40,7 +40,7 @@ public class S_PlayerTrinket : MonoBehaviour
     {
         foreach (S_Trinket loot in S_TrinketList.GetInitSkillsByStartGame())
         {
-            AddTrinket(loot, Vector3.zero);
+            AddTrinket(loot, S_TrinketInfoSystem.Instance.pos_OwnedTrinketBase.transform.position);
         }
     }
     public void AddTrinket(S_Trinket tri, Vector3 pos)
@@ -52,7 +52,7 @@ public class S_PlayerTrinket : MonoBehaviour
         }
         else
         {
-            S_InGameUISystem.Instance.CreateLog("능력을 더이상 획득할 수 없습니다.");
+            S_InGameUISystem.Instance.CreateLog("더 이상 쓸만한 물건을 추가할 수 없습니다.");
         }
     }
     public void RemoveTrinket(S_Trinket tri)
@@ -263,6 +263,8 @@ public enum S_TrinketConditionEnum
     Overflow_Six,
     GrandChaos_One,
     GrandChaos_Two,
+    // 적
+    GrandChaos_One_Flip,
 }
 public enum S_TrinketModifyEnum
 {
@@ -273,8 +275,13 @@ public enum S_TrinketModifyEnum
 public enum S_TrinketPassiveEnum
 {
     None,
-    CurseGet10Str,
+    // 공통
     CurseStr,
+    CurseMind,
+    CurseLuck,
+    CurseCommon,
+    // 쓸만한 물건
+    CurseGet10Str,
     Perfect15Mind,
     Perfect8StrLuck,
     Gen1Trig,
@@ -289,6 +296,10 @@ public enum S_TrinketPassiveEnum
     SameMindLuck,
     NoBurstPerfect,
     AddProductCount,
+    // 적
+    NoDeterminationDeathAttack,
+    Ignore25PerHarm,
+    Immunity30PerHarm,
 }
 public enum S_TrinketEffectEnum
 {
@@ -308,4 +319,8 @@ public enum S_TrinketEffectEnum
     Gen_Deck,
     Retrigger_CurrentTurn,
     Health,
+    // Foe
+    DeathAttack,
+    Delusion,
+    CurseCurrentTurn,
 }

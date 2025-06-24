@@ -13,9 +13,10 @@ public class S_TrinketObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     [HideInInspector] public S_Trinket TrinketInfo;
 
     [Header("컴포넌트")]
-    [SerializeField] GameObject obj_Trinket;
+    [SerializeField] public GameObject obj_Trinket;
     [SerializeField] SpriteRenderer sprite_MeetConditionEffect;
     [SerializeField] protected SpriteRenderer sprite_Trinket;
+    [SerializeField] protected SpriteRenderer sprite_BlurEffect;
 
     [Header("VFX")]
     [HideInInspector] public PRS OriginPRS;
@@ -58,15 +59,16 @@ public class S_TrinketObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         {
             sprite_MeetConditionEffect.sprite = opHandle.Result;
             sprite_Trinket.sprite = opHandle.Result;
+            sprite_BlurEffect.sprite = opHandle.Result;
         }
     }
     public virtual void SetOrder(int order) // 각 요소의 소팅오더 설정
     {
         sprite_MeetConditionEffect.sortingLayerName = "WorldObject";
-        sprite_MeetConditionEffect.sortingOrder = order;
+        sprite_MeetConditionEffect.sortingOrder = order + 1;
 
         sprite_Trinket.sortingLayerName = "WorldObject";
-        sprite_Trinket.sortingOrder = order + 1;
+        sprite_Trinket.sortingOrder = order + 2;
     }
     #endregion
     #region 주요 함수
@@ -92,12 +94,11 @@ public class S_TrinketObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         if (S_GameFlowManager.Instance.IsInState(VALID_STATES))
         {
-            obj_Trinket.transform.DOKill();
+            transform.DOKill();
 
             SetOrder(1000);
-            obj_Trinket.transform.DOScale(OriginPRS.Scale * POINTER_ENTER_SCALE_AMOUNT, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
 
-            S_HoverInfoSystem.Instance.ActivateHoverInfo(TrinketInfo, gameObject);
+            transform.DOScale(OriginPRS.Scale * POINTER_ENTER_SCALE_AMOUNT, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
 
             isEnter = true;
         }
@@ -110,10 +111,10 @@ public class S_TrinketObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     {
         if (!isEnter) return;
 
-        obj_Trinket.transform.DOKill();
+        transform.DOKill();
 
         SetOrder(OriginOrder);
-        obj_Trinket.transform.DOScale(OriginPRS.Scale, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+        transform.DOScale(OriginPRS.Scale, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
 
         S_HoverInfoSystem.Instance.DeactiveHoverInfo();
 
@@ -131,7 +132,7 @@ public class S_TrinketObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     }
     public void BouncingVFX()
     {
-        S_TweenHelper.Instance.BouncingVFX(obj_Trinket.transform, OriginPRS.Scale);
+        S_TweenHelper.Instance.BouncingVFX(transform, OriginPRS.Scale);
     }
     #endregion
 }

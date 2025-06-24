@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +10,19 @@ public class S_AdditiveDescription : MonoBehaviour
     [SerializeField] Image image_Base;
     [SerializeField] TMP_Text text_Title;
     [SerializeField] TMP_Text text_Description;
+
+    // 볼드 처리 글자
+    [HideInInspector] public HashSet<string> BoldTargetString = new HashSet<string>() { "저주", "버스트", "완벽", "망상", "전개", "우선", "냉혈" };
+    [HideInInspector] public Dictionary<string, S_AdditiveDescriptionTargetWordEnum> BoldTargetDictionary = new()
+    {
+        { "저주", S_AdditiveDescriptionTargetWordEnum.Curse },
+        { "버스트", S_AdditiveDescriptionTargetWordEnum.Burst },
+        { "완벽", S_AdditiveDescriptionTargetWordEnum.Perfect },
+        { "망상", S_AdditiveDescriptionTargetWordEnum.Delusion },
+        { "전개", S_AdditiveDescriptionTargetWordEnum.Expansion },
+        { "우선", S_AdditiveDescriptionTargetWordEnum.First },
+        { "냉혈", S_AdditiveDescriptionTargetWordEnum.ColdBlood }
+    };
 
     // 폰트 크기
     const float TITLE_FONT_SIZE = 24f;
@@ -23,9 +38,8 @@ public class S_AdditiveDescription : MonoBehaviour
     Color transparentPanelColor = new Color(0f, 0f, 0f, 0f);
     Color additiveDescriptionPanelColor = new Color(0.3f, 0.3f, 0.3f, 1f);
 
-
     #region 카드 설명
-    public void SetCursedAndGenText(S_Card card)
+    public void SetGenAndCurseText(S_Card card)
     {
         text_Title.gameObject.SetActive(true);
         text_Description.gameObject.SetActive(false);
@@ -61,7 +75,7 @@ public class S_AdditiveDescription : MonoBehaviour
         text_Title.fontSize = TITLE_FONT_SIZE;
         text_Title.color = origionTextColor;
 
-        text_Description.text = $"{S_PlayerCard.Instance.GetCardEffectDescription(card)}";
+        text_Description.text = BoldText($"{S_PlayerCard.Instance.GetCardEffectDescription(card)}");
         text_Description.fontSize = DESCRIPTION_FONT_SIZE;
         text_Description.color = origionTextColor;
 
@@ -76,7 +90,7 @@ public class S_AdditiveDescription : MonoBehaviour
         text_Title.fontSize = TITLE_FONT_SIZE;
         text_Title.color = origionTextColor;
 
-        text_Description.text = $"{S_PlayerCard.Instance.GetEngravingDescription(card)}";
+        text_Description.text = BoldText($"{S_PlayerCard.Instance.GetEngravingDescription(card)}");
         text_Description.fontSize = DESCRIPTION_FONT_SIZE;
         text_Description.color = origionTextColor;
 
@@ -89,7 +103,7 @@ public class S_AdditiveDescription : MonoBehaviour
         text_Title.gameObject.SetActive(true);
         text_Description.gameObject.SetActive(false);
 
-        text_Title.text = $"{tri.Name}";
+        text_Title.text = BoldText($"{tri.Name}");
         text_Title.fontSize = TITLE_FONT_SIZE;
         text_Title.color = origionTextColor;
 
@@ -100,7 +114,31 @@ public class S_AdditiveDescription : MonoBehaviour
         text_Title.gameObject.SetActive(false);
         text_Description.gameObject.SetActive(true);
 
-        text_Description.text = $"{S_PlayerTrinket.Instance.GetTrinketDescription(tri)}";
+        text_Description.text = BoldText($"{S_PlayerTrinket.Instance.GetTrinketDescription(tri)}");
+        text_Description.fontSize = DESCRIPTION_FONT_SIZE;
+        text_Description.color = origionTextColor;
+
+        image_Base.color = originPanelColor;
+    }
+    #endregion
+    #region 적 설명
+    public void SetFoeName(S_Foe foe)
+    {
+        text_Title.gameObject.SetActive(true);
+        text_Description.gameObject.SetActive(false);
+
+        text_Title.text = BoldText($"{foe.Name}");
+        text_Title.fontSize = TITLE_FONT_SIZE;
+        text_Title.color = origionTextColor;
+
+        image_Base.color = originPanelColor;
+    }
+    public void SetFoeDescription(S_Foe foe)
+    {
+        text_Title.gameObject.SetActive(false);
+        text_Description.gameObject.SetActive(true);
+
+        text_Description.text = BoldText($"{S_FoeInfoSystem.Instance.GetFoeDescription(foe)}");
         text_Description.fontSize = DESCRIPTION_FONT_SIZE;
         text_Description.color = origionTextColor;
 
@@ -154,6 +192,15 @@ public class S_AdditiveDescription : MonoBehaviour
         image_Base.color = additiveDescriptionPanelColor;
     }
     #endregion
+    string BoldText(string text)
+    {
+        foreach (string word in BoldTargetString)
+        {
+            text = Regex.Replace(text, word, $"<b>{word}</b>");
+        }
+
+        return text;
+    }
 }
 
 public enum S_AdditiveDescriptionTargetWordEnum

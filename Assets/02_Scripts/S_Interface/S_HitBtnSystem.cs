@@ -60,7 +60,7 @@ public class S_HitBtnSystem : MonoBehaviour
         text_CleanHitProb = Array.Find(texts, c => c.gameObject.name.Equals("Text_CleanHitProb"));
         text_BurstProb = Array.Find(texts, c => c.gameObject.name.Equals("Text_BurstProb"));
 
-        image_HideExpansionCardsBtn = Array.Find(transforms, c => c.gameObject.name.Equals("image_HideExpansionCardsBtn")).gameObject;
+        image_HideExpansionCardsBtn = Array.Find(transforms, c => c.gameObject.name.Equals("Image_HideExpansionCardsBtn")).gameObject;
         text_HideExpansionCards = Array.Find(texts, c => c.gameObject.name.Equals("Text_HideExpansionCards"));
 
         // 싱글턴
@@ -72,8 +72,6 @@ public class S_HitBtnSystem : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        InitPos();
     }
     S_GameFlowStateEnum prevState;
     void Update()
@@ -105,11 +103,6 @@ public class S_HitBtnSystem : MonoBehaviour
         }
     }
 
-    public void InitPos()
-    {
-        panel_HitBtnBase.GetComponent<RectTransform>().anchoredPosition = btnBaseHidePos;
-        panel_HitBtnBase.SetActive(false);
-    }
     public void AppearHitBtn() // 패널 등장
     {
         panel_HitBtnBase.SetActive(true);
@@ -133,50 +126,7 @@ public class S_HitBtnSystem : MonoBehaviour
 
         if ((S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit) && !S_PlayerStat.Instance.IsBurst && S_PlayerCard.Instance.GetDeckCards().Count > 0)
         {
-            S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.HittingCard;
-
-            if (S_PlayerCard.Instance.GetDeckCards().Count > 1)
-            {
-                List<S_Card> cards = new();
-                if (S_PlayerStat.Instance.IsExpansion)
-                {
-                    cards = S_PlayerCard.Instance.DrawRandomCard(4);
-                }
-                else
-                {
-                    cards = S_PlayerCard.Instance.DrawRandomCard(2);
-                }
-
-                // 카드 세팅
-                pos_ExpansionBase.SetActive(true);
-                foreach (S_Card card in cards)
-                {
-                    GameObject go = Instantiate(prefab_ExpansionCardObj, pos_ExpansionBase.transform, true);
-                    expansionCardObjs.Add(go);
-                    go.transform.localPosition = Vector3.zero;
-                    go.GetComponent<S_ExpansionCardObj>().SetCardInfo(card);
-
-                    go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(0, 0);
-                    go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(1, EXPANSION_TIME);
-                }
-                AlignmentExpansionCards();
-
-                // 블락 패널 켜기
-                sprite_BlackBackgroundByExpansion.gameObject.SetActive(true);
-                sprite_BlackBackgroundByExpansion.DOFade(1, EXPANSION_TIME);
-
-                // 숨기기 버튼 켜기
-                image_HideExpansionCardsBtn.SetActive(true);
-
-                // 히트 버튼 퇴장
-                DisappearHitBtn();
-            }
-            else // 카드가 1장이라면 바로 내기
-            {
-                S_Card hitCard = S_PlayerCard.Instance.DrawRandomCard(1).First();
-
-                await SelectHitCard(hitCard);
-            }
+            await StartHitCardAsync();
         }
         else if (S_PlayerStat.Instance.IsBurst)
         {
@@ -191,9 +141,57 @@ public class S_HitBtnSystem : MonoBehaviour
 
         }
     }
+    public async Task StartHitCardAsync()
+    {
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.HittingCard;
+
+        if (S_PlayerCard.Instance.GetDeckCards().Count > 1)
+        {
+            List<S_Card> cards = new();
+            if (S_PlayerStat.Instance.IsExpansion)
+            {
+                cards = S_PlayerCard.Instance.DrawRandomCard(4);
+            }
+            else
+            {
+                cards = S_PlayerCard.Instance.DrawRandomCard(2);
+            }
+
+            // 카드 세팅
+            pos_ExpansionBase.SetActive(true);
+            foreach (S_Card card in cards)
+            {
+                GameObject go = Instantiate(prefab_ExpansionCardObj, pos_ExpansionBase.transform, true);
+                expansionCardObjs.Add(go);
+                go.transform.localPosition = Vector3.zero;
+                go.GetComponent<S_ExpansionCardObj>().SetCardInfo(card);
+
+                go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(0, 0);
+                go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(1, EXPANSION_TIME);
+            }
+            AlignmentExpansionCards();
+
+            // 블락 패널 켜기
+            sprite_BlackBackgroundByExpansion.gameObject.SetActive(true);
+            sprite_BlackBackgroundByExpansion.DOFade(0.85f, EXPANSION_TIME);
+
+            // 숨기기 버튼 켜기
+            image_HideExpansionCardsBtn.SetActive(true);
+
+            // 히트 버튼 퇴장
+            DisappearHitBtn();
+        }
+        else // 카드가 1장이라면 바로 내기
+        {
+            S_Card hitCard = S_PlayerCard.Instance.DrawRandomCard(1).First();
+
+            await SelectHitCard(hitCard);
+        }
+    }
+
     public void ClickTwistBtn() // 히트, 다이얼로그 시에만 작동
     {
-        // Dialog 시스템 전용
+        // Dialog 시스템 전용. 다이얼로그에서 GameFlowState를 Hit으로 바꿔줘야한다.
         S_DialogInfoSystem.Instance.ClickNextBtn();
 
         if ((S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit) && !S_PlayerStat.Instance.IsBurst && S_PlayerStat.Instance.CanUseDetermination() && S_GameFlowManager.Instance.IsCurrentTurnHitted())
@@ -219,7 +217,7 @@ public class S_HitBtnSystem : MonoBehaviour
     }
     public void ClickStandBtn() // 히트, 다이얼로그 시에만 작동
     {
-        // Dialog 시스템 전용
+        // Dialog 시스템 전용. 다이얼로그에서 GameFlowState를 Hit으로 바꿔줘야한다.
         S_DialogInfoSystem.Instance.ClickNextBtn();
 
         if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit)
@@ -234,7 +232,7 @@ public class S_HitBtnSystem : MonoBehaviour
     public async Task SelectHitCard(S_Card card) // S_ExpansionCard에서 호출하는 메서드
     {
         // 전개 및 우선 해제
-        if (S_PlayerStat.Instance.IsFirst)
+        if (S_PlayerStat.Instance.IsExpansion)
         {
             await S_EffectActivator.Instance.AppliedExpansionAsync();
         }
@@ -246,7 +244,7 @@ public class S_HitBtnSystem : MonoBehaviour
         // 카드 내기
         await S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(card, S_CardOrderTypeEnum.Hit);
     }
-    void AlignmentExpansionCards() // 카드를 정렬하기
+    void AlignmentExpansionCards() // 전개 카드를 정렬하기
     {
         List<PRS> originCardPRS = SetExpansionCardsPos(expansionCardObjs.Count);
         List<Task> tweenTask = new List<Task>();
@@ -257,7 +255,7 @@ public class S_HitBtnSystem : MonoBehaviour
             expansionCardObjs[i].GetComponent<S_ExpansionCardObj>().OriginPRS = originCardPRS[i];
 
             // 소팅오더 설정
-            expansionCardObjs[i].GetComponent<S_ExpansionCardObj>().OriginOrder = (i + 1) * 10;
+            expansionCardObjs[i].GetComponent<S_ExpansionCardObj>().OriginOrder = (i + 1) * 550;
             expansionCardObjs[i].GetComponent<S_ExpansionCardObj>().SetOrder(expansionCardObjs[i].GetComponent<S_ExpansionCardObj>().OriginOrder);
 
             // 카드의 위치 설정
@@ -270,15 +268,28 @@ public class S_HitBtnSystem : MonoBehaviour
     List<PRS> SetExpansionCardsPos(int cardCount) // 카드 위치 설정하는 메서드
     {
         List<PRS> results = new List<PRS>(cardCount);
-        float interval = cardCount == 1 ? 0 : 1f / (cardCount - 1);
 
         for (int i = 0; i < cardCount; i++)
         {
-            Vector3 pos = Vector3.Lerp(EXPANSION_START_POS, EXPANSION_END_POS, interval * i);
+            float t;
+
+            if (cardCount == 1)
+            {
+                t = 0.5f;
+            }
+            else if (cardCount == 2)
+            {
+                t = (i == 0) ? 0.35f : 0.65f;
+            }
+            else
+            {
+                t = (cardCount == 1) ? 0.5f : (float)i / (cardCount - 1);
+            }
+
+            Vector3 pos = Vector3.Lerp(EXPANSION_START_POS, EXPANSION_END_POS, t);
             pos = new Vector3(pos.x, pos.y, i * STACK_Z_VALUE);
 
             Vector3 rot = Vector3.zero;
-
             Vector3 scale = STACK_CARD_ORIGIN_SCALE;
 
             results.Add(new PRS(pos, rot, scale));
@@ -286,21 +297,19 @@ public class S_HitBtnSystem : MonoBehaviour
 
         return results;
     }
-    public async void ClickHideExpansionCardsBtn()
+    public void ClickHideExpansionCardsBtn()
     {
-        if (pos_ExpansionBase.activeInHierarchy)
+        if (sprite_BlackBackgroundByExpansion.gameObject.activeInHierarchy)
         {
             // 카드 숨기기
             foreach (GameObject go in expansionCardObjs)
             {
-                go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(0, EXPANSION_TIME);
-                await Task.Delay(Mathf.RoundToInt(EXPANSION_TIME * 1000));
-                go.SetActive(false);
+                go.GetComponent<S_ExpansionCardObj>().SetAlphaValueAsync(0, EXPANSION_TIME).OnComplete(() => go.SetActive(false));
             }
 
             // 블락 패널 끄기
             sprite_BlackBackgroundByExpansion.DOKill();
-            sprite_BlackBackgroundByExpansion.DOFade(1, EXPANSION_TIME)
+            sprite_BlackBackgroundByExpansion.DOFade(0f, EXPANSION_TIME)
                 .OnComplete(() => sprite_BlackBackgroundByExpansion.gameObject.SetActive(false));
 
             text_HideExpansionCards.text = "카드 보기";
@@ -317,24 +326,23 @@ public class S_HitBtnSystem : MonoBehaviour
             // 블락 패널 끄기
             sprite_BlackBackgroundByExpansion.gameObject.SetActive(true);
             sprite_BlackBackgroundByExpansion.DOKill();
-            sprite_BlackBackgroundByExpansion.DOFade(1, EXPANSION_TIME);
+            sprite_BlackBackgroundByExpansion.DOFade(0.85f, EXPANSION_TIME);
 
             text_HideExpansionCards.text = "숨기기";
         }
     }
-    public async Task EndExpansion()
+    public void EndExpansion()
     {
-        // 카드 숨기기
+        // 카드 제거
         foreach (GameObject go in expansionCardObjs)
         {
-            go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(0, EXPANSION_TIME);
-            await Task.Delay(Mathf.RoundToInt(EXPANSION_TIME * 1000));
-            Destroy(go);
+            go.GetComponent<S_ExpansionCardObj>().SetAlphaValueAsync(0, EXPANSION_TIME).OnComplete(() => Destroy(go));
         }
+        expansionCardObjs.Clear();
 
         // 블락 패널 끄기
         sprite_BlackBackgroundByExpansion.DOKill();
-        sprite_BlackBackgroundByExpansion.DOFade(1, EXPANSION_TIME)
+        sprite_BlackBackgroundByExpansion.DOFade(0f, EXPANSION_TIME)
             .OnComplete(() => sprite_BlackBackgroundByExpansion.gameObject.SetActive(false));
 
         // 숨기기 버튼 켜기

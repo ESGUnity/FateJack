@@ -13,6 +13,11 @@ public class BtnObject_OnlyBackground : BtnObjectAction, IPointerEnterHandler, I
 
         sprite_BtnBase.color = exitBtnBaseColor;
     }
+    void OnDisable()
+    {
+        sprite_BtnBase.DOColor(exitBtnBaseColor, 0);
+        text_BtnText.DOColor(exitTextColor, 0);
+    }
 
     public void OnPointerEnter(PointerEventData eventData)
     {

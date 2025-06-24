@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class S_ShowingCardObj : S_CardObj
 {
-    [SerializeField] Material m_Origin;
-    [SerializeField] Material m_Dissolve;
+    [SerializeField] Material mat_Origin;
+    [SerializeField] Material mat_Dissolve;
     Vector3 showingPos = new Vector3(0f, 0f, -2f);
     Vector3 deckPos = new Vector3(0f, 0f, -9f);
 
@@ -24,7 +24,7 @@ public class S_ShowingCardObj : S_CardObj
     }
     public async Task ChangeCardEffect()
     {
-        Material newMat = Instantiate(m_Dissolve);
+        Material newMat = Instantiate(mat_Dissolve);
         sprite_CardEffect.material = newMat;
 
         newMat.SetFloat("_DissolveStrength", MIN_VALUE);
@@ -38,14 +38,14 @@ public class S_ShowingCardObj : S_CardObj
         await newMat.DOFloat(MIN_VALUE, "_DissolveStrength", CHANGE_TIME).AsyncWaitForCompletion();
 
         // 원래 매터리얼로 되돌림
-        sprite_CardEffect.material = m_Origin;
+        sprite_CardEffect.material = mat_Origin;
 
         // 약간의 시간 텀 후 후속 작업
         await Task.Delay(300);
     }
     public async Task ChangeEngraving()
     {
-        Material newMat = Instantiate(m_Dissolve);
+        Material newMat = Instantiate(mat_Dissolve);
         sprite_Engraving.material = newMat;
 
         newMat.SetFloat("_DissolveStrength", MIN_VALUE);
@@ -62,7 +62,7 @@ public class S_ShowingCardObj : S_CardObj
         }
 
         // 원래 매터리얼로 되돌림
-        sprite_Engraving.material = m_Origin;
+        sprite_Engraving.material = mat_Origin;
 
         // 약간의 시간 텀 후 후속 작업
         await Task.Delay(300);

@@ -105,19 +105,19 @@ public class S_EffectChecker : MonoBehaviour
     {
         return pCard.GetStackCards().Where(x => IsSameType(x.CardType, type)).ToList();
     }
-    public List<S_Card> GetSameTypeCardsInPreStackInCurrentTurn(S_CardTypeEnum type) // 스택에서 type과 같은 타입의 카드 리스트 반환 메서드(단 한 턴에)
+    public List<S_Card> GetSameTypeCardsInStackInCurrentTurn(S_CardTypeEnum type) // 스택에서 type과 같은 타입의 카드 리스트 반환 메서드(단 한 턴에)
     {
         return pCard.GetStackCards().Where(x => IsSameType(x.CardType, type)).Where(x => x.IsCurrentTurn).ToList();
     }
-    public List<S_Card> GetCardsInPreStack() // 스택에서 suit와 같은 문양의 카드
+    public List<S_Card> GetCardsInStack() // 스택에서 suit와 같은 문양의 카드
     {
         return pCard.GetStackCards().ToList();
     }
-    public List<S_Card> GetCardsInPreStackInCurrentTurn() // 스택의 카드(단 한 턴에)
+    public List<S_Card> GetCardsInStackInCurrentTurn() // 스택의 카드(단 한 턴에)
     {
         return pCard.GetStackCards().Where(x => x.IsCurrentTurn).ToList();
     }
-    public List<S_Card> GetCardsInPreDeck() // 덱에서 suit와 같은 문양의 카드
+    public List<S_Card> GetCardsInDeck() // 덱에서 suit와 같은 문양의 카드
     {
         return pCard.GetDeckCards().ToList();
     }
@@ -154,17 +154,17 @@ public class S_EffectChecker : MonoBehaviour
     }
     #endregion
     #region 특정 카드 무게 합 반환
-    public int GetSameTypeSumInPreStack(S_CardTypeEnum suit) // 같은 타입 카드의 무게 합 반환 메서드
+    public int GetSameTypeSumInStack(S_CardTypeEnum suit) // 같은 타입 카드의 무게 합 반환 메서드
     {
         return pCard.GetStackCards().Where(x => IsSameType(x.CardType, suit)).Sum(x => x.Num);
     }
-    public int GetSumInPreStack() // 카드의 무게 합 반환 메서드
+    public int GetSumInStack() // 카드의 무게 합 반환 메서드
     {
         return pCard.GetStackCards().Sum(x => x.Num);
     }
     #endregion
     #region 특정 카드 타입 반환
-    public List<S_CardTypeEnum> GetGrandChaosInPreStack(int amount) // 대혼돈 값 반환 메서드
+    public List<S_CardTypeEnum> GetGrandChaosInStack(int amount) // 대혼돈 값 반환 메서드
     {
         List<S_Card> cards = pCard.GetStackCards();
 
@@ -181,7 +181,7 @@ public class S_EffectChecker : MonoBehaviour
 
         return results;
     }
-    public List<S_CardTypeEnum> GetGrandChaosInPreStackInCurrentTurn(int amount) // 대혼돈 값 반환 메서드(단 한 턴에)
+    public List<S_CardTypeEnum> GetGrandChaosInStackInCurrentTurn(int amount) // 대혼돈 값 반환 메서드(단 한 턴에)
     {
         List<S_Card> cards = pCard.GetStackCards();
 

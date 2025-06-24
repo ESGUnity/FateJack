@@ -1,22 +1,21 @@
 using DG.Tweening;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class S_FoeInfoSystem : MonoBehaviour
 {
     [Header("주요 정보")]
-    [HideInInspector] public S_FoeInfo CurrentFoe;
-    GameObject foeAttackVFX;
+    [HideInInspector] public S_FoeInfo FoeInfo;
 
-    [Header("씬 오브젝트")]
-    [SerializeField] SpriteRenderer sprite_Foe;
-    [SerializeField] SpriteRenderer sprite_FoeMeetConditionEffect;
+    [Header("프리팹")]
+    [SerializeField] GameObject prefab_Section;
+    [HideInInspector] public GameObject Instance_Section;
 
     [Header("컴포넌트")]
     GameObject panel_FoeInfoBase;
@@ -31,6 +30,12 @@ public class S_FoeInfoSystem : MonoBehaviour
     [Header("UI")]
     Vector2 hidePos = new Vector2(0, 300);
     Vector2 originPos = new Vector2(0, 0);
+    Vector3 ATTACK_TARGET_POS = new Vector3(0, -5, -1.15f);
+    Vector3 ATTACK_POS_AMOUNT_1 = new Vector3(0, 0, -1);
+
+    [Header("포인터 연출")]
+    bool isEnter = false;
+    List<S_GameFlowStateEnum> VALID_STATES;
 
     // 싱글턴
     static S_FoeInfoSystem instance;
@@ -53,6 +58,9 @@ public class S_FoeInfoSystem : MonoBehaviour
         text_Name = Array.Find(texts, c => c.gameObject.name.Equals("Text_Name"));
         text_Ability = Array.Find(texts, c => c.gameObject.name.Equals("Text_Ability"));
 
+        // 유효 상태
+        VALID_STATES = new() { S_GameFlowStateEnum.Hit };
+
         // 싱글턴
         if (instance == null)
         {
@@ -62,143 +70,154 @@ public class S_FoeInfoSystem : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        InitPos();
     }
+    void Update()
+    {
+        // Enter 상태인데 상태가 유효하지 않게 바뀌면 강제로 Exit
+        if (isEnter && !S_GameFlowManager.Instance.IsInState(VALID_STATES))
+        {
+            ForceExit();
+        }
+    }
+    void OnDisable()
+    {
+        ForceExit();
+    }
+
     #region 초기화
-    public void SetFoe(S_FoeInfo foeInfo)
+    public void StartFoeTrial()
     {
         // CurrentCreature에 세팅
-        CurrentFoe = foeInfo;
-
-        // 각종 텍스트 세팅
-        image_HealthBar.fillAmount = 1f;
-        text_HealthValue.text = $"{CurrentFoe.OldHealth} / {CurrentFoe.MaxHealth}";
+        FoeInfo = S_FoeManager.Instance.GetFoeInfo();
 
         // 이름 설정
-        text_Name.text = CurrentFoe.FoeInfo.Name;
-        if (CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Clotho_Elite ||
-            CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Lachesis_Elite ||
-            CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Atropos_Elite)
+        text_Name.text = FoeInfo.CurrentFoe.Name;
+        if (FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Clotho_Elite || FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Lachesis_Elite || FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Atropos_Elite)
         {
             text_Name.text = $"{text_Name.text}(엘리트)";
         }
-        if (CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Clotho_Boss || CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Lachesis_Boss || CurrentFoe.FoeInfo.FoeType == S_FoeTypeEnum.Atropos_Boss)
+        if (FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Clotho_Boss || FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Lachesis_Boss || FoeInfo.CurrentFoe.FoeType == S_FoeTypeEnum.Atropos_Boss)
         {
             text_Name.text = $"{text_Name.text}(보스)";
         }
 
         // 능력 설정
-        text_Ability.text = CurrentFoe.FoeInfo.AbilityDescription;
+        text_Ability.text = FoeInfo.CurrentFoe.Description;
 
         // ActivatedCount
-        if (CurrentFoe.FoeInfo.Passive == S_FoePassiveEnum.NeedActivatedCount)
+        if (FoeInfo.CurrentFoe.IsNeedActivatedCount)
         {
             text_Count.gameObject.SetActive(true);
-            text_Count.text = CurrentFoe.FoeInfo.ActivatedCount.ToString();
+            text_Count.text = FoeInfo.CurrentFoe.ActivatedCount.ToString();
         }
         else
         {
             text_Count.gameObject.SetActive(false);
         }
 
-        // 피조물 이미지 세팅
-        var creatureImageOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_{CurrentFoe.FoeInfo.Key}");
-        creatureImageOpHandle.Completed += OnFoeSpriteLoadComplete;
+        // 체력바
+        image_HealthBar.fillAmount = 1f;
+        text_HealthValue.text = $"{FoeInfo.OldHealth} / {FoeInfo.MaxHealth}";
 
-        // 피조물의 공격 VFX 세팅
-        var attackVFXOpHandle = Addressables.LoadAssetAsync<GameObject>($"Prefab_VFX_TempCommon"); // TODO : Prefab_VFX_{CurrentFoe.FoeInfo.FoeType.ToString()}
-        attackVFXOpHandle.Completed += OnAttackVFXLoadComplete;
+        panel_FoeInfoBase.SetActive(true);
+        panel_FoeInfoBase.GetComponent<RectTransform>().DOKill();
+        panel_FoeInfoBase.GetComponent<RectTransform>().DOAnchorPos(originPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+
+        // 섹션 등장
+        Instance_Section = Instantiate(prefab_Section);
+        Instance_Section.GetComponent<S_SectionObj>().SpawnSection($"Character_{FoeInfo.CurrentFoe.Key}");
+        Instance_Section.GetComponent<S_SectionObj>().sprite_MeetConditionEffect.gameObject.SetActive(false);
+
+        // 섹션의 스프라이트에 포인터 엔터 바인딩하기.
+        EventTrigger spriteTrigger = Instance_Section.GetComponent<S_SectionObj>().sprite_Character.GetComponent<EventTrigger>();
+        EventTrigger.Entry spritePointerEnterEntry = spriteTrigger.triggers.Find(e => e.eventID == EventTriggerType.PointerEnter);
+        EventTrigger.Entry spritePointerExitEntry = spriteTrigger.triggers.Find(e => e.eventID == EventTriggerType.PointerExit);
+        // 바인딩
+        spritePointerEnterEntry.callback.AddListener((eventData) => { PointerEnterInFoeSprite((PointerEventData)eventData); });
+        spritePointerExitEntry.callback.AddListener((eventData) => { PointerExitInFoeSprite((PointerEventData)eventData); });
+
     }
-    void OnFoeSpriteLoadComplete(AsyncOperationHandle<Sprite> opHandle)
+    public void StartFoeTrialByTutorial()
     {
-        if (opHandle.Status == AsyncOperationStatus.Succeeded)
-        {
-            sprite_Foe.sprite = opHandle.Result;
-        }
-    }
-    void OnAttackVFXLoadComplete(AsyncOperationHandle<GameObject> opHandle)
-    {
-        if (opHandle.Status == AsyncOperationStatus.Succeeded)
-        {
-            foeAttackVFX = opHandle.Result;
-        }
+        // CurrentCreature에 세팅
+        FoeInfo = S_FoeManager.Instance.GetTutorialCharacterInfo();
+
+        // 이름 설정
+        text_Name.text = $"{FoeInfo.CurrentFoe.Name}(보스)";
+
+        // 능력 설정
+        text_Ability.text = FoeInfo.CurrentFoe.Description;
+
+        // ActivatedCount
+        text_Count.gameObject.SetActive(false);
+
+        // 체력바
+        image_HealthBar.fillAmount = 1f;
+        text_HealthValue.text = $"{FoeInfo.OldHealth} / {FoeInfo.MaxHealth}";
+
+        panel_FoeInfoBase.SetActive(true);
+        panel_FoeInfoBase.GetComponent<RectTransform>().DOKill();
+        panel_FoeInfoBase.GetComponent<RectTransform>().DOAnchorPos(originPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+
+        // 섹션 등장
+        Instance_Section = Instantiate(prefab_Section);
+        Instance_Section.GetComponent<S_SectionObj>().SpawnSection($"Character_{FoeInfo.CurrentFoe.Key}");
+        Instance_Section.GetComponent<S_SectionObj>().sprite_MeetConditionEffect.gameObject.SetActive(false);
     }
     #endregion
     #region 연출
-    public void InitPos()
+    public void PointerEnterInFoeSprite(PointerEventData eventData)
     {
-        panel_FoeInfoBase.GetComponent<RectTransform>().anchoredPosition = hidePos;
-        image_NameAndAbilityBase.SetActive(false);
-        panel_FoeInfoBase.SetActive(false);
-    }
-    public void AppearUIFoe() // 패널 등장
-    {
-        panel_FoeInfoBase.SetActive(true);
-        panel_FoeInfoBase.GetComponent<RectTransform>().DOKill(); 
-        panel_FoeInfoBase.GetComponent<RectTransform>().DOAnchorPos(originPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-    }
-    public void DisappearUIFoe() // 패널 퇴장
-    {
-        panel_FoeInfoBase.GetComponent<RectTransform>().DOKill(); 
-        panel_FoeInfoBase.GetComponent<RectTransform>().DOAnchorPos(hidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
-            .OnComplete(() => panel_FoeInfoBase.SetActive(false));
-    }
-    public void AppearFoeSprite()
-    {
-        sprite_Foe.gameObject.SetActive(true);
-        sprite_Foe.GetComponent<SpriteRenderer>().DOKill(); // 두트윈 전 트윈 초기화
-        sprite_Foe.DOFade(1f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
-    }
-    public void DisappearFoeSprite()
-    {
-        sprite_Foe.DOKill(); // 두트윈 전 트윈 초기화
-        sprite_Foe.DOFade(0f, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
-            .OnComplete(() => 
-            {
-                sprite_Foe.gameObject.SetActive(false);
-            });
-    }
-    public void PointerEnterInFoeSprite()
-    {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit)
+        if (S_GameFlowManager.Instance.IsInState(VALID_STATES))
         {
-            text_Ability.text = CurrentFoe.FoeInfo.GetDescription();
-            image_NameAndAbilityBase.SetActive(true);
+            S_HoverInfoSystem.Instance.ActivateHoverInfo(FoeInfo.CurrentFoe, Instance_Section.GetComponent<S_SectionObj>().sprite_Character);
+
+            isEnter = true;
         }
     }
-    public void PointerExitInFoeSprite()
+    public void PointerExitInFoeSprite(PointerEventData eventData)
     {
-        image_NameAndAbilityBase.SetActive(false);
+        ForceExit();
+    }
+    void ForceExit()
+    {
+        if (!isEnter) return;
+
+        S_HoverInfoSystem.Instance.DeactiveHoverInfo();
     }
     public void UpdateFoeObject() // 적 오브젝트 업데이트
     {
-        if (CurrentFoe.FoeInfo.Passive == S_FoePassiveEnum.NeedActivatedCount)
+        if (FoeInfo.CurrentFoe.IsNeedActivatedCount)
         {
-            ChangeCountVFXTween(int.Parse(text_Count.text), CurrentFoe.FoeInfo.ActivatedCount, text_Count);
+            ChangeCountVFXTween(int.Parse(text_Count.text), FoeInfo.CurrentFoe.ActivatedCount, text_Count);
         }
         else
         {
             text_Count.gameObject.SetActive(false);
         }
 
-        if (CurrentFoe.FoeInfo.IsMeetCondition)
+        if (FoeInfo.CurrentFoe.IsMeetCondition)
         {
-            sprite_FoeMeetConditionEffect.gameObject.SetActive(true);
+            Instance_Section.GetComponent<S_SectionObj>().sprite_MeetConditionEffect.gameObject.SetActive(true);
         }
         else
         {
-            sprite_FoeMeetConditionEffect.gameObject.SetActive(false);
+            Instance_Section.GetComponent<S_SectionObj>().sprite_MeetConditionEffect.gameObject.SetActive(false);
         }
+    }
+    public void FoeBouncingVFX()
+    {
+        S_TweenHelper.Instance.BouncingVFX(Instance_Section.GetComponent<S_SectionObj>().sprite_Character.transform, Instance_Section.GetComponent<S_SectionObj>().sprite_Character.transform.localScale);
+        S_TweenHelper.Instance.BouncingVFX(Instance_Section.GetComponent<S_SectionObj>().sprite_MeetConditionEffect.transform, Instance_Section.GetComponent<S_SectionObj>().sprite_MeetConditionEffect.transform.localScale);
     }
     #endregion
     #region VFX
     public void ChangeHealthValueVFX()
     {
-        if (CurrentFoe == null) return;
+        if (FoeInfo == null) return;
 
-        image_HealthBar.DOFillAmount((float)CurrentFoe.CurrentHealth / CurrentFoe.MaxHealth, S_EffectActivator.Instance.GetEffectLifeTime() / 5 * 4).SetEase(Ease.OutQuart);
-        ChangeHealthValueVFXTween(int.Parse(text_HealthValue.text.Split('/')[0].Trim()), CurrentFoe.CurrentHealth, text_HealthValue);
+        image_HealthBar.DOFillAmount((float)FoeInfo.CurrentHealth / FoeInfo.MaxHealth, S_EffectActivator.Instance.GetEffectLifeTime() / 5 * 4).SetEase(Ease.OutQuart);
+        ChangeHealthValueVFXTween(int.Parse(text_HealthValue.text.Split('/')[0].Trim()), FoeInfo.CurrentHealth, text_HealthValue);
     }
     void ChangeHealthValueVFXTween(int oldValue, int newValue, TMP_Text statText)
     {
@@ -206,7 +225,7 @@ public class S_FoeInfoSystem : MonoBehaviour
         DOTween.To
             (
                 () => currentNumber,
-                x => { currentNumber = x; statText.text = $"{currentNumber} / {CurrentFoe.MaxHealth}"; },
+                x => { currentNumber = x; statText.text = $"{currentNumber} / {FoeInfo.MaxHealth}"; },
                 newValue,
                 S_EffectActivator.Instance.GetEffectLifeTime() / 5 * 4
             ).SetEase(Ease.OutQuart);
@@ -222,109 +241,183 @@ public class S_FoeInfoSystem : MonoBehaviour
                 S_EffectActivator.Instance.GetEffectLifeTime() * 0.8f
             ).SetEase(Ease.OutQuart);
     }
-    public void FoeSpriteBouncingVFX()
-    {
-        S_TweenHelper.Instance.BouncingVFX(sprite_Foe.transform, sprite_Foe.transform.localScale);
-    }
     #endregion
-    #region 보조
-    public async Task AttackPlayer()
+    #region 시련 진행에 따른 메서드
+    public async Task UpdateFoeByStartTrial()
     {
-        // VFX 생성 및 재생
-        GameObject go = Instantiate(foeAttackVFX);
-
-        // 공격이 적중할 때까지 대기
-        await Task.Delay(go.GetComponent<S_AttackVFX>().GetHitTimeByMs(0.5f)); 
-
-        // 딱 적중하는 시점에 체력 달기
-        if (CurrentFoe.FoeInfo.Condition == S_FoeAbilityConditionEnum.DeathAttack && CurrentFoe.FoeInfo.IsMeetCondition)
-        {
-            await S_PlayerStat.Instance.GetDamagedByStand(9999);
-        }
-        else
-        {
-            await S_PlayerStat.Instance.GetDamagedByStand(1);
-        }
+        await S_EffectActivator.Instance.ActivateFoeByStartTrial();
     }
-    public void DestroyFoeByEndTrial()
+    public void UpdateFoeByStartNewTurn()
     {
-        CurrentFoe = null;
-        foeAttackVFX = null;
-    }
-    public void DamagedByHarm(int harmValue) // 피해로 인한 데미지
-    {
-        CurrentFoe.CurrentHealth -= harmValue;
-
-        if (CurrentFoe.CurrentHealth > CurrentFoe.MaxHealth)
+        // 매 턴마다 능력치가 변경되는 효과의 능력치를 바꿔주기
+        if (FoeInfo.CurrentFoe.Effect == S_TrinketEffectEnum.Harm_TwoStat_Random)
         {
-            CurrentFoe.CurrentHealth = CurrentFoe.MaxHealth;
+            List<S_BattleStatEnum> stat = new() { S_BattleStatEnum.Str_Mind, S_BattleStatEnum.Str_Luck, S_BattleStatEnum.Mind_Luck };
+            FoeInfo.CurrentFoe.Stat = stat[UnityEngine.Random.Range(0, stat.Count)];
         }
+
+        // 한 턴에 ~ 하는 효과의 조건 충족 여부를 무조건 false로 바꾸기
+        if (FoeInfo.CurrentFoe.Condition == S_TrinketConditionEnum.Only || FoeInfo.CurrentFoe.Condition == S_TrinketConditionEnum.Resection_Three || FoeInfo.CurrentFoe.Condition == S_TrinketConditionEnum.Overflow_Six ||
+            FoeInfo.CurrentFoe.Condition == S_TrinketConditionEnum.GrandChaos_One || FoeInfo.CurrentFoe.Condition == S_TrinketConditionEnum.GrandChaos_Two)
+        {
+            FoeInfo.CurrentFoe.ActivatedCount = 0;
+            FoeInfo.CurrentFoe.IsMeetCondition = false;
+        }
+
+        // 조건 검사 한 번 해주기
+        S_EffectActivator.Instance.CheckFoeMeetCondition();
+
+        // ActivatedCount와 IsMeetCondition이 변경되었음으로 상태 업데이트
+        UpdateFoeObject();
+    }
+    public void ResetHealthByTwist() // 비틀기 시 체력 되돌리기
+    {
+        FoeInfo.CurrentHealth = FoeInfo.OldHealth;
 
         ChangeHealthValueVFX();
     }
     public void FixHealthByStand() // 스탠드 시 체력 고정
     {
-        CurrentFoe.OldHealth = CurrentFoe.CurrentHealth;
+        FoeInfo.OldHealth = FoeInfo.CurrentHealth;
+    }
+    public async Task ExitFoeByEndTrial()
+    {
+        panel_FoeInfoBase.GetComponent<RectTransform>().DOKill();
+        panel_FoeInfoBase.GetComponent<RectTransform>().DOAnchorPos(hidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
+            .OnComplete(() => panel_FoeInfoBase.SetActive(false));
+
+        await Instance_Section.GetComponent<S_SectionObj>().ExitCharacter();
+        FoeInfo = null;
+    }
+    public void ExitSectionByEndTrial()
+    {
+        Instance_Section.GetComponent<S_SectionObj>().ExitSection();
+    }
+    #endregion
+    #region 보조
+    public bool IsFoeHavePassive(S_TrinketPassiveEnum passive) // passive가 있는지 없는치 확인하는 메서드
+    {
+        return FoeInfo.CurrentFoe.Passive == passive;
+    }
+    public string GetFoeDescription(S_Foe foe) // 설명에 추가로 붙은 것들 메서드
+    {
+        StringBuilder sb = new();
+
+        sb.Append(foe.Description);
+
+        // 무작위 능력치 2개
+        if (foe.Effect == S_TrinketEffectEnum.Harm_TwoStat_Random)
+        {
+            switch (foe.Stat)
+            {
+                case S_BattleStatEnum.Str_Mind:
+                    sb.Replace("능력치 2개를", "힘과 정신력을");
+                    break;
+                case S_BattleStatEnum.Str_Luck:
+                    sb.Replace("능력치 2개를", "힘과 행운을");
+                    break;
+                case S_BattleStatEnum.Mind_Luck:
+                    sb.Replace("능력치 2개를", "정신력과 행운을");
+                    break;
+            }
+        }
+
+        // 조건에 따라 추가 설명
+        switch (foe.Condition)
+        {
+            case S_TrinketConditionEnum.Reverb_Two:
+                sb.Append($"\n(낸 카드 : {foe.ActivatedCount}장 째)");
+                break;
+            case S_TrinketConditionEnum.Reverb_Three:
+                sb.Append($"\n(낸 카드 : {foe.ActivatedCount}장 째)");
+                break;
+            case S_TrinketConditionEnum.Precision_Six:
+                sb.Append($"\n(스택의 카드 : {foe.ActivatedCount}장)");
+                break;
+            case S_TrinketConditionEnum.Legion_Twenty:
+                sb.Append($"\n(스택의 카드 무게 합 : {foe.ActivatedCount})");
+                break;
+            case S_TrinketConditionEnum.Resection_Three:
+                sb.Append($"\n(이번 턴에 낸 카드 : {foe.ActivatedCount}장 째)");
+                break;
+            case S_TrinketConditionEnum.Overflow_Six:
+                sb.Append($"\n(이번 턴에 낸 카드 : {foe.ActivatedCount}장 째)");
+                break;
+            case S_TrinketConditionEnum.GrandChaos_One:
+                sb.Append($"\n(만족한 카드 타입 : {foe.ActivatedCount}개)");
+                break;
+            case S_TrinketConditionEnum.GrandChaos_Two:
+                sb.Append($"\n(만족한 카드 타입 : {foe.ActivatedCount}개)");
+                break;
+        }
+
+        // 예상 값 추가
+        switch (foe.Effect)
+        {
+            case S_TrinketEffectEnum.Harm:
+                sb.Append($"\n(예상 피해량 : {foe.ExpectedValue})");
+                break;
+            case S_TrinketEffectEnum.Harm_TwoStat_Random:
+                sb.Append($"\n(예상 피해량 : {foe.ExpectedValue})");
+                break;
+            case S_TrinketEffectEnum.Harm_AllStat:
+                sb.Append($"\n(예상 피해량 : {foe.ExpectedValue})");
+                break;
+            case S_TrinketEffectEnum.Stat_Multi:
+                sb.Append($"\n(예상 증가량 : {foe.ExpectedValue})");
+                break;
+        }
+
+        return sb.ToString();
+    }
+    public async Task AttackPlayer()
+    {
+        GameObject character = Instance_Section.GetComponent<S_SectionObj>().sprite_Character;
+        GameObject meetCondition = Instance_Section.GetComponent<S_SectionObj>().sprite_MeetConditionEffect;
+
+        Sequence seq = DOTween.Sequence();
+
+        // 살짝 들리기
+        seq.Append(character.transform.DOLocalMove(character.transform.localPosition + ATTACK_POS_AMOUNT_1, 0.3f).SetEase(Ease.OutQuart))
+            .Join(meetCondition.transform.DOLocalMove(character.transform.localPosition + ATTACK_POS_AMOUNT_1, 0.3f).SetEase(Ease.OutQuart));
+
+        // 공격
+        seq.Append(character.transform.DOLocalMove(ATTACK_TARGET_POS, 0.2f).SetEase(Ease.OutQuart))
+            .Join(meetCondition.transform.DOLocalMove(ATTACK_TARGET_POS, 0.2f).SetEase(Ease.OutQuart));
+
+        // 딱 적중하는 시점에 체력 달기
+        if (FoeInfo.CurrentFoe.Effect == S_TrinketEffectEnum.DeathAttack && FoeInfo.CurrentFoe.IsMeetCondition) // 즉사 효과에 조건 충족했다면 즉사
+        {
+            seq.AppendCallback(() => _ = S_PlayerStat.Instance.GetDamagedByStand(9999));
+        }
+        else if (IsFoeHavePassive(S_TrinketPassiveEnum.NoDeterminationDeathAttack)) // 격동하는 오이지스의 의지 0일 때 즉사
+        {
+            if (S_PlayerStat.Instance.GetCurrentDetermination() <= 0)
+            {
+                seq.AppendCallback(() => _ = S_PlayerStat.Instance.GetDamagedByStand(9999));
+            }
+        }
+        else // 아니라면 1의 피해
+        {
+            seq.AppendCallback(() => _ = S_PlayerStat.Instance.GetDamagedByStand(1));
+        }
+
+        // 원위치
+        seq.Append(character.transform.DOLocalMove(Instance_Section.GetComponent<S_SectionObj>().CHARACTER_ORIGIN_POS, 0.4f).SetEase(Ease.OutQuart))
+           .Join(meetCondition.transform.DOLocalMove(Instance_Section.GetComponent<S_SectionObj>().MEET_CONDITION_EFFECT_ORIGIN_POS, 0.4f).SetEase(Ease.OutQuart));
+
+        await seq.AsyncWaitForCompletion();
+    }
+    public void DamagedByHarm(int harmValue) // 피해로 인한 데미지
+    {
+        FoeInfo.CurrentHealth -= harmValue;
+
+        if (FoeInfo.CurrentHealth > FoeInfo.MaxHealth)
+        {
+            FoeInfo.CurrentHealth = FoeInfo.MaxHealth;
+        }
 
         ChangeHealthValueVFX();
-    }
-    public void ResetHealthByTwist() // 비틀기 시 체력 되돌리기
-    {
-        CurrentFoe.CurrentHealth = CurrentFoe.OldHealth;
-
-        ChangeHealthValueVFX();
-    }
-    public void ResetFoeActivatedCountByEndTrial() // 시련 종료 시 ActivatedCount 초기화
-    {
-        if (CurrentFoe.FoeInfo.Passive == S_FoePassiveEnum.NeedActivatedCount)
-        {
-            CurrentFoe.FoeInfo.ActivatedCount = 0;
-        }
-    }
-    public void CheckFoeMeetCondition(S_Card card = null) // 조건 검사(ActivatedCount도 같이)
-    {
-        if (CurrentFoe.FoeInfo.Passive == S_FoePassiveEnum.NeedActivatedCount)
-        {
-            CurrentFoe.FoeInfo.CheckMeetConditionByActivatedCount(card);
-        }
-        else
-        {
-            CurrentFoe.FoeInfo.CheckMeetCondition(card);
-        }
-
-        UpdateFoeObject();
-    }
-    public void CheckFoeMeetConditionAfterEffect() // 이게 필요한 건 바로 발동하는 찐 메아리 효과만
-    {
-        CurrentFoe.FoeInfo.CheckMeetCondition();
-
-        UpdateFoeObject();
-    }
-    public async Task ActivateStartTrialFoeByStartTrial()
-    {
-        if (CurrentFoe.FoeInfo.Condition == S_FoeAbilityConditionEnum.StartTrial)
-        {
-            await CurrentFoe.FoeInfo.ActiveFoeAbility(S_EffectActivator.Instance, null);
-            CheckFoeMeetConditionAfterEffect();
-        }
-    }
-    public async Task ActivateReverbFoeByHitCard(S_Card hitCard)
-    {
-        if (CurrentFoe.FoeInfo.Condition == S_FoeAbilityConditionEnum.StartTrial && CurrentFoe.FoeInfo.IsMeetCondition)
-        {
-            await CurrentFoe.FoeInfo.ActiveFoeAbility(S_EffectActivator.Instance, hitCard);
-            CheckFoeMeetConditionAfterEffect();
-        }
-
-        S_PlayerStat.Instance.SaveStatHistory(hitCard, S_StatHistoryTriggerEnum.Foe);
-    }
-    public async Task ActivateStandFoeByStand()
-    {
-        if (CurrentFoe.FoeInfo.Condition == S_FoeAbilityConditionEnum.Stand && CurrentFoe.FoeInfo.IsMeetCondition)
-        {
-            await CurrentFoe.FoeInfo.ActiveFoeAbility(S_EffectActivator.Instance, null);
-            CheckFoeMeetConditionAfterEffect();
-        }
     }
     #endregion
 }

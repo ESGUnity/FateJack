@@ -8,6 +8,7 @@ public class S_PlayerInfoSystem : MonoBehaviour
 {
     [Header("컴포넌트")]
     [SerializeField] GameObject pos_Player;
+    [SerializeField] GameObject pos_Foe;
 
     [Header("프리팹")]
     [SerializeField] GameObject prefab_PlayerVFX;
@@ -47,10 +48,10 @@ public class S_PlayerInfoSystem : MonoBehaviour
             await go.GetComponent<S_PlayerVFX>().VFXAsync(vfx, target);
         }
     }
-    public async Task HarmVFXAsync(S_PlayerVFXEnum vfx, GameObject target) // 공격 VFX
+    public async Task HarmVFXAsync(S_PlayerVFXEnum vfx) // 공격 VFX
     {
         GameObject go = Instantiate(prefab_PlayerVFX);
-        await go.GetComponent<S_PlayerVFX>().VFXAsync(vfx, target);
+        await go.GetComponent<S_PlayerVFX>().VFXAsync(vfx, pos_Foe);
     }
 }
 

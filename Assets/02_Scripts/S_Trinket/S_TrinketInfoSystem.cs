@@ -1,10 +1,8 @@
 using DG.Tweening;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class S_TrinketInfoSystem : MonoBehaviour
 {
@@ -12,14 +10,14 @@ public class S_TrinketInfoSystem : MonoBehaviour
     [SerializeField] GameObject prefab_StackTrinketObj;
 
     [Header("씬 오브젝트")]
-    GameObject pos_OwnedTrinketBase;
-    TMP_Text text_TrinketCount;
+    [SerializeField] public GameObject pos_OwnedTrinketBase;
+    [SerializeField] TMP_Text text_TrinketCount;
 
     [Header("연출 관련")]
     Vector3 TRINKET_START_POS = new Vector3(-2.3f, 0, 0);
     Vector3 TRINKET_END_POS = new Vector3(2.3f, 0, 0);
     const float STACK_Z_VALUE = -0.02f;
-    Vector3 STACK_TRINKET_ORIGIN_SCALE = new Vector3(0.65f, 0.65f, 0.65f);
+    Vector3 STACK_TRINKET_ORIGIN_SCALE = new Vector3(1.15f, 1.15f, 1.15f);
 
     [Header("소유한 능력 리스트")]
     List<GameObject> ownedTrinketObjs = new();
@@ -40,10 +38,11 @@ public class S_TrinketInfoSystem : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
     #region 쓸만한 물건 관리
     public void AddTrinketObj(S_Trinket tri, Vector3 pos) // 쓸만한 물건 추가하기
     {
-        GameObject go = Instantiate(prefab_StackTrinketObj, pos_OwnedTrinketBase.transform, true);
+        GameObject go = Instantiate(prefab_StackTrinketObj, pos_OwnedTrinketBase.transform, false);
         go.transform.position = pos;
         go.GetComponent<S_StackTrinketObj>().SetTrinketInfo(tri);
         ownedTrinketObjs.Add(go);
@@ -52,7 +51,7 @@ public class S_TrinketInfoSystem : MonoBehaviour
 
         UpdateTotalOwnedTrinketCount();
     }
-    void AlignmentTrinkets() // 쓸만한 물건 정렬
+    public void AlignmentTrinkets() // 쓸만한 물건 정렬
     {
         List<PRS> originCardPRS = SetTrinketsPos(ownedTrinketObjs.Count);
         List<Task> tweenTask = new List<Task>();
@@ -94,7 +93,7 @@ public class S_TrinketInfoSystem : MonoBehaviour
 
         return results;
     }
-    public void RemoveTrinketObj(S_Trinket tri) // 덱에서 카드 제거하기
+    public void RemoveTrinketObj(S_Trinket tri) // 쓸만한 물건 제거
     {
         GameObject removeObj = null;
         foreach (GameObject go in ownedTrinketObjs)
@@ -115,7 +114,7 @@ public class S_TrinketInfoSystem : MonoBehaviour
     }
     #endregion
     #region 효과
-    public void SwapLeftTrinketObjIndex(S_Trinket tri)
+    public void SwapLeftTrinketObjIndex(S_Trinket tri) // 쓸만한 물건 인덱스 교체
     {
         int index = ownedTrinketObjs.IndexOf(GetTrinketObj(tri));
 

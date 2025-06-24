@@ -5,9 +5,6 @@ using UnityEngine.EventSystems;
 
 public class S_OptionTrinketObj : S_TrinketObj, IPointerEnterHandler, IPointerClickHandler
 {
-    [SerializeField] Material m_Option;
-    [SerializeField] Material m_Origin;
-
     protected override void Awake()
     {
         VALID_STATES = new() { S_GameFlowStateEnum.StoreBuying };
@@ -19,14 +16,16 @@ public class S_OptionTrinketObj : S_TrinketObj, IPointerEnterHandler, IPointerCl
 
         if (S_GameFlowManager.Instance.IsInState(VALID_STATES))
         {
-            sprite_Trinket.material = m_Option;
+            S_HoverInfoSystem.Instance.ActivateHoverInfo(TrinketInfo, sprite_Trinket.gameObject, false);
+
+            sprite_BlurEffect.gameObject.SetActive(false);
         }
     }
     public override void ForceExit()
     {
         base.ForceExit();
 
-        sprite_Trinket.material = m_Origin;
+        sprite_BlurEffect.gameObject.SetActive(true);
     }
 
     public void OnPointerClick(PointerEventData eventData)

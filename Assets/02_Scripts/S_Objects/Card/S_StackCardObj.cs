@@ -3,71 +3,68 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class S_StackCardObj : S_CardObj, IPointerEnterHandler
+public class S_StackCardObj : S_CardObj
 {
     [SerializeField] SpriteRenderer sprite_MoveRightBtn;
     [SerializeField] TMP_Text text_MoveRight;
     [SerializeField] SpriteRenderer sprite_MoveLeftBtn;
     [SerializeField] TMP_Text text_MoveLeft;
 
+    const float LEAN_VALUE = 3.5f;
+    Vector3 CARD_ROT;
+
     protected override void Awake()
     {
         VALID_STATES = new() { S_GameFlowStateEnum.Hit, S_GameFlowStateEnum.HittingCard };
+
+        CARD_ROT = new Vector3(0, 0, Random.Range(-LEAN_VALUE, LEAN_VALUE));
+
+        obj_Card.transform.DOLocalRotate(CARD_ROT, 0);
     }
 
     public override void SetOrder(int order)
     {
         base.SetOrder(order);
 
-        sprite_MoveRightBtn.sortingLayerName = "WorldObject";
-        sprite_MoveRightBtn.sortingOrder = order + 1;
-        text_MoveRight.GetComponent<MeshRenderer>().sortingLayerName = "WorldObject";
-        text_MoveRight.GetComponent<MeshRenderer>().sortingOrder = order + 2;
-        sprite_MoveLeftBtn.sortingLayerName = "WorldObject";
-        sprite_MoveLeftBtn.sortingOrder = order + 1;
-        text_MoveLeft.GetComponent<MeshRenderer>().sortingLayerName = "WorldObject";
-        text_MoveLeft.GetComponent<MeshRenderer>().sortingOrder = order + 2;
-    }
-
-    public override void OnPointerEnter(PointerEventData eventData)
-    {
-        base.OnPointerEnter(eventData);
-
-        // 유연 각인 카드는 이동 버튼이 뜨고 이동시킬 수 있다.
-        if (S_GameFlowManager.Instance.IsInState(VALID_STATES))
+        if (CardInfo.Engraving == S_EngravingEnum.Flexible)
         {
-            if (CardInfo.Engraving == S_EngravingEnum.Flexible)
-            {
-                SetAlphaValueBtn(1f, POINTER_ENTER_ANIMATION_TIME);
-            }
+            sprite_MoveRightBtn.gameObject.SetActive(true);
+            sprite_MoveLeftBtn.gameObject.SetActive(true);
+            sprite_MoveRightBtn.sortingLayerName = "WorldObject";
+            sprite_MoveRightBtn.sortingOrder = order + 1;
+            text_MoveRight.GetComponent<MeshRenderer>().sortingLayerName = "WorldObject";
+            text_MoveRight.GetComponent<MeshRenderer>().sortingOrder = order + 2;
+            sprite_MoveLeftBtn.sortingLayerName = "WorldObject";
+            sprite_MoveLeftBtn.sortingOrder = order + 1;
+            text_MoveLeft.GetComponent<MeshRenderer>().sortingLayerName = "WorldObject";
+            text_MoveLeft.GetComponent<MeshRenderer>().sortingOrder = order + 2;
+
+            EventTrigger rightTrigger = sprite_MoveRightBtn.GetComponent<EventTrigger>();
+            EventTrigger.Entry rightClickEntry = rightTrigger.triggers.Find(e => e.eventID == EventTriggerType.PointerClick);
+            rightClickEntry.callback.AddListener((eventData) => { ClickMoveRightBtn((PointerEventData)eventData); });
+
+            EventTrigger leftTrigger = sprite_MoveRightBtn.GetComponent<EventTrigger>();
+            EventTrigger.Entry leftClickEntry = leftTrigger.triggers.Find(e => e.eventID == EventTriggerType.PointerClick);
+            leftClickEntry.callback.AddListener((eventData) => { ClickMoveLeftBtn((PointerEventData)eventData); });
+        }
+        else
+        {
+            sprite_MoveRightBtn.gameObject.SetActive(false);
+            sprite_MoveLeftBtn.gameObject.SetActive(false);
         }
     }
     public override void ForceExit()
     {
         base.ForceExit();
 
-        SetAlphaValueBtn(0f, POINTER_ENTER_ANIMATION_TIME);
+        obj_Card.transform.DOLocalRotate(CARD_ROT, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
     }
-
-    public void SetAlphaValueBtn(float value, float duration)
-    {
-        sprite_MoveRightBtn.DOKill();
-        text_MoveRight.DOKill();
-        sprite_MoveLeftBtn.DOKill();
-        text_MoveLeft.DOKill();
-
-        sprite_MoveRightBtn.DOFade(value, duration);
-        text_MoveRight.DOFade(value, duration);
-        sprite_MoveLeftBtn.DOFade(value, duration);
-        text_MoveLeft.DOFade(value, duration);
-    }
-
-    public async void ClickMoveRightBtn()
+    public async void ClickMoveRightBtn(PointerEventData eventData)
     {
         S_PlayerCard.Instance.SwapCardObjIndex(CardInfo, true);
         await S_StackInfoSystem.Instance.SwapCardObjIndex(CardInfo, true);
     }
-    public async void ClickMoveLeftBtn()
+    public async void ClickMoveLeftBtn(PointerEventData eventData)
     {
         S_PlayerCard.Instance.SwapCardObjIndex(CardInfo, false);
         await S_StackInfoSystem.Instance.SwapCardObjIndex(CardInfo, false);
