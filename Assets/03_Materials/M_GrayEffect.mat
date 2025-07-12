@@ -42,11 +42,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Float: 0.8
+    - _Float: 0.51
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
-    - _Color: {r: 0.40566036, g: 0.40566036, b: 0.40566036, a: 0}
+    - _Color: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &5515785081122722467

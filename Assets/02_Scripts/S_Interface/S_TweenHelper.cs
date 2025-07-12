@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class S_TweenHelper : MonoBehaviour
 {
-    const float BOUNCING_SCALE_AMOUNT = 1.25f;
+    const float BOUNCING_SCALE_AMOUNT = 1.45f;
 
     // 싱글턴
     static S_TweenHelper instance;

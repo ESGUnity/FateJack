@@ -1,9 +1,7 @@
-using DG.Tweening;
 using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public enum LobbyTypeEnum
 {
@@ -14,30 +12,13 @@ public enum LobbyTypeEnum
 
 public class MainMenuManager : MonoBehaviour
 {
-    //LobbyTypeEnum _lobbyType;
-    float transitionDuration = 0.2f;
-
-    GameObject mainMenuBase;
-
-    GameObject multiGameBase;
-    GameObject hostBase;
-    GameObject lobbyPublicBtn;
-    GameObject lobbyPrivateBtn;
-    TMP_InputField lobbyNameInputField;
-    TMP_InputField joinCodeInputField;
-    GameObject joinCodeBase;
-
-    GameObject transitionPanel;
-
-    GameObject loadingPanel;
-    TMP_Text loadingText;
-
-    GameObject tutorialBtnBase;
+    GameObject image_TutorialBtnBase;
     TMP_Text text_HighTrial;
 
     // 싱글턴
     static MainMenuManager instance;
     public static MainMenuManager Instance { get { return instance; } }
+
     void Awake()
     {
         if (instance == null)
@@ -49,75 +30,33 @@ public class MainMenuManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
     void Start()
     {
-        //_lobbyType = LobbyTypeEnum.None;
-
         Transform[] transforms = GetComponentsInChildren<Transform>(true);
 
-        mainMenuBase = Array.Find(transforms, c => c.gameObject.name.Equals("MainMenuBase")).gameObject;
-
-        multiGameBase = Array.Find(transforms, c => c.gameObject.name.Equals("MultiGameBase")).gameObject;
-        hostBase = Array.Find(transforms, c => c.gameObject.name.Equals("HostBase")).gameObject;
-        lobbyPublicBtn = Array.Find(transforms, c => c.gameObject.name.Equals("LobbyPublicBtn")).gameObject;
-        lobbyPrivateBtn = Array.Find(transforms, c => c.gameObject.name.Equals("LobbyPrivateBtn")).gameObject;
-        lobbyNameInputField = Array.Find(transforms, c => c.gameObject.name.Equals("LobbyNameInputField")).gameObject.GetComponent<TMP_InputField>();
-        joinCodeInputField = Array.Find(transforms, c => c.gameObject.name.Equals("JoinCodeInputField")).gameObject.GetComponent<TMP_InputField>();
-        joinCodeBase = Array.Find(transforms, c => c.gameObject.name.Equals("JoinCodeBase")).gameObject;
-        multiGameBase.SetActive(false);
-
-        transitionPanel = Array.Find(transforms, c => c.gameObject.name.Equals("TransitionPanel")).gameObject;
-        transitionPanel.SetActive(false);
-
-        loadingPanel = Array.Find(transforms, c => c.gameObject.name.Equals("LoadingPanel")).gameObject;
-        loadingText = Array.Find(transforms, c => c.gameObject.name.Equals("LoadingText")).gameObject.GetComponent<TMP_Text>();
-        loadingPanel.SetActive(false);
-
-        tutorialBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("TutorialBtnBase")).gameObject;
+        image_TutorialBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_TutorialBtnBase")).gameObject;
         text_HighTrial = Array.Find(transforms, c => c.gameObject.name.Equals("Text_HighTrial")).gameObject.GetComponent<TMP_Text>();
-
 
         // 튜토리얼 여부
         if (PlayerPrefs.HasKey("TutorialCompleted"))
         {
-            tutorialBtnBase.SetActive(true);
+            image_TutorialBtnBase.SetActive(true);
         }
         else
         {
-            tutorialBtnBase.SetActive(false);
+            image_TutorialBtnBase.SetActive(false);
         }
 
         // 최고 시련
         text_HighTrial.text = $"등반한 최고 시련 : {PlayerPrefs.GetInt("HighTrial"), 0}";
     }
-    void Update()
-    {
-        
-    }
-    void DoTransition(GameObject prev, GameObject next)
-    {
-        transitionPanel.SetActive(true);
 
-        Sequence sequence = DOTween.Sequence();
-        sequence.Append
-            (
-                transitionPanel.GetComponent<Image>()
-                .DOColor(new Color(0f, 0f, 0f, 1f), transitionDuration).SetEase(Ease.OutQuart))
-                .AppendCallback(() => prev.SetActive(false))
-                .AppendInterval(0.1f)
-                .AppendCallback(() => next.SetActive(true))
-                .Append(transitionPanel.GetComponent<Image>()
-                .DOColor(new Color(0f, 0f, 0f, 0f), transitionDuration).SetEase(Ease.OutQuart)
-                .OnComplete(() => transitionPanel.SetActive(false))
-            );
-    }
     public void PressTutorialBtn()
     {
         PlayerPrefs.SetInt("TutorialCompleted", 0);
         PlayerPrefs.Save();
 
-        SceneManager.LoadScene("SingleGameScene");
+        S_LoadingSceneManager.LoadScene("SingleGameScene");
     }
     public void PressSingleGameBtn()
     {
@@ -127,7 +66,7 @@ public class MainMenuManager : MonoBehaviour
             PlayerPrefs.Save();
         }
 
-        SceneManager.LoadScene("SingleGameScene");
+        S_LoadingSceneManager.LoadScene("SingleGameScene");
     }
     public void PressOptionBtn()
     {
@@ -140,6 +79,23 @@ public class MainMenuManager : MonoBehaviour
     }
 
     // 멀티 코드
+    //void DoTransition(GameObject prev, GameObject next)
+    //{
+    //    transitionPanel.SetActive(true);
+
+    //    Sequence sequence = DOTween.Sequence();
+    //    sequence.Append
+    //        (
+    //            transitionPanel.GetComponent<Image>()
+    //            .DOColor(new Color(0f, 0f, 0f, 1f), transitionDuration).SetEase(Ease.OutQuart))
+    //            .AppendCallback(() => prev.SetActive(false))
+    //            .AppendInterval(0.1f)
+    //            .AppendCallback(() => next.SetActive(true))
+    //            .Append(transitionPanel.GetComponent<Image>()
+    //            .DOColor(new Color(0f, 0f, 0f, 0f), transitionDuration).SetEase(Ease.OutQuart)
+    //            .OnComplete(() => transitionPanel.SetActive(false))
+    //        );
+    //}
     //public void PressMultiGameBtn()
     //{
     //    DoTransition(mainMenuBase, multiGameBase);

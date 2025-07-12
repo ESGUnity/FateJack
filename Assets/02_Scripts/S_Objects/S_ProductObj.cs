@@ -2,24 +2,19 @@ using DG.Tweening;
 using System.Collections.Generic;
 using System.Dynamic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.EventSystems;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class S_ProductObj : MonoBehaviour // TODO : CardObj처럼 꼼꼼하게 만들기. 버튼은 클릭하면 나오게 하기
+public class S_ProductObj : MonoBehaviour
 {
     [Header("주요 정보")]
-    [HideInInspector] public S_ProductInfoEnum ProductInfo;
-    [HideInInspector] public int Price;
+    [HideInInspector] public S_ProductEnum ProductInfo;
 
     [Header("컴포넌트")]
     [SerializeField] SpriteRenderer sprite_Product;
-    [SerializeField] TMP_Text text_Name;
-    [SerializeField] TMP_Text text_Price;
-
-    [SerializeField] SpriteRenderer sprite_BuyBtn;
-    [SerializeField] TMP_Text text_Buy;
 
     [Header("VFX")]
     [HideInInspector] public PRS OriginPRS;
@@ -43,16 +38,9 @@ public class S_ProductObj : MonoBehaviour // TODO : CardObj처럼 꼼꼼하게 �
         EventTrigger.Entry spritePointerEnterEntry = spriteTrigger.triggers.Find(e => e.eventID == EventTriggerType.PointerEnter);
         EventTrigger.Entry spritePointerExitEntry = spriteTrigger.triggers.Find(e => e.eventID == EventTriggerType.PointerExit);
         EventTrigger.Entry spritePointerClickEntry = spriteTrigger.triggers.Find(e => e.eventID == EventTriggerType.PointerClick);
-        // 함수 바인딩 추가
         spritePointerEnterEntry.callback.AddListener((eventData) => { PointerEnterProductSprite((PointerEventData)eventData); });
         spritePointerExitEntry.callback.AddListener((eventData) => { PointerExitProductSprite((PointerEventData)eventData); });
         spritePointerClickEntry.callback.AddListener((eventData) => { PointerClickProductSprite((PointerEventData)eventData); });
-
-        // 버튼 바인딩
-        EventTrigger btnTrigger = sprite_BuyBtn.GetComponent<EventTrigger>();
-        EventTrigger.Entry btnPointerClickEntry = btnTrigger.triggers.Find(e => e.eventID == EventTriggerType.PointerClick);
-        // 함수 바인딩 추가
-        btnPointerClickEntry.callback.AddListener((eventData) => { PointerClickBuyBtn((PointerEventData)eventData); });
     }
     void Update()
     {
@@ -60,6 +48,8 @@ public class S_ProductObj : MonoBehaviour // TODO : CardObj처럼 꼼꼼하게 �
         if (isEnter && !S_GameFlowManager.Instance.IsInState(VALID_STATES))
         {
             ForceExit();
+
+            isEnter = false;
         }
     }
     void OnDisable()
@@ -67,40 +57,13 @@ public class S_ProductObj : MonoBehaviour // TODO : CardObj처럼 꼼꼼하게 �
         ForceExit();
     }
 
-    public void SetProductInfo(S_ProductInfoEnum product, bool isTutorial = false)
+    public void SetProductInfo(S_ProductEnum product, bool isTutorial = false)
     {
         // 상품 설정
         ProductInfo = product;
 
-        // 이름 설정
-        text_Name.text = S_ProductMetaData.GetName(product);
-
-        // 가격 설정
-        Price = S_ProductMetaData.GetPrice(product);
-        if (Price == 0)
-        {
-            if (ProductInfo == S_ProductInfoEnum.OracleBall)
-            {
-                text_Price.text = "비매품!";
-            }
-            else
-            {
-                text_Price.text = "무료!";
-            }
-        }
-        else
-        {
-            text_Price.text = $"{Price} 골드";
-        }
-
-        if (isTutorial)
-        {
-            Price = 0;
-            text_Price.text = "무료!";
-        }
-
         // 상품 스프라이트
-        var cardEffectOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_{ProductInfo}");
+        var cardEffectOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_Product_{ProductInfo}");
         cardEffectOpHandle.Completed += OnProductLoadComplete;
 
         // 소팅오더 설정
@@ -117,29 +80,19 @@ public class S_ProductObj : MonoBehaviour // TODO : CardObj처럼 꼼꼼하게 �
     {
         sprite_Product.sortingLayerName = "WorldObject";
         sprite_Product.sortingOrder = order;
-
-        text_Name.GetComponent<MeshRenderer>().sortingLayerName = "WorldObject";
-        text_Name.GetComponent<MeshRenderer>().sortingOrder = order + 1;
-
-        text_Price.GetComponent<MeshRenderer>().sortingLayerName = "WorldObject";
-        text_Price.GetComponent<MeshRenderer>().sortingOrder = order + 1;
-
-        sprite_BuyBtn.sortingLayerName = "WorldObject";
-        sprite_BuyBtn.sortingOrder = order + 1;
-
-        text_Buy.GetComponent<MeshRenderer>().sortingLayerName = "WorldObject";
-        text_Buy.GetComponent<MeshRenderer>().sortingOrder = order + 2;
     }
     #region 포인터 함수
     public void PointerEnterProductSprite(BaseEventData eventData)
     {
         if (S_GameFlowManager.Instance.IsInState(VALID_STATES))
         {
-            sprite_Product.transform.DOKill();
+            transform.DOKill();
 
-            sprite_Product.transform.DOScale(OriginPRS.Scale + POINTER_ENTER_SCALE_VALUE, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+            transform.DOScale(OriginPRS.Scale + POINTER_ENTER_SCALE_VALUE, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
 
-            S_StoreInfoSystem.Instance.GenerateMonologByHoverProduct(ProductInfo);
+            // 호버링 시 뜨는 모놀로그
+            DialogData dialog = S_DialogMetaData.GetMonologs($"Reward_{ProductInfo}");
+            S_DialogInfoSystem.Instance.StartMonolog(dialog.Name, dialog.Dialog, 9999);
 
             isEnter = true;
         }
@@ -152,34 +105,17 @@ public class S_ProductObj : MonoBehaviour // TODO : CardObj처럼 꼼꼼하게 �
     {
         if (!isEnter) return;
 
-        sprite_Product.transform.DOKill();
+        transform.DOKill();
 
-        sprite_Product.transform.DOScale(OriginPRS.Scale, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
+        transform.DOScale(OriginPRS.Scale, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
 
         S_DialogInfoSystem.Instance.EndMonolog();
 
         isEnter = false;
     }
-    public void PointerClickProductSprite(BaseEventData eventData) // 클릭 시 버튼 생김
+    public void PointerClickProductSprite(BaseEventData eventData)
     {
-        if (sprite_BuyBtn.gameObject.activeInHierarchy)
-        {
-            sprite_Product.transform.DOKill();
-            sprite_Product.transform.DOScale(OriginPRS.Scale, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
-
-            sprite_BuyBtn.gameObject.SetActive(false);
-        }
-        else
-        {
-            sprite_Product.transform.DOKill();
-            sprite_Product.transform.DOScale(OriginPRS.Scale + CLICK_SCALE_VALUE, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
-
-            sprite_BuyBtn.gameObject.SetActive(true);
-        }
-    }
-    public void PointerClickBuyBtn(BaseEventData eventData)
-    {
-        S_StoreInfoSystem.Instance.BuyProduct(this);
+        S_RewardInfoSystem.Instance.BuyProduct(this);
     }
     #endregion
 }

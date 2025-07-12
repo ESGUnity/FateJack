@@ -46,7 +46,7 @@ public class S_CameraManager : MonoBehaviour
         originalPos = camTransform.localPosition;
         originalRot = camTransform.eulerAngles;
 
-        StartShake();
+        StartHandHeld();
     }
     void Update()
     {
@@ -61,18 +61,18 @@ public class S_CameraManager : MonoBehaviour
             camTransform.localPosition = originalPos + new Vector3(shakeX, shakeY, 0);
         }
     }
-    public void StartShake()
+    public void StartHandHeld()
     {
         isShaking = true;
     }
-    public void StopShake()
+    public void StopHandHeld()
     {
         // 흔들림 중지하고 원위치 복귀
         isShaking = false;
     }
     public void MoveToPosition(Vector3 targetPos, Vector3 targetRot, float duration)  // 지정 위치로 이동 + 흔들림 잠시 중지 후 재개
     {
-        StopShake();
+        StopHandHeld();
 
         originalPos = targetPos;
         originalRot = targetRot;
@@ -88,7 +88,23 @@ public class S_CameraManager : MonoBehaviour
 
                 shakeTime = 0f;
 
-                StartShake();
+                StartHandHeld();
             });
+    }
+    public void ShakeCamera(float power)
+    {
+        StopHandHeld();
+
+        Sequence seq = DOTween.Sequence();
+
+        seq.Append(camTransform.DOShakePosition(S_EffectActivator.Instance.GetEffectLifeTime() / 2, power))
+            .Append(camTransform.DOMove(originalPos, S_EffectActivator.Instance.GetEffectLifeTime() / 4))
+            .Join(camTransform.DORotate(originalRot, S_EffectActivator.Instance.GetEffectLifeTime() / 4))
+                 .OnComplete(() =>
+                 {
+                     shakeTime = 0f;
+
+                     StartHandHeld();
+                 });
     }
 }

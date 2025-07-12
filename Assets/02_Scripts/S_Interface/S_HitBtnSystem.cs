@@ -13,14 +13,12 @@ public class S_HitBtnSystem : MonoBehaviour
     [SerializeField] GameObject prefab_ExpansionCardObj;
 
     [Header("씬 오브젝트")]
-    [SerializeField] SpriteRenderer sprite_BlackBackgroundByTwistBtn;
     [SerializeField] SpriteRenderer sprite_BlackBackgroundByExpansion;
     [SerializeField] GameObject pos_ExpansionBase;
 
     [Header("컴포넌트")]
     GameObject panel_HitBtnBase;
-    GameObject image_BasicHitBtnBase;
-    GameObject image_TwistBtnBase;
+    GameObject image_HitBtnBase;
     GameObject image_HoverHitBtnInfoBase;
     TMP_Text text_CleanHitProb;
     TMP_Text text_BurstProb;
@@ -32,14 +30,12 @@ public class S_HitBtnSystem : MonoBehaviour
     Vector3 EXPANSION_START_POS = new Vector3(-6f, 0, 0);
     Vector3 EXPANSION_END_POS = new Vector3(6f, 0, 0);
     const float STACK_Z_VALUE = -0.02f;
-    const float EXPANSION_TIME = 0.3f;
+    const float EXPANSION_TIME = 0.1f;
     Vector3 STACK_CARD_ORIGIN_SCALE = new Vector3(1.7f, 1.7f, 1.7f);
 
     [Header("UI")]
-    Vector2 btnBaseHidePos = new Vector2(0, -140);
-    Vector2 btnBaseOriginPos = new Vector2(0, 85);
-    int prevDeckCount;
-    int prevStackSum;
+    Vector2 BTNS_HIDE_POS = new Vector2(0, -140);
+    Vector2 BTNS_ORIGIN_POS = new Vector2(0, 85);
 
     // 싱글턴
     static S_HitBtnSystem instance;
@@ -53,8 +49,7 @@ public class S_HitBtnSystem : MonoBehaviour
 
         // 히트 버튼 관련 컴포넌트 할당
         panel_HitBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Panel_HitBtnBase")).gameObject;
-        image_BasicHitBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_BasicHitBtnBase")).gameObject;
-        image_TwistBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_TwistBtnBase")).gameObject;
+        image_HitBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_HitBtnBase")).gameObject;
 
         image_HoverHitBtnInfoBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_HoverHitBtnInfoBase")).gameObject;
         text_CleanHitProb = Array.Find(texts, c => c.gameObject.name.Equals("Text_CleanHitProb"));
@@ -84,18 +79,13 @@ public class S_HitBtnSystem : MonoBehaviour
             if (currentState != S_GameFlowStateEnum.Hit)
             {
                 PointerExitOnHitBtn();
-                PointerExitOnTwistBtn();
             }
             // 2. 이전 상태는 Hit가 아니었고, 현재 상태가 Hit로 바뀐 경우
             else if (prevState != S_GameFlowStateEnum.Hit && currentState == S_GameFlowStateEnum.Hit)
             {
-                if (IsPointerOverUIObject(image_BasicHitBtnBase))
+                if (IsPointerOverUIObject(image_HitBtnBase))
                 {
                      PointerEnterOnHitBtn();
-                }
-                if (IsPointerOverUIObject(image_TwistBtnBase))
-                {
-                    PointerExitOnTwistBtn();
                 }
             }
 
@@ -109,111 +99,77 @@ public class S_HitBtnSystem : MonoBehaviour
 
         // 두트윈으로 등장 애니메이션 주기
         panel_HitBtnBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-        panel_HitBtnBase.GetComponent<RectTransform>().DOAnchorPos(btnBaseOriginPos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
+        panel_HitBtnBase.GetComponent<RectTransform>().DOAnchorPos(BTNS_ORIGIN_POS, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart);
     }
     public void DisappearHitBtn() // 패널 퇴장
     {
         panel_HitBtnBase.GetComponent<RectTransform>().DOKill(); // 두트윈 전 트윈 초기화
-        panel_HitBtnBase.GetComponent<RectTransform>().DOAnchorPos(btnBaseHidePos, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
+        panel_HitBtnBase.GetComponent<RectTransform>().DOAnchorPos(BTNS_HIDE_POS, S_GameFlowManager.PANEL_APPEAR_TIME).SetEase(Ease.OutQuart)
             .OnComplete(() => panel_HitBtnBase.SetActive(false));
     }
 
     #region 버튼 함수
-    public async void ClickHitBtnAsync() // 히트, 다이얼로그 시에만 작동
+    public void ClickHitBtnAsync() // 히트, 다이얼로그 시에만 작동
     {
         // Dialog 시스템 전용. 다이얼로그에서 GameFlowState를 Hit으로 바꿔줘야한다.
         S_DialogInfoSystem.Instance.ClickNextBtn();
 
-        if ((S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit) && !S_PlayerStat.Instance.IsBurst && S_PlayerCard.Instance.GetDeckCards().Count > 0)
+        if ((S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit) && !S_PlayerStat.Instance.IsBurst && !S_PlayerStat.Instance.IsPerfect && (S_PlayerCard.Instance.GetDeckCards().Count > 0 || S_PlayerCard.Instance.GetUsedCards().Count > 0))
         {
-            await StartHitCardAsync();
+            HitCard();
         }
-        else if (S_PlayerStat.Instance.IsBurst)
+        else if (S_PlayerStat.Instance.IsBurst || S_PlayerStat.Instance.IsPerfect)
         {
-            S_InGameUISystem.Instance.CreateLog("버스트 시엔 히트할 수 없습니다.");
+            DialogData dialog = S_DialogMetaData.GetMonologs("Hit_BurstOrPerfect");
+            S_DialogInfoSystem.Instance.StartMonolog(dialog.Name, dialog.Dialog, 8);
         }
-        else if (S_PlayerCard.Instance.GetDeckCards().Count <= 0)
+        else if (S_PlayerCard.Instance.GetDeckCards().Count == 0 && S_PlayerCard.Instance.GetUsedCards().Count == 0)
         {
-            S_InGameUISystem.Instance.CreateLog("덱에 카드가 없습니다!");
+            DialogData dialog = S_DialogMetaData.GetMonologs("Hit_NoCardInDeckAndUsed");
+            S_DialogInfoSystem.Instance.StartMonolog(dialog.Name, dialog.Dialog, 8);
         }
         else
         {
-
+            // 히트가 아닐 때 클릭 시
         }
     }
-    public async Task StartHitCardAsync()
+    public void HitCard()
     {
         S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.HittingCard;
 
-        if (S_PlayerCard.Instance.GetDeckCards().Count > 1)
+        List<S_CardBase> cards = new();
+        if (S_PlayerStat.Instance.IsExpansion > 0)
         {
-            List<S_Card> cards = new();
-            if (S_PlayerStat.Instance.IsExpansion)
-            {
-                cards = S_PlayerCard.Instance.DrawRandomCard(4);
-            }
-            else
-            {
-                cards = S_PlayerCard.Instance.DrawRandomCard(2);
-            }
-
-            // 카드 세팅
-            pos_ExpansionBase.SetActive(true);
-            foreach (S_Card card in cards)
-            {
-                GameObject go = Instantiate(prefab_ExpansionCardObj, pos_ExpansionBase.transform, true);
-                expansionCardObjs.Add(go);
-                go.transform.localPosition = Vector3.zero;
-                go.GetComponent<S_ExpansionCardObj>().SetCardInfo(card);
-
-                go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(0, 0);
-                go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(1, EXPANSION_TIME);
-            }
-            AlignmentExpansionCards();
-
-            // 블락 패널 켜기
-            sprite_BlackBackgroundByExpansion.gameObject.SetActive(true);
-            sprite_BlackBackgroundByExpansion.DOFade(0.85f, EXPANSION_TIME);
-
-            // 숨기기 버튼 켜기
-            image_HideExpansionCardsBtn.SetActive(true);
-
-            // 히트 버튼 퇴장
-            DisappearHitBtn();
+            cards = S_PlayerCard.Instance.DrawRandomCard(4);
         }
-        else // 카드가 1장이라면 바로 내기
+        else
         {
-            S_Card hitCard = S_PlayerCard.Instance.DrawRandomCard(1).First();
+            cards = S_PlayerCard.Instance.DrawRandomCard(2);
+        }
 
-            await SelectHitCard(hitCard);
-        }
-    }
+        // 카드 세팅
+        pos_ExpansionBase.SetActive(true);
+        foreach (S_CardBase card in cards)
+        {
+            GameObject go = Instantiate(prefab_ExpansionCardObj, pos_ExpansionBase.transform, true);
+            expansionCardObjs.Add(go);
+            go.transform.localPosition = Vector3.zero;
+            go.GetComponent<S_ExpansionCardObj>().SetCardInfo(card);
 
-    public void ClickTwistBtn() // 히트, 다이얼로그 시에만 작동
-    {
-        // Dialog 시스템 전용. 다이얼로그에서 GameFlowState를 Hit으로 바꿔줘야한다.
-        S_DialogInfoSystem.Instance.ClickNextBtn();
+            go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(0, 0);
+            go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(1, EXPANSION_TIME);
+        }
+        AlignmentExpansionCards();
 
-        if ((S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit) && !S_PlayerStat.Instance.IsBurst && S_PlayerStat.Instance.CanUseDetermination() && S_GameFlowManager.Instance.IsCurrentTurnHitted())
-        {
-            S_GameFlowManager.Instance.StartTwist();
-        }
-        else if (S_GameFlowManager.Instance.GameFlowState != S_GameFlowStateEnum.Hit)
-        {
+        // 블락 패널 켜기
+        sprite_BlackBackgroundByExpansion.gameObject.SetActive(true);
+        sprite_BlackBackgroundByExpansion.DOFade(0.85f, EXPANSION_TIME);
 
-        }
-        else if (S_PlayerStat.Instance.IsBurst)
-        {
-            S_InGameUISystem.Instance.CreateLog("버스트 시엔 할 수 없어.");
-        }
-        else if (!S_PlayerStat.Instance.CanUseDetermination())
-        {
-            S_InGameUISystem.Instance.CreateLog("의지가 부족하다네~");
-        }
-        else if (!S_GameFlowManager.Instance.IsCurrentTurnHitted())
-        {
-            S_InGameUISystem.Instance.CreateLog("비틀 운명이 없어.");
-        }
+        // 숨기기 버튼 켜기
+        image_HideExpansionCardsBtn.SetActive(true);
+
+        // 히트 버튼 퇴장
+        DisappearHitBtn();
     }
     public void ClickStandBtn() // 히트, 다이얼로그 시에만 작동
     {
@@ -229,25 +185,24 @@ public class S_HitBtnSystem : MonoBehaviour
 
         }
     }
-    public async Task SelectHitCard(S_Card card) // S_ExpansionCard에서 호출하는 메서드
+    public async Task SelectHitCard(S_CardBase card) // S_ExpansionCard에서 호출하는 메서드
     {
         // 전개 및 우선 해제
-        if (S_PlayerStat.Instance.IsExpansion)
+        if (S_PlayerStat.Instance.IsExpansion > 0)
         {
             await S_EffectActivator.Instance.AppliedExpansionAsync();
         }
-        if (S_PlayerStat.Instance.IsFirst)
+        if (S_PlayerStat.Instance.IsFirst > 0)
         {
             await S_EffectActivator.Instance.AppliedFirstAsync();
         }
 
         // 카드 내기
-        await S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(card, S_CardOrderTypeEnum.Hit);
+        await S_GameFlowManager.Instance.StartHitCardAsync(card);
     }
     void AlignmentExpansionCards() // 전개 카드를 정렬하기
     {
         List<PRS> originCardPRS = SetExpansionCardsPos(expansionCardObjs.Count);
-        List<Task> tweenTask = new List<Task>();
 
         for (int i = 0; i < expansionCardObjs.Count; i++)
         {
@@ -352,16 +307,16 @@ public class S_HitBtnSystem : MonoBehaviour
         AppearHitBtn();
     }
     #endregion
-    #region 버스트 및 클린히트 알려주는 기능
+    #region 버스트 및 완벽 알려주는 기능
     public void RenewProbText()
     {
         int limit = S_PlayerStat.Instance.CurrentLimit;
         int stackSum = S_PlayerStat.Instance.CurrentWeight;
         var preDeckCards = S_PlayerCard.Instance.GetDeckCards();
 
-        if (S_PlayerStat.Instance.IsFirst)
+        if (S_PlayerStat.Instance.IsFirst > 0)
         {
-            List<S_Card> firstCards = S_PlayerCard.Instance.GetValidCardsByFirst();
+            List<S_CardBase> firstCards = S_PlayerCard.Instance.GetValidCardsByFirst();
 
             if (firstCards.Count > 0)
             {
@@ -373,7 +328,7 @@ public class S_HitBtnSystem : MonoBehaviour
         // None이거나, 우선 카드가 없을 때
         CalculateProb(preDeckCards, stackSum, limit);
     }
-    void CalculateProb(List<S_Card> cards, int stackSum, int limit)
+    void CalculateProb(List<S_CardBase> cards, int stackSum, int limit)
     {
         int cleanHitCount = 0;
         int burstCount = 0;
@@ -381,7 +336,7 @@ public class S_HitBtnSystem : MonoBehaviour
 
         foreach (var c in cards)
         {
-            int i = stackSum + c.Num;
+            int i = stackSum + c.Weight;
             if (i == limit)
             {
                 cleanHitCount++;
@@ -395,6 +350,11 @@ public class S_HitBtnSystem : MonoBehaviour
         float cleanHitProbF = (float)cleanHitCount / totalCount * 100f;
         float burstProbF = (float)burstCount / totalCount * 100f;
 
+        if (totalCount == 0)
+        {
+            cleanHitProbF = 0;
+            burstProbF = 0;
+        }
         text_CleanHitProb.text = $"{cleanHitProbF.ToString("F1")}%";
         text_BurstProb.text = $"{burstProbF.ToString("F1")}%";
     }
@@ -415,32 +375,7 @@ public class S_HitBtnSystem : MonoBehaviour
         image_HoverHitBtnInfoBase.SetActive(false);
     }
     #endregion
-    #region 비틀기 시 사라지는 카드 보여주는 기능
-    public void PointerEnterOnTwistBtn()
-    {
-        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit && S_StackInfoSystem.Instance.GetCurrentTurnCardObjs().Count != 0)
-        {
-            sprite_BlackBackgroundByTwistBtn.DOKill();
-            sprite_BlackBackgroundByTwistBtn.DOFade(0.8f, 0.1f);
-
-            int order = 600;
-            foreach (GameObject go in S_StackInfoSystem.Instance.GetCurrentTurnCardObjs())
-            {
-                go.GetComponent<S_StackCardObj>().SetOrder(order);
-
-                order += 10;
-            }
-        }
-    }
-    public void PointerExitOnTwistBtn()
-    {
-        sprite_BlackBackgroundByTwistBtn.DOKill();
-        sprite_BlackBackgroundByTwistBtn.DOFade(0f, 0.1f);
-
-        S_StackInfoSystem.Instance.AlignmentStackBaseOnlyOrder();
-    }
-    #endregion
-    #region 보조 메서드
+    #region 보조
     bool IsPointerOverUIObject(GameObject target)
     {
         PointerEventData pointerData = new PointerEventData(EventSystem.current)

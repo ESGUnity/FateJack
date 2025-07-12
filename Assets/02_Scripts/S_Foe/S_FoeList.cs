@@ -1,34 +1,60 @@
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 
 public static class S_FoeList
 {
-    public static List<S_Foe> Foes = new()
+    public static List<S_FoeStruct> FOES = new()
     {
-        new S_GateKeeper(), 
-        new S_HypnosSleepWaker(),
-        new S_ClothoFateWeaver(),
+        new S_FoeStruct(0, 150, new(){ new S_Execution() }, new(){ }, 0, new(){ S_ProductEnum.OldMold, S_ProductEnum.OldMold }, 2, default),
+        new S_FoeStruct(1, 150, new(){ new S_Execution() }, new(){ }, 0, new(){ S_ProductEnum.OldMold, S_ProductEnum.OldMold }, 2, default),
+        new S_FoeStruct(2, 250, new(){ new S_Execution() }, new(){ }, 0, new(){ S_ProductEnum.OldMold, S_ProductEnum.OldMold }, 2, default),
+        new S_FoeStruct(3, 800, new() { new S_Execution() }, new(){ }, 0, new() { S_ProductEnum.OldMold, S_ProductEnum.OldMold }, 2, default),
+        new S_FoeStruct(4, 2000, new() { new S_Execution(), new S_Retribution() }, new(){ }, 0, new() { S_ProductEnum.OldMold, S_ProductEnum.OldMold }, 2, S_FoeEventEnum.Engraving_1),
 
-        new S_Devourer(), 
-        new S_OizysTheRebel(), 
-        new S_LachesisTheDecider(),
-
-        new S_GraveKeeper(),
-        new S_MorosDoomBringer(), new S_ThanatosTheRest(), 
-        new S_AtroposTheReaper(), 
     };
+}
 
-    public static S_Foe GetRandomFoe(S_FoeTypeEnum foeType) // 무작위 피조물 능력을 가져오기
+public struct S_FoeStruct
+{
+    public int Trial;
+    public int Health;
+    public List<S_CardBase> EssentialFoeCards;
+    public List<S_CardBase> OptionalFoeCards;
+    public int OptionalCount;
+    public List<S_ProductEnum> Rewards;
+    public int RewardCount;
+    public S_FoeEventEnum FoeEvent;
+
+    public S_FoeStruct(int trial, int health, List<S_CardBase> essentialFoeCards, List<S_CardBase> optionalFoeCards, int optionalCount, List<S_ProductEnum> rewards, int rewardCount, S_FoeEventEnum foeEvent = default)
     {
-        // 시련을 세팅
-        int realTrial = S_GameFlowManager.Instance.CurrentTrial + 1;
-
-        // 적 타입에 맞는 리스트 생성
-        List<S_Foe> list = Foes.ToList().Where(x => x.FoeType == foeType).ToList();
-
-        // 리스트에서 무작위로 고르기
-        int randomIndex = Random.Range(0, list.Count);
-        return list[randomIndex].Clone();
+        Trial = trial;
+        Health = health;
+        EssentialFoeCards = essentialFoeCards;
+        OptionalFoeCards = optionalFoeCards;
+        OptionalCount = optionalCount;
+        Rewards = rewards;
+        RewardCount = rewardCount;
+        FoeEvent = foeEvent;
     }
+}
+
+public enum S_FoeEventEnum
+{
+    None,
+
+    Engraving_1, Engraving_2, Engraving_3,
+
+    Dismantle_1, Mask_1,
+}
+public enum S_FoeTypeEnum
+{
+    None,
+    Clotho,
+    Lachesis,
+    Atropos,
+    Clotho_Elite,
+    Lachesis_Elite,
+    Atropos_Elite,
+    Clotho_Boss,
+    Lachesis_Boss,
+    Atropos_Boss,
 }

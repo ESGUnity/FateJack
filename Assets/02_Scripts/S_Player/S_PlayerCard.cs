@@ -7,16 +7,15 @@ using UnityEngine;
 public class S_PlayerCard : MonoBehaviour
 {
     [Header("컴포넌트")]
-    S_PlayerTrinket pTri;
     S_PlayerStat pStat;
 
     [Header("카드 관련")]
-    List<S_Card> originPlayerDeck = new(); // 시련 진행 중엔 절대 바뀌지 않는 불변 덱
+    List<S_CardBase> originPlayerDeck = new(); // 시련 진행 중엔 절대 바뀌지 않는 불변 덱
 
     // pre는 카드 효과 계산 시 카드가 내진 순간의 조건을 검사하기 위한 것
-    List<S_Card> deckCards = new(); // 덱에 있는 카드
-    List<S_Card> stackCards = new(); // 스택에 있는 카드
-    List<S_Card> exclusionCards = new(); // 환상 카드 합쳐서 제외된 카드
+    List<S_CardBase> deckCards = new(); // 덱
+    List<S_CardBase> usedCards = new(); // 사용한 카드 더미
+    List<S_CardBase> fieldCards = new(); // 필드
 
     // 싱글턴
     static S_PlayerCard instance;
@@ -25,7 +24,6 @@ public class S_PlayerCard : MonoBehaviour
     void Awake()
     {
         // 컴포넌트 할당
-        pTri = GetComponent<S_PlayerTrinket>();
         pStat = GetComponent<S_PlayerStat>();
 
         // 싱글턴
@@ -40,35 +38,59 @@ public class S_PlayerCard : MonoBehaviour
     }
 
     #region 카드 뽑기 및 덱 관리 부분
-    public void AddCard(S_Card card) // 덱에 카드 추가(대부분 상점 혹은 게임 시작 시)
+    public void AddCard(S_CardBase card) // 덱에 카드 추가(대부분 상점 혹은 게임 시작 시)
     {
+        card.IsInDeck = true;
+        card.IsInUsed = false;
+        card.IsCurrentTurn = false;
+        card.IsCursed = false;
+
         originPlayerDeck.Add(card);
         S_DeckInfoSystem.Instance.AddDeck(card);
     }
-    public void RemoveCard(S_Card card) // 덱에서 카드 제거
+    public void RemoveCard(S_CardBase card) // 덱에서 카드 제거
     {
         originPlayerDeck.Remove(card);
-        S_DeckInfoSystem.Instance.RemoveDeck(card);
+        S_DeckInfoSystem.Instance.RemoveDeckCard(card);
     }
-    public List<S_Card> DrawRandomCard(int drawCount) // 카드를 낼 때.
+    public List<S_CardBase> DrawRandomCard(int drawCount) // 카드를 낼 때 카드 보기를 뽑는 메서드
     {
-        List<S_Card> remainDeck = GetDeckCards();
-        List<S_Card> selected = new();
+        List<S_CardBase> remainDeck = GetDeckCards();
+        List<S_CardBase> selected = new();
 
-        if (remainDeck.Count >= drawCount)
+        // 덱에 카드가 없을 땐 사용한 카드 더미에서 가져와서 보충하기
+        if (remainDeck.Count == 0)
+        {
+            // 실제 카드를 덱으로 옮김
+            deckCards = usedCards.ToList();
+            usedCards.Clear();
+            foreach (S_CardBase card in deckCards)
+            {
+                card.IsInDeck = true;
+                card.IsInUsed = false;
+            }
+
+            // 연출 로직. 사용한 카드 더미가 사라지고 사용한 카드가 덱으로 바뀜
+            S_DeckInfoSystem.Instance.VacateViewUsedCards();
+            S_DeckInfoSystem.Instance.AddDecks(deckCards);
+
+            remainDeck = GetDeckCards();
+        }
+
+        if (remainDeck.Count > drawCount)
         {
             for (int i = 0; i < drawCount; i++)
             {
-                S_Card pickedCard;
+                S_CardBase pickedCard;
 
-                if (pStat.IsFirst)
+                if (pStat.IsFirst > 0)
                 {
                     int diff = S_PlayerStat.Instance.CurrentLimit - S_PlayerStat.Instance.CurrentWeight;
-                    pickedCard = remainDeck.Where(x => x.Num <= diff).OrderBy(x => Mathf.Abs(x.Num - diff)).FirstOrDefault();
+                    pickedCard = remainDeck.Where(x => x.Weight <= diff).OrderBy(x => Mathf.Abs(x.Weight - diff)).FirstOrDefault();
 
                     if (pickedCard == null)
                     {
-                        pickedCard = remainDeck.Where(x => x.Num > diff).OrderBy(x => Mathf.Abs(x.Num - diff)).FirstOrDefault();
+                        pickedCard = remainDeck.Where(x => x.Weight > diff).OrderBy(x => Mathf.Abs(x.Weight - diff)).FirstOrDefault();
                     }
                 }
                 else
@@ -84,395 +106,284 @@ public class S_PlayerCard : MonoBehaviour
         }
 
         // 카드 수 부족 시 전체 반환
-        return new List<S_Card>(remainDeck);
+        return new List<S_CardBase>(remainDeck);
     }
-    public List<S_Card> GetValidCardsByFirst() // 우선 대상 카드 찾기
+    public List<S_CardBase> GetValidCardsByFirst() // 우선 대상 카드 찾기
     {
-        List<S_Card> deckCards = GetDeckCards();
-        List<S_Card> pickedCards = new();
+        List<S_CardBase> deckCards = GetDeckCards();
+        List<S_CardBase> pickedCards = new();
         if (deckCards.Count <= 0) return pickedCards;
 
-        if (!pStat.IsFirst)
-        {
-            return deckCards;
-        }
-        else
+        if (pStat.IsFirst > 0)
         {
             int diff = S_PlayerStat.Instance.CurrentLimit - S_PlayerStat.Instance.CurrentWeight;
 
-            return deckCards.Where(x => x.Num > diff).OrderBy(x => Mathf.Abs(x.Num - diff)).ToList();
+            if (deckCards.Where(x => x.Weight == diff).Count() > 0)
+            {
+                return deckCards.Where(x => x.Weight == diff).ToList();
+            }
+            else if (deckCards.Where(x => x.Weight < diff).Count() > 0)
+            {
+                return deckCards.Where(x => x.Weight < diff).ToList();
+            }
+            else
+            {
+                return deckCards;
+            }
+        }
+        else
+        {
+            return deckCards;
         }
     }
     #endregion
     #region 시련 관련 메서드
     public void InitDeckByStartGame() // 게임 첫 시작 시 카드 추가
     {
-        foreach (S_Card card in S_CardManager.Instance.GenerateCardByStartGame())
+        foreach (S_CardBase card in S_CardList.GetInitCardsByStartGame())
         {
-            card.IsInDeck = true;
-            card.IsGenerated = false;
-            card.IsCurrentTurn = false;
-            card.IsCursed = false;
             AddCard(card);
         }
     }
-    public async Task UpdateCardsByStartTrial() // 시작 시 preDeck이랑 immediateDeck 채우고 속전속결 각인 카드도 발동(카드 내기)
+    public async Task UpdateCardsByStartTrial() // 덱 카드 채우기, 속전속결 카드 내기
     {
         deckCards = GetOriginPlayerDeckCards();
+        List<S_CardBase> cards = GetDeckCards();
+        S_DeckInfoSystem.Instance.AddDecks(cards);
 
-        List<S_Card> cards = GetDeckCards();
         for (int i = 0; i < cards.Count; i++)
         {
-            if (cards[i].Engraving == S_EngravingEnum.QuickAction)
+            if (cards[i].OriginEngraving.Contains(S_EngravingEnum.QuickAction) || cards[i].Engraving.Contains(S_EngravingEnum.QuickAction))
             {
-                await S_GameFlowManager.Instance.EnqueueCardOrderAndUpdateCardsState(cards[i], S_CardOrderTypeEnum.Hit);
+                await S_GameFlowManager.Instance.StartHitCardAsync(cards[i]);
             }
         }
     }
-    public void UpdateCardByStartNewTurn() // 새로운 턴 시작 시 업데이트 해야하는 카드. 무작위 능력치인 카드와 한 턴에~ 카드 초기화
+    public async Task UpdateCardsByStand() // 사용한 카드 더미로 카드 보내기
     {
-        foreach (S_Card card in GetStackCards())
+        List<S_CardBase> temp = new();
+        foreach (S_CardBase card in fieldCards)
         {
-            // 매 턴마다 능력치가 변경되는 효과의 능력치를 바꿔주기
-            if (card.CardEffect == S_CardEffectEnum.Common_Balance)
-            {
-                List<S_BattleStatEnum> stat = new() { S_BattleStatEnum.Str, S_BattleStatEnum.Mind, S_BattleStatEnum.Luck };
-                card.Stat = stat[Random.Range(0, stat.Count)];
-            }
-
-            // 매 턴마다 능력치가 변경되는 효과의 능력치를 바꿔주기
-            if (card.CardEffect == S_CardEffectEnum.Common_Berserk)
-            {
-                List<S_BattleStatEnum> stat = new() { S_BattleStatEnum.Str_Mind, S_BattleStatEnum.Str_Luck, S_BattleStatEnum.Mind_Luck };
-                card.Stat = stat[Random.Range(0, stat.Count)];
-            }
-
-            // 대혼돈 각인 전용(유일한 한 턴에 ~ 효과)
-            if (card.Engraving == S_EngravingEnum.GrandChaos || card.Engraving == S_EngravingEnum.GrandChaos_Flip ||
-                card.Engraving == S_EngravingEnum.Crush || card.Engraving == S_EngravingEnum.Crush_Flip)
-            {
-                card.ActivatedCount = 0;
-                card.IsMeetCondition = false;
-            }
-        }
-
-        // 조건 검사 한 번 해주기
-        S_EffectActivator.Instance.CheckCardMeetCondition();
-
-        // ActivatedCount와 IsMeetCondition이 변경되었음으로 상태 업데이트
-        S_StackInfoSystem.Instance.UpdateStackCardState();
-    }
-    public void ResetCardsByTwist(out List<S_Card> stacks, out List<S_Card> exclusions) // 비틀기에 의한 카드 제외 및 제외된 카드 돌아오기
-    {
-        // 낸 카드 덱으로 돌려보내기
-        stacks = GetStackCards().Where(x => x.IsCurrentTurn).ToList();
-        foreach (S_Card card in stacks)
-        {
-            stackCards.Remove(card);
             card.IsCurrentTurn = false;
 
-            if (!card.IsGenerated)
+            // 고정이라면
+            if (card.OriginEngraving.Contains(S_EngravingEnum.Fix) || card.Engraving.Contains(S_EngravingEnum.Fix)) 
             {
-                deckCards.Add(card);
-                card.IsInDeck = true;
+                // 넘어가기
             }
-        }
-        foreach (S_Card card in stackCards)
-        {
-            card.IsCurrentTurn = false;
-        }
-
-        // 이번 턴에 제외된 카드는 덱으로 되돌아오기
-        exclusions = exclusionCards.ToList().Where(x => x.IsCurrentTurn).ToList();
-        foreach (S_Card card in exclusions)
-        {
-            if (card.IsGenerated)
+            // 지속 효과 : 저주받은 카드는 고정
+            else if (GetPersistCardsInField(S_PersistEnum.Fix_FixCursedCard).Count > 0 && card.IsCursed)
             {
-                exclusionCards.Remove(card);
+                // 넘어가기
             }
-            else
+            else // 아니라면 사용한 카드 더미로 이동
             {
-                exclusionCards.Remove(card);
-                deckCards.Add(card);
-                card.IsInDeck = true;
                 card.IsCurrentTurn = false;
+                card.IsInDeck = false;
+                card.IsInUsed = true;
+                temp.Add(card);
+                usedCards.Add(card);
+                S_DeckInfoSystem.Instance.AddUsedByStand(card);
+                S_FieldInfoSystem.Instance.RemoveFieldCard(card);
             }
         }
-        foreach (S_Card card in exclusionCards)
+        foreach (S_CardBase card in temp)
         {
-            card.IsCurrentTurn = false;
+            fieldCards.Remove(card);
         }
-
-        // 덱, 스택 인포 업데이트
-        S_DeckInfoSystem.Instance.UpdateDeckCardsState();
-        S_StackInfoSystem.Instance.UpdateStackCardState();
+        S_DeckInfoSystem.Instance.AlignmentViewUsedCards(); // 사용한 카드 더미 정렬
+        await S_FieldInfoSystem.Instance.AlignmentFieldCards();
     }
-    public void FixCardsByStand()
+    public async Task ResetCardsByEndTrial()
     {
-        foreach (S_Card card in stackCards)
-        {
-            card.IsCurrentTurn = false;
-        }
-        foreach (S_Card card in exclusionCards)
-        {
-            card.IsCurrentTurn = false;
-        }
+        // 사용한 카드 더미 비우기 연출
+        S_DeckInfoSystem.Instance.VacateViewUsedCards();
 
-        // 덱, 스택 인포 업데이트
-        S_DeckInfoSystem.Instance.UpdateDeckCardsState();
-        S_StackInfoSystem.Instance.UpdateStackCardState();
-    }
-    public void ResetCardsByEndTrial()
-    {
         // 덱 카드 정상화
-        foreach (S_Card card in originPlayerDeck)
+        foreach (S_CardBase card in originPlayerDeck)
         {
-            card.ActivatedCount = 0;
-            card.Stat = S_BattleStatEnum.None;
-            card.ExpectedValue = 0;
-
             card.IsInDeck = true;
+            card.IsInUsed = false;
             card.IsCurrentTurn = false;
-            card.IsGenerated = false;
             card.IsCursed = false;
-            card.IsMeetCondition = false;
-        }
 
-        stackCards.Clear();
-        exclusionCards.Clear();
+            card.ExpectedValue = 0;
+            card.HitCount = 0;
+            card.ReboundCount = 0;
+        }
+        fieldCards.Clear();
+        usedCards.Clear();
         deckCards = GetOriginPlayerDeckCards();
 
-        // 덱 인포 업데이트
-        S_DeckInfoSystem.Instance.UpdateDeckCardsState();
+        // 필드에 있는 모든 카드가 돌아오는 연출
+        await S_FieldInfoSystem.Instance.ResetCardsByEndTrialAsync();
+
+        // 덱 카드 업데이트
+        S_DeckInfoSystem.Instance.AddDecks(GetDeckCards());
+        S_DeckInfoSystem.Instance.UpdateCardsState();
     }
     #endregion
-    #region 히트 및 제외
-    public void HitCard(S_Card hitCard) // 덱에서 히트. 스택과 덱 업데이트
+    #region 카드
+    public async Task HitCard(S_CardBase card) // 카드를 내는 메서드
     {
-        deckCards.Remove(hitCard);
-        stackCards.Add(hitCard);
-
-        hitCard.IsInDeck = false;
-        hitCard.IsCurrentTurn = true;
-        hitCard.IsGenerated = false;
-    }
-    public void GenCard(S_Card card) // 새롭게 생성하여 히트. 스택과 덱 업데이트
-    {
-        stackCards.Add(card);
+        deckCards.Remove(card);
+        fieldCards.Add(card);
 
         card.IsInDeck = false;
+        card.IsInUsed = false;
         card.IsCurrentTurn = true;
-        card.IsGenerated = true;
-    }
-    public void ExclusionCard(S_Card card) // 제외에 의한 덱 카드 제외
-    {
-        if (stackCards.Contains(card))
-        {
-            stackCards.Remove(card);
-        }
-        if (deckCards.Contains(card))
-        {
-            deckCards.Remove(card);
-        }
-        exclusionCards.Add(card);
 
-        card.IsInDeck = false;
-        card.IsCurrentTurn = true;
+        card.HitCount++;
+
+        S_DeckInfoSystem.Instance.RemoveDeckCard(card);
+        await S_FieldInfoSystem.Instance.HitFieldCard(card);
     }
+    public void FlexibleCard(S_CardBase card)
+    {
+        int index = fieldCards.IndexOf(card);
+        if (index == -1 || index == fieldCards.Count - 1) return; // 없거나 이미 마지막이면 할 필요 없음
+
+        fieldCards.RemoveAt(index);
+        fieldCards.Add(card);
+    }
+    public void LeapCard(S_CardBase card)
+    {
+        int index = fieldCards.IndexOf(card);
+        if (index <= 0) return; // 없거나 이미 첫 번째면 무시
+
+        fieldCards.RemoveAt(index);
+        fieldCards.Insert(0, card);
+    }
+    public void UpdateCardObjsState()
+    {
+        S_FieldInfoSystem.Instance.UpdateCardState();
+        S_DeckInfoSystem.Instance.UpdateCardsState();
+    }
+
     #endregion
     #region 보조 메서드
-    public List<S_Card> GetOriginPlayerDeckCards()
+    public List<S_CardBase> GetOriginPlayerDeckCards()
     {
         return originPlayerDeck.ToList();
     }
-    public List<S_Card> GetDeckCards()
+    public List<S_CardBase> GetDeckCards()
     {
         return deckCards.ToList();
     }
-    public List<S_Card> GetStackCards()
+    public List<S_CardBase> GetUsedCards()
     {
-        return stackCards.ToList();
+        return usedCards.ToList();
     }
-    public List<S_Card> GetExclusionCards()
+    public List<S_CardBase> GetFieldCards()
     {
-        return exclusionCards.ToList();
+        return fieldCards.ToList();
     }
-
-    public string GetCardEffectDescription(S_Card card) // 설명에 추가로 붙은 것들 메서드
+    public List<S_CardBase> GetPersistCardsInField(S_PersistEnum persist)
     {
-        StringBuilder sb = new();
-
-        sb.Append(S_CardEffectMetadata.GetDescription(card.CardEffect));
-
-        // 무작위 능력치 
-        if (card.CardEffect == S_CardEffectEnum.Common_Balance)
+        List<S_CardBase> result = new();
+        foreach (S_CardBase card in GetFieldCards().Where(x => !x.IsCursed).ToList())
         {
-            switch (card.Stat)
+            foreach (S_PersistStruct pers in card.Persist)
             {
-                case S_BattleStatEnum.Str:
-                    sb.Replace("능력치가", "힘이");
-                    break;
-                case S_BattleStatEnum.Mind:
-                    sb.Replace("능력치가", "정신력이");
-                    break;
-                case S_BattleStatEnum.Luck:
-                    sb.Replace("능력치가", "행운이");
-                    break;
-            }
-        }
-        if (card.CardEffect == S_CardEffectEnum.Common_Berserk)
-        {
-            switch (card.Stat)
-            {
-                case S_BattleStatEnum.Str_Mind:
-                    sb.Replace("능력치 2개를", "힘과 정신력을");
-                    break;
-                case S_BattleStatEnum.Str_Luck:
-                    sb.Replace("능력치 2개를", "힘과 행운을");
-                    break;
-                case S_BattleStatEnum.Mind_Luck:
-                    sb.Replace("능력치 2개를", "정신력과 행운을");
-                    break;
-            }
-        }
-
-        if (!card.IsInDeck) // 덱에 없는 카드라면 추가 표기하기
-        {
-            HashSet<S_CardEffectEnum> expectedStatIncreases = new()
-            {
-                S_CardEffectEnum.Str_ZenithBreak, S_CardEffectEnum.Str_CalamityApproaches, S_CardEffectEnum.Str_UntappedPower, S_CardEffectEnum.Str_UnjustSacrifice,
-                S_CardEffectEnum.Mind_DeepInsight, S_CardEffectEnum.Mind_PerfectForm, S_CardEffectEnum.Mind_Unshackle, S_CardEffectEnum.Mind_Drain, S_CardEffectEnum.Mind_WingsOfFreedom, S_CardEffectEnum.Mind_Accept,
-                S_CardEffectEnum.Luck_Disorder, S_CardEffectEnum.Luck_Composure, S_CardEffectEnum.Luck_Grill,
-                S_CardEffectEnum.Common_Balance
-            };
-            HashSet<S_CardEffectEnum> expectedHarmValue = new()
-            {
-                S_CardEffectEnum.Str_WrathStrike, S_CardEffectEnum.Str_EngulfInFlames, S_CardEffectEnum.Str_FinishingStrike, S_CardEffectEnum.Str_FlowingSin, S_CardEffectEnum.Str_BindingForce, S_CardEffectEnum.Str_Grudge,
-                S_CardEffectEnum.Mind_PreciseStrike, S_CardEffectEnum.Mind_SharpCut, S_CardEffectEnum.Mind_Split, S_CardEffectEnum.Mind_Dissolute, S_CardEffectEnum.Mind_Awakening,
-                S_CardEffectEnum.Luck_SuddenStrike, S_CardEffectEnum.Luck_CriticalBlow, S_CardEffectEnum.Luck_ForcedTake, S_CardEffectEnum.Luck_Shake, S_CardEffectEnum.Luck_FatalBlow,
-                S_CardEffectEnum.Common_Berserk, S_CardEffectEnum.Common_Carnage, S_CardEffectEnum.Common_LastStruggle
-            };
-
-            if (expectedStatIncreases.Contains(card.CardEffect))
-            {
-                sb.Append($"\n(예상 증가량 : {card.ExpectedValue})");
-            }
-            else if (expectedHarmValue.Contains(card.CardEffect))
-            {
-                sb.Append($"\n(예상 피해량 : {card.ExpectedValue})");
-            }
-        }
-
-        return sb.ToString();
-    }
-    public string GetEngravingDescription(S_Card card) // 설명에 추가로 붙은 것들 메서드
-    {
-        StringBuilder sb = new();
-
-        sb.Append(S_CardEffectMetadata.GetDescription(card.Engraving));
-
-        switch (card.Engraving)
-        {
-            case S_EngravingEnum.Legion:
-                sb.Append($"\n(스택의 카드 무게 합 : {card.ActivatedCount}"); break;
-            case S_EngravingEnum.Legion_Flip:
-                sb.Append($"\n(스택의 카드 무게 합 : {card.ActivatedCount}"); break;
-            case S_EngravingEnum.AllOut:
-                sb.Append($"\n(스택의 카드 무게 합 : {card.ActivatedCount}"); break;
-            case S_EngravingEnum.AllOut_Flip:
-                sb.Append($"\n(스택의 카드 무게 합 : {card.ActivatedCount}"); break;
-            case S_EngravingEnum.Delicacy:
-                sb.Append($"\n(스택의 카드 : {card.ActivatedCount}장)"); break;
-            case S_EngravingEnum.Delicacy_Flip:
-                sb.Append($"\n(스택의 카드 : {card.ActivatedCount}장)"); break;
-            case S_EngravingEnum.Precision:
-                sb.Append($"\n(스택의 카드 : {card.ActivatedCount}장)"); break;
-            case S_EngravingEnum.Precision_Flip:
-                sb.Append($"\n(스택의 카드 : {card.ActivatedCount}장)"); break;
-            case S_EngravingEnum.Resection:
-                sb.Append($"\n(이번 턴에 낸 카드 : {card.ActivatedCount}장 째)"); break;
-            case S_EngravingEnum.Resection_Flip:
-                sb.Append($"\n(이번 턴에 낸 카드 : {card.ActivatedCount}장 째)"); break;
-            case S_EngravingEnum.Patience:
-                sb.Append($"\n(이번 턴에 낸 카드 : {card.ActivatedCount}장 째)"); break;
-            case S_EngravingEnum.Patience_Flip:
-                sb.Append($"\n(이번 턴에 낸 카드 : {card.ActivatedCount}장 째)"); break;
-            case S_EngravingEnum.Overflow:
-                sb.Append($"\n(이번 턴에 낸 카드 : {card.ActivatedCount}장 째)"); break;
-            case S_EngravingEnum.Overflow_Flip:
-                sb.Append($"\n(이번 턴에 낸 카드 : {card.ActivatedCount}장 째)"); break;
-            case S_EngravingEnum.Fierce:
-                sb.Append($"\n(이번 턴에 낸 카드 : {card.ActivatedCount}장 째)"); break;
-            case S_EngravingEnum.Fierce_Flip:
-                sb.Append($"\n(이번 턴에 낸 카드 : {card.ActivatedCount}장 째)"); break;
-            case S_EngravingEnum.GrandChaos:
-                sb.Append($"\n(만족한 카드 타입 : {card.ActivatedCount}개)"); break;
-            case S_EngravingEnum.GrandChaos_Flip:
-                sb.Append($"\n(만족한 카드 타입 : {card.ActivatedCount}개)"); break;
-            case S_EngravingEnum.Crush:
-                sb.Append($"\n(만족한 카드 타입 : {card.ActivatedCount}개)"); break;
-            case S_EngravingEnum.Crush_Flip:
-                sb.Append($"\n(만족한 카드 타입 : {card.ActivatedCount}개)"); break;
-            case S_EngravingEnum.Finale:
-                sb.Append($"\n(덱의 남은 카드 : {card.ActivatedCount}장"); break;
-            case S_EngravingEnum.Climax:
-                sb.Append($"\n(덱의 남은 카드 : {card.ActivatedCount}장"); break;
-        }
-        return sb.ToString();
-    }
-
-    public void SwapCardObjIndex(S_Card card, bool isMoveRight) // 오브젝트 인덱스 교환하는 메서드
-    {
-        if (isMoveRight)
-        {
-            int index = stackCards.IndexOf(card);
-
-            if (index == stackCards.Count - 1) // 마지막 인덱스라면
-            {
-                S_Card lastCard = stackCards[index];
-
-                // 리스트의 요소들을 뒤에서부터 한 칸씩 뒤로 밀기
-                for (int i = index; i > 0; i--)
+                if (pers.Persist == persist)
                 {
-                    stackCards[i] = stackCards[i - 1];
+                    result.Add(card);
+                    break;
                 }
-
-                // 맨 앞에 마지막 카드를 넣기
-                stackCards[0] = lastCard;
-            }
-            else // 아니라면
-            {
-                // 오른쪽 요소와 자리 바꾸기
-                S_Card tempGo = stackCards[index + 1];
-                stackCards[index + 1] = stackCards[index];
-                stackCards[index] = tempGo;
             }
         }
-        else
+
+        return result;
+    }
+    public List<S_CardBase> GetPersistCardsInRight(S_CardBase card, S_PersistEnum persist)
+    {
+        List<S_CardBase> result = new();
+
+        int startIndex = fieldCards.IndexOf(card);
+        if (startIndex == -1) return result; // 안전장치: card가 없으면 빈 리스트 반환
+
+        for (int i = startIndex + 1; i < fieldCards.Count; i++) // 오른쪽 카드만 검사
         {
-            int index = stackCards.IndexOf(card);
-
-            if (index == 0)
+            S_CardBase fieldCard = fieldCards[i];
+            if (fieldCard.IsCursed) continue;
+            foreach (S_PersistStruct pers in fieldCard.Persist)
             {
-                S_Card firstCard = stackCards[0];
-
-                // 요소들을 왼쪽으로 한 칸씩 이동
-                for (int i = 0; i < stackCards.Count - 1; i++)
+                if (pers.Persist == persist)
                 {
-                    stackCards[i] = stackCards[i + 1];
+                    result.Add(fieldCard);
+                    break;
                 }
-
-                // 마지막 자리에 처음 요소 넣기
-                stackCards[stackCards.Count - 1] = firstCard;
-            }
-            else
-            {
-                // 일반적인 왼쪽 교체
-                S_Card tempGo = stackCards[index - 1];
-                stackCards[index - 1] = stackCards[index];
-                stackCards[index] = tempGo;
             }
         }
+
+        return result;
+    }
+    public List<S_CardBase> GetPersistCardsInLeft(S_CardBase card, S_PersistEnum persist)
+    {
+        List<S_CardBase> result = new();
+
+        int startIndex = fieldCards.IndexOf(card);
+        if (startIndex == -1) return result; // 안전장치: card가 없으면 빈 리스트 반환
+
+        for (int i = startIndex - 1; i >= 0; i--) // 왼쪽 카드만 검사
+        {
+            S_CardBase fieldCard = fieldCards[i];
+            if (fieldCard.IsCursed) continue;
+            foreach (S_PersistStruct pers in fieldCard.Persist)
+            {
+                if (pers.Persist == persist)
+                {
+                    result.Add(fieldCard);
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+    public S_CardBase GetPersistCardInRight(S_CardBase card, S_PersistEnum persist)
+    {
+        S_CardBase result = new();
+
+        int index = fieldCards.IndexOf(card);
+        if (index == -1 || index >= fieldCards.Count - 1) return result; // 카드가 첫 번째거나 없으면 왼쪽 없음
+
+        S_CardBase rightCard = fieldCards[index + 1];
+
+        if (rightCard.IsCursed) return result;
+
+        foreach (S_PersistStruct pers in rightCard.Persist)
+        {
+            if (pers.Persist == persist)
+            {
+                result = rightCard;
+                break;
+            }
+        }
+
+        return result;
+    }
+    public S_CardBase GetPersistCardInLeft(S_CardBase card, S_PersistEnum persist)
+    {
+        S_CardBase result = new();
+
+        int index = fieldCards.IndexOf(card);
+        if (index <= 0) return result; // 카드가 첫 번째거나 없으면 왼쪽 없음
+
+        S_CardBase leftCard = fieldCards[index - 1];
+
+        if (leftCard.IsCursed) return result;
+
+        foreach (S_PersistStruct pers in leftCard.Persist)
+        {
+            if (pers.Persist == persist)
+            {
+                result = leftCard;
+                break;
+            }
+        }
+
+        return result;
     }
     #endregion
 }

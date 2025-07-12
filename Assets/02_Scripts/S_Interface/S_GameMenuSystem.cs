@@ -1,7 +1,6 @@
 using DG.Tweening;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,6 +14,11 @@ public class S_GameMenuSystem : MonoBehaviour
     GameObject image_SaveBtnBase;
     GameObject image_ForgiveBtnBase;
     GameObject image_ContinueBtnBase;
+
+    Slider masterVolumeSlider;
+    Slider bGMVolumeSlider;
+    Slider sFXVolumeSlider;
+    Slider uIVolumeSlider;
 
     [Header("씬 오브젝트")]
     [SerializeField] TMP_Dropdown dropdown_Resolution;
@@ -37,6 +41,7 @@ public class S_GameMenuSystem : MonoBehaviour
     {
         // 자식 오브젝트의 컴포넌트 가져오기
         Transform[] transforms = GetComponentsInChildren<Transform>(true);
+        Slider[] sliders = GetComponentsInChildren<Slider>(true);
 
         image_BlackBackground = Array.Find(transforms, c => c.gameObject.name.Equals("Image_BlackBackground")).gameObject;
         panel_GameMenuBase = Array.Find(transforms, c => c.gameObject.name.Equals("Panel_GameMenuBase")).gameObject;
@@ -44,11 +49,25 @@ public class S_GameMenuSystem : MonoBehaviour
         image_ForgiveBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_ForgiveBtnBase")).gameObject;
         image_ContinueBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_ContinueBtnBase")).gameObject;
 
+        masterVolumeSlider = Array.Find(sliders, c => c.gameObject.name.Equals("MasterVolumeSlider"));
+        bGMVolumeSlider = Array.Find(sliders, c => c.gameObject.name.Equals("BGMVolumeSlider"));
+        sFXVolumeSlider = Array.Find(sliders, c => c.gameObject.name.Equals("SFXVolumeSlider"));
+        uIVolumeSlider = Array.Find(sliders, c => c.gameObject.name.Equals("UIVolumeSlider"));
+
+        masterVolumeSlider.onValueChanged.AddListener(MasterVolumeValueChanged);
+        bGMVolumeSlider.onValueChanged.AddListener(BGMVolumeValueChanged);
+        sFXVolumeSlider.onValueChanged.AddListener(SFXVolumeValueChanged);
+        uIVolumeSlider.onValueChanged.AddListener(UIVolumeValueChanged);
+
+        masterVolumeSlider.value = PlayerPrefs.GetFloat("MasterVolume");
+        bGMVolumeSlider.value = PlayerPrefs.GetFloat("BGMVolume");
+        sFXVolumeSlider.value = PlayerPrefs.GetFloat("SFXVolume");
+        uIVolumeSlider.value = PlayerPrefs.GetFloat("UIVolume");
+
         // 싱글턴
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -192,6 +211,7 @@ public class S_GameMenuSystem : MonoBehaviour
     }
     public void ClickForgiveBtn()
     {
+        DisappearGameMenuPanel();
         S_GameOverSystem.Instance.AppearGameOverPanel();
     }
     public void ClickContinueBtn()
@@ -248,5 +268,22 @@ public class S_GameMenuSystem : MonoBehaviour
     void OnDisplayModeDropdownChanged(int newDisplayModeIndex)
     {
         ApplyResolution(dropdown_Resolution.value, newDisplayModeIndex);
+    }
+
+    void MasterVolumeValueChanged(float value)
+    {
+        S_AudioManager.Instance.SetMasterVolume(value);
+    }
+    void BGMVolumeValueChanged(float value)
+    {
+        S_AudioManager.Instance.SetBGMVolume(value);
+    }
+    void SFXVolumeValueChanged(float value)
+    {
+        S_AudioManager.Instance.SetSFXVolume(value);
+    }
+    void UIVolumeValueChanged(float value)
+    {
+        S_AudioManager.Instance.SetUIVolume(value);
     }
 }

@@ -16,10 +16,14 @@ public class S_SectionObj : MonoBehaviour
     Vector3 SECTION_ARRIVE_POS = new Vector3(0, 0, 0);
     Vector3 SECTION_EXIT_POS = new Vector3(0, 0, -35f);
 
-    [HideInInspector] public Vector3 CHARACTER_ORIGIN_POS = new Vector3(0f, 3.86f, -1.15f);
-    [HideInInspector] public Vector3 MEET_CONDITION_EFFECT_ORIGIN_POS = new Vector3(0f, 3.87f, -1.13f);
-    Vector3 CHARACTER_EXIT_POS = new Vector3(-15f, 3.86f, -1.15f);
-    Vector3 MEET_CONDITION_EFFECT_EXIT_POS = new Vector3(-15f, 3.87f, -1.13f);
+    [HideInInspector] public Vector3 CHARACTER_ORIGIN_POS;
+    protected Vector3 CHARACTER_EXIT_POS;
+
+    public virtual void Awake()
+    {
+        CHARACTER_ORIGIN_POS = new Vector3(0f, 3.86f, -1.15f);
+        CHARACTER_EXIT_POS = new Vector3(-15f, 3.86f, -1.15f);
+    }
 
     public void SpawnSection(string sprite)
     {
@@ -48,8 +52,7 @@ public class S_SectionObj : MonoBehaviour
     {
         Sequence seq = DOTween.Sequence();
 
-        seq.Append(sprite_Character.transform.DOMove(CHARACTER_EXIT_POS, S_GameFlowManager.PANEL_APPEAR_TIME * 2).SetEase(Ease.OutQuart))
-            .Join(sprite_MeetConditionEffect.transform.DOMove(CHARACTER_EXIT_POS, S_GameFlowManager.PANEL_APPEAR_TIME * 2).SetEase(Ease.OutQuart));
+        seq.Append(sprite_Character.transform.DOLocalMove(CHARACTER_EXIT_POS, S_GameFlowManager.PANEL_APPEAR_TIME * 2).SetEase(Ease.OutQuart));
 
         await seq.AsyncWaitForCompletion();
     }

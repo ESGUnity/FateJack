@@ -1,30 +1,30 @@
 using DG.Tweening;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.EventSystems;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler // PointerEnter를 다 obj_card에 양도. 왜냐하면 부모 콜라이더는 그대론데 obj_Card만 커지면 어긋난다.
+public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("주요 정보")]
-    [HideInInspector] public S_Card CardInfo;
+    [HideInInspector] public S_CardBase CardInfo;
 
     [Header("씬 오브젝트")]
     [SerializeField] protected GameObject obj_Card; // 버튼없는 오직 카드 요소만 있는 오브젝트
-    [SerializeField] SpriteRenderer sprite_CardBase; // 그냥 카드와 생성된 카드에 따라
-    [SerializeField] SpriteRenderer sprite_CardFrame; // 타입에 따라 바뀜 (테두리가 아래에 Type 적는 ㅜㅂ분도 있음.
+    [SerializeField] SpriteRenderer sprite_CardBase; 
+    [SerializeField] public SpriteRenderer sprite_CardFrame; // 타입에 따라 바뀜 (테두리가 아래에 Type 적는 ㅜㅂ분도 있음.
     [SerializeField] TMP_Text text_CardType; // 타입에 따라 바뀜
     [SerializeField] TMP_Text text_CardNumber;
-    [SerializeField] protected SpriteRenderer sprite_CardEffect;
-    [SerializeField] protected SpriteRenderer sprite_Engraving;
+    [SerializeField] public SpriteRenderer sprite_CardEffect;
+    [SerializeField] public SpriteRenderer sprite_Engraving;
     [SerializeField] SpriteRenderer sprite_CursedEffect;
-    [SerializeField] SpriteRenderer sprite_GenEffect;
+    [SerializeField] SpriteRenderer sprite_CursedEffect2;
 
     [Header("프리팹")]
-    [SerializeField] Material mat_EngravingOrigin;
-    [SerializeField] Material mat_EngravingGlow;
+    [SerializeField] protected Material mat_OriginEngraving;
 
     [Header("연출")]
     [HideInInspector] public PRS OriginPRS;
@@ -54,65 +54,89 @@ public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     }
 
     #region 초기화
-    public void SetCardInfo(S_Card card)
+    public void SetCardInfo(S_CardBase card)
     {
         // 카드 정보 설정
         CardInfo = card;
 
         if (CardInfo == null) return;
 
-        // 생성된 카드라면 필터 씌우기
-        if (card.IsGenerated)
+        // 카드 베이스
+        var cardBaseOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_CardBase_Origin");
+        cardBaseOpHandle.Completed += OnCardBaseLoadComplete;
+
+        if (card.CardType == S_CardTypeEnum.Foe)
         {
-            sprite_GenEffect.gameObject.SetActive(true);
+            sprite_CardFrame.gameObject.SetActive(false);
+            text_CardType.gameObject.SetActive(false);
+            text_CardNumber.gameObject.SetActive(false);
         }
         else
         {
-            sprite_GenEffect.gameObject.SetActive(false);
+            sprite_CardFrame.gameObject.SetActive(true);
+            text_CardType.gameObject.SetActive(true);
+            text_CardNumber.gameObject.SetActive(true);
+
+            // 카드 프레임 설정
+            var cardFrameOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_CardFrame_{card.CardType}");
+            cardFrameOpHandle.Completed += OnCardFrameLoadComplete;
+            // 카드 타입 설정
+            switch (card.CardType)
+            {
+                case S_CardTypeEnum.Str:
+                    text_CardType.text = "힘";
+                    break;
+                case S_CardTypeEnum.Mind:
+                    text_CardType.text = "정신력";
+                    break;
+                case S_CardTypeEnum.Luck:
+                    text_CardType.text = "행운";
+                    break;
+                case S_CardTypeEnum.Common:
+                    text_CardType.text = "공용";
+                    break;
+                case S_CardTypeEnum.Foe:
+                    text_CardType.text = "";
+                    break;
+            }
+
+            // 카드 숫자 설정
+            text_CardNumber.text = card.Weight.ToString();
         }
-
-        // 카드 프레임 설정
-        var cardFrameOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_CardFrame_{card.CardType}");
-        cardFrameOpHandle.Completed += OnCardFrameLoadComplete;
-
-        // 카드 타입 설정
-        switch (card.CardType)
-        {
-            case S_CardTypeEnum.Str:
-                text_CardType.text = "힘";
-                break;
-            case S_CardTypeEnum.Mind:
-                text_CardType.text = "정신력";
-                break;
-            case S_CardTypeEnum.Luck:
-                text_CardType.text = "행운";
-                break;
-            case S_CardTypeEnum.Common:
-                text_CardType.text = "공용";
-                break;
-        }
-
-        // 카드 숫자 설정
-        text_CardNumber.text = card.Num.ToString();
 
         // 카드 효과 설정
-        if (card.CardEffect != S_CardEffectEnum.None)
+        string effectKey = card.Key;
+        bool isFlipped = false;
+        if (effectKey.EndsWith("_Flip")) // _Flip 감지 및 제거
         {
-            sprite_CardEffect.gameObject.SetActive(true);
-            var cardEffectOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_CardEffect_{card.CardEffect}");
-            cardEffectOpHandle.Completed += OnCardEffectLoadComplete;
+            isFlipped = true;
+            effectKey = effectKey.Replace("_Flip", "");
         }
-        else
-        {
-            sprite_CardEffect.gameObject.SetActive(false);
-        }
+        if (isFlipped) sprite_CardEffect.transform.DOLocalRotate(new Vector3(0, 0, 180), 0); // _Flip이었다면 뒤집기
+
+        sprite_CardEffect.gameObject.SetActive(true);
+        var cardEffectOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_CardEffect_{effectKey}"); // 스프라이트 불러오기
+        cardEffectOpHandle.Completed += OnCardEffectLoadComplete;
 
         // 각인 설정
-        if (card.Engraving != S_EngravingEnum.None)
+        if (card.Engraving.Count > 0)
         {
+            S_EngravingEnum engraving = card.Engraving.First();
             sprite_Engraving.gameObject.SetActive(true);
-            var engravingOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_Engraving_{card.Engraving}");
+            var engravingOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_Engraving_{engraving}");
             engravingOpHandle.Completed += OnEngravingLoadComplete;
+
+            switch (engraving) // 분해나 가면의 경우 카드 베이스도 변경해주기
+            {
+                case S_EngravingEnum.Dismantle:
+                    cardBaseOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_CardBase_Dismantle");
+                    cardBaseOpHandle.Completed += OnCardBaseLoadComplete;
+                    break;
+                case S_EngravingEnum.Mask:
+                    cardBaseOpHandle = Addressables.LoadAssetAsync<Sprite>($"Sprite_CardBase_Mask");
+                    cardBaseOpHandle.Completed += OnCardBaseLoadComplete;
+                    break;
+            }
         }
         else
         {
@@ -167,6 +191,8 @@ public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         sprite_Engraving.sortingOrder = order + 3;
         sprite_CursedEffect.sortingLayerName = "WorldObject";
         sprite_CursedEffect.sortingOrder = order + 7;
+        sprite_CursedEffect2.sortingLayerName = "WorldObject";
+        sprite_CursedEffect2.sortingOrder = order + 7;
     }
     #endregion
     #region 버튼 함수
@@ -174,6 +200,7 @@ public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     {
         if (S_GameFlowManager.Instance.IsInState(VALID_STATES))
         {
+            transform.DOKill();
             obj_Card.transform.DOKill();
 
             SetOrder(1000);
@@ -181,7 +208,7 @@ public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
             transform.DOLocalRotate(Vector3.zero, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
             obj_Card.transform.DOLocalRotate(Vector3.zero, POINTER_ENTER_ANIMATION_TIME).SetEase(Ease.OutQuart);
 
-            S_HoverInfoSystem.Instance.ActivateHoverInfo(CardInfo, sprite_CardBase.gameObject);
+            S_HoverInfoSystem.Instance.ActivateHoverInfoByCard(CardInfo, sprite_CardBase.gameObject);
 
             isEnter = true;
         }
@@ -194,6 +221,7 @@ public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     {
         if (!isEnter) return;
 
+        transform.DOKill();
         obj_Card.transform.DOKill();
 
         SetOrder(OriginOrder);
@@ -209,28 +237,18 @@ public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     public virtual void UpdateCardState()
     {
         OnCursedEffect();
-        OnEngravingMeetConditionEffect();
     }
     public void OnCursedEffect()
     {
         if (CardInfo.IsCursed)
         {
             sprite_CursedEffect.gameObject.SetActive(true);
+            sprite_CursedEffect2.gameObject.SetActive(true);
         }
         else
         {
             sprite_CursedEffect.gameObject.SetActive(false);
-        }
-    }
-    public void OnEngravingMeetConditionEffect()
-    {
-        if (CardInfo.IsEngravingActiaved)
-        {
-            sprite_Engraving.material = mat_EngravingGlow;
-        }
-        else
-        {
-            sprite_Engraving.material = mat_EngravingOrigin;
+            sprite_CursedEffect2.gameObject.SetActive(false);
         }
     }
     public virtual void SetAlphaValue(float value, float duration)
@@ -242,6 +260,7 @@ public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         sprite_CardEffect.DOKill();
         sprite_Engraving.DOKill();
         sprite_CursedEffect.DOKill();
+        sprite_CursedEffect2.DOKill();
 
         sprite_CardBase.material.DOFloat(value, "_AlphaValue", duration);
         sprite_CardFrame.material.DOFloat(value, "_AlphaValue", duration);
@@ -250,6 +269,7 @@ public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         sprite_CardEffect.material.DOFloat(value, "_AlphaValue", duration);
         sprite_Engraving.material.DOFloat(value, "_AlphaValue", duration);
         sprite_CursedEffect.material.DOFloat(value, "_AlphaValue", duration);
+        sprite_CursedEffect2.material.DOFloat(value, "_AlphaValue", duration);
     }
     public virtual Sequence SetAlphaValueAsync(float value, float duration)
     {
@@ -260,18 +280,20 @@ public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         sprite_CardEffect.DOKill();
         sprite_Engraving.DOKill();
         sprite_CursedEffect.DOKill();
+        sprite_CursedEffect2.DOKill();
 
         // Sequence 생성
         Sequence seq = DOTween.Sequence();
 
         // 모든 트윈을 시퀀스에 추가
-        seq.Join(sprite_CardBase.material.DOFloat(value, "_AlphaValue", duration));
+        seq.Append(sprite_CardBase.material.DOFloat(value, "_AlphaValue", duration));
         seq.Join(sprite_CardFrame.material.DOFloat(value, "_AlphaValue", duration));
         seq.Join(text_CardType.DOFade(value, duration));
         seq.Join(text_CardNumber.DOFade(value, duration));
         seq.Join(sprite_CardEffect.material.DOFloat(value, "_AlphaValue", duration));
         seq.Join(sprite_Engraving.material.DOFloat(value, "_AlphaValue", duration));
         seq.Join(sprite_CursedEffect.material.DOFloat(value, "_AlphaValue", duration));
+        seq.Join(sprite_CursedEffect2.material.DOFloat(value, "_AlphaValue", duration));
 
         return seq;
     }

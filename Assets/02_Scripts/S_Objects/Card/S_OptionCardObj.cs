@@ -48,8 +48,8 @@ public class S_OptionCardObj : S_CardObj, IPointerEnterHandler, IPointerClickHan
         sprite_BlurEffect.gameObject.SetActive(true);
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    public async void OnPointerClick(PointerEventData eventData)
     {
-        S_StoreInfoSystem.Instance.DecideSelectCard(CardInfo);
+        await S_RewardInfoSystem.Instance.DecideSelectCard(CardInfo);
     }
 }

@@ -122,5 +122,4 @@ public class S_InGameUISystem : MonoBehaviour
                Destroy(go);
            });
     }
-
 }

@@ -23,150 +23,12 @@ public class S_CardManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-    public List<S_Card> GenerateCardByStartGame() // 게임 시작 시 최초 덱 생성
-    {
-        List<S_Card> cardList = new();
-
-        List<(S_CardTypeEnum, S_CardEffectEnum)> cEList = new()
-        {
-            (S_CardTypeEnum.Str, S_CardEffectEnum.Str_Stimulus), (S_CardTypeEnum.Str, S_CardEffectEnum.Str_Stimulus), (S_CardTypeEnum.Str, S_CardEffectEnum.Str_Stimulus),
-            (S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_Focus), (S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_Focus), (S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_Focus),
-            (S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Chance), (S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Chance), (S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Chance),
-            (S_CardTypeEnum.Str, S_CardEffectEnum.Str_ZenithBreak), (S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_DeepInsight), (S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_Disorder),
-            (S_CardTypeEnum.Str, S_CardEffectEnum.Str_WrathStrike),(S_CardTypeEnum.Mind, S_CardEffectEnum.Mind_PreciseStrike), (S_CardTypeEnum.Luck, S_CardEffectEnum.Luck_SuddenStrike)
-        };
-
-        foreach ((S_CardTypeEnum, S_CardEffectEnum) cE in cEList)
-        {
-            cardList.Add(GenerateCard(cE.Item1, cE.Item2));
-        }
-
-        return cardList;
-    }
-    public S_Card GenerateCard(S_CardTypeEnum cardType, S_CardEffectEnum cardEffect, S_EngravingEnum engraving = S_EngravingEnum.None)
-    {
-        int num = S_CardEffectMetadata.GetWeights(cardEffect) + S_CardEffectMetadata.GetWeights(engraving);
-        num = num < 0 ? 0 : num;    
-
-        S_Card card = new S_Card(idCount, num, cardType, cardEffect, engraving);
-
-        idCount++;
-
-        return card;
-    }
-    public S_Card CopyCard(S_Card card)
-    {
-        S_Card copy = new S_Card(idCount, card.Num, card.CardType, card.CardEffect, card.Engraving);
-
-        idCount++;
-
-        return copy;
-    }
-    public S_Card GenerateRandomCard(S_CardTypeEnum type = default)
-    {
-        S_CardEffectEnum cardEffect;
-        if (type == default)
-        {
-            cardEffect = GetRandomCardEffect(out type);
-        }
-        else
-        {
-            cardEffect = GetCardEffectByCardType(type);
-        }
-
-        S_EngravingEnum[] engravingEffectArray = System.Enum.GetValues(typeof(S_EngravingEnum))
-            .Cast<S_EngravingEnum>()
-            .ToArray();
-
-        S_EngravingEnum engraving = engravingEffectArray[Random.Range(0, engravingEffectArray.Length)];
-
-        return GenerateCard(type, cardEffect, engraving);
-    }
-    S_CardEffectEnum GetRandomCardEffect(out S_CardTypeEnum cardType) // 랜덤한 카드 효과 설정
-    {
-        S_CardEffectEnum[] array = System.Enum.GetValues(typeof(S_CardEffectEnum))
-            .Cast<S_CardEffectEnum>()
-            .Where(x => x != S_CardEffectEnum.None)
-            .ToArray();
-
-        int randomIndex = Random.Range(0, array.Length);
-
-        cardType = S_CardEffectMetadata.GetCardTypeFromEffect(array[randomIndex]);
-        return array[randomIndex];
-    }
-    S_CardEffectEnum GetCardEffectByCardType(S_CardTypeEnum cardType) // 특정 타입의 카드 효과 설정
-    {
-        List<S_CardEffectEnum> list = S_CardEffectMetadata.GetCardEffectsByType(cardType);
-
-        int randomIndex = Random.Range(0, list.Count);
-
-        return list[randomIndex];
-    }
-    S_EngravingEnum GetRandomEngravingEffect() // 무작위 각인 설정
-    {
-        // 각인 효과 설정
-        S_EngravingEnum[] array = System.Enum.GetValues(typeof(S_EngravingEnum))
-            .Cast<S_EngravingEnum>()
-            .Where(x => x != S_EngravingEnum.None)
-            .ToArray();
-
-        return array[Random.Range(0, array.Length)];
-    }
-
-    #region 상품에 의한 카드 효과 변경
-    public void ChangeCardEffect(S_Card card) // 카드의 효과 변경
-    {
-        card.CardEffect = GetRandomCardEffect(out S_CardTypeEnum cardType);
-        card.CardType = cardType;
-    }
-    public void ChangeSameTypeCardEffect(S_Card card) // 같은 유형의 카드로 효과 변경
-    {
-        S_CardEffectEnum cardEffect = GetCardEffectByCardType(card.CardType);
-        card.CardEffect = cardEffect;
-    }
-    public void DeleteEngraving(S_Card card) // 카드의 각인 제거
-    {
-        card.Engraving = S_EngravingEnum.None;
-    }
-    public void GrantEngraving(S_Card card) // 카드에 각인 부여
-    {
-        S_EngravingEnum engraving = GetRandomEngravingEffect();
-        card.Engraving = engraving;
-    }
-    public void FlipEngraving(S_Card card)
-    {
-        string name = card.Engraving.ToString();
-
-        if (name.EndsWith("_Flip"))
-        {
-            string baseName = name.Substring(0, name.Length - "_Flip".Length);
-            if (System.Enum.TryParse(baseName, out S_EngravingEnum result))
-            {
-                card.Engraving = result;
-            }
-        }
-        else
-        {
-            string baseName = $"{name}_Flip";
-            if (System.Enum.TryParse(baseName, out S_EngravingEnum result))
-            {
-                card.Engraving = result;
-            }
-        }
-    }
-    #endregion
 }
-public enum S_BattleStatEnum
+public enum S_StatEnum
 {
     None,
-    Str,
-    Mind,
-    Luck,
-    Random,
-    Str_Mind,
-    Str_Luck,
-    Mind_Luck,
+    Str, Mind, Luck,
+    Str_Mind, Str_Luck, Mind_Luck,
     AllStat
 }
 public enum S_CardTypeEnum
@@ -175,43 +37,79 @@ public enum S_CardTypeEnum
     Str,
     Mind,
     Luck,
-    Common
+    Common,
+    Foe,
 }
-public enum S_CardEffectEnum
+public enum S_UnleashEnum
 {
     None,
-    Str_Stimulus, Str_ZenithBreak, Str_SinisterImpulse, Str_CalamityApproaches, Str_UntappedPower, Str_UnjustSacrifice, 
-    Str_WrathStrike, Str_EngulfInFlames, Str_FinishingStrike, Str_FlowingSin, Str_BindingForce, Str_Grudge,
-    Mind_Focus, Mind_DeepInsight, Mind_PerfectForm, Mind_Unshackle, Mind_Drain, Mind_WingsOfFreedom,
-    Mind_PreciseStrike, Mind_SharpCut, Mind_Split, Mind_Accept, Mind_Dissolute, Mind_Awakening,
-    Luck_Chance, Luck_Disorder, Luck_Composure, Luck_SilentDomination, Luck_Artifice, Luck_AllForOne,
-    Luck_SuddenStrike, Luck_CriticalBlow, Luck_ForcedTake, Luck_Grill, Luck_Shake, Luck_FatalBlow,
-    Common_Trinity, Common_Balance,
-    Common_Berserk, Common_Carnage, Common_LastStruggle,
-    Common_Resistance, Common_Realization,
-    Common_Corrupt, Common_Imitate,
-    Common_Plunder,
-    Common_Undertow,
-    Common_Adventure, Common_Inspiration, Common_Repose,
+    // 스탯
+    Stat, Stat_SubAllHighestStatAndStr3Multi, Stat_StrLuck5SubAndMind2Multi, Stat_Mind10SubAndStrLuck10Add, Stat_Per1State, 
+    Stat_Per1MindCard, Stat_Per1LuckCard, Stat_Per1CommonCard,
+    // 피해
+    Harm, Harm_Per1CursedCard, Harm_Per4CursedCard, Harm_Per1StrCard, Harm_Per3StrCard,
+    Harm_Per1MindCard, Harm_Per3MindCard, Harm_Per1LuckCard, Harm_Per3LuckCard, Harm_Per1State,
+    Harm_Per4State,
+    // 체력
+    Health,
+    // 상태
+    Delusion, Expansion, First, ColdBlood, 
+    State_SubAllStates, State_AddRandomStatesPer10Luck, 
+    // 무게
+    Weight, Weight_AddIfWeightLowerLimit, Weight_MakePerfectAndAddMind, Weight_1Or11,
+    // 한계
+    Limit, Limit_Per10Mind, Limit1_Weight2,
+    // 저주 해제
+    Dispel_AllCard, Dispel_Per10Str, DispelAndCurse_AllCard,
+    // 저주
+    Curse_AllRightCards, Curse_AllCardsIfBurst,
+
+    // 적
+    // 피해
+    Damaged, Damaged_DiffLimitWeight, Damaged_CriticalBurst,
+}
+public enum S_PersistEnum
+{
+    None,
+    // 카드를 낼 때 (ActivateByHit)
+    ReverbCard_CurseAndAddStat, ReverbCard_Weight, ReverbCard_First, ReverbCard_Expansion, ReverbCard_Stat, ReverbCard_Only2WeightWhenHitCurseCard,
+    // 상태를 얻을 때 (AddOrSubState)
+    ReverbState_Dispel, ReverbState_CantAddState, ReverbState_MultiState,
+    // 카드가 저주받을 때 (CurseCard)
+    Cursed_Stat, Cursed_AddRandomState, Cursed_Weight, Cursed_LeftCardsImmunity,
+    // 스탯을 얻을 때 (AddOrSubStat)
+    Stat_MultiStat, Stat_AddStatPer1Rebound, Stat_CantStat,
+    // 피해를 줄 때 (HarmFoe)
+    Harm_CantHarm, Harm_MultiDamage, Harm_MultiDamagePer1HitCount, Harm_AddDamagePer1Rebound, Harm_NoBurstPerfect,
+    // 무게 계산 시 (AddOrSubWeight, AddOrSubLimit)
+    Weight_PerfectAddStat, Weight_PerfectAddColdBlood,
+    // 버스트 및 완벽 체크 시 적용할 지속 효과(S_PlayerStat에서 계산)
+    CheckBurstAndPerfect_CanPerfectDiff1,
+    // 스탠드 시 (ActivateByStand)
+    Stand_RightCardReboundPer10Luck, Stand_LeftLuckCardsRebound1, Stand_AllRightCardsRebound2, Stand_FieldCardLowerThan3Rebound2, Stand_FirstCardRebound2, Stand_AllCardsRebound1, Stand_Overload_AllRightCards,
+    // 발현할 때마다 (ActivateUnleash)
+    Unleash_StatPer1Rebound, Unleash_HarmPer1Rebound,
+    // 고정 처리하는 곳(S_PlayerCard -> UpdateCardsByStand)
+    Fix_FixCursedCard,
+    // 타입 (IsSameType)
+    IsSameType_StrCommon, IsSameType_MindLuck,
+}
+
+public enum S_PersistModifyEnum
+{
+    None,
+    Any,
+    Str, Mind, Luck, Common,
 }
 public enum S_EngravingEnum
 {
     None,
-    Reverb,
-    Resolve,
-    Legion, Legion_Flip, AllOut_Flip, AllOut,
-    Delicacy, Delicacy_Flip, Precision, Precision_Flip,
-    Resection, Resection_Flip, Patience, Patience_Flip,
-    Overflow, Overflow_Flip, Fierce, Fierce_Flip,
-    GrandChaos, GrandChaos_Flip, Crush, Crush_Flip,
-    Overdrive, Immersion,
-    Finale, Climax,
-    Immunity, 
-    Omen,
-    Greed,
-    Unleash,
-    Flexible,
-    QuickAction,
-    Spell, 
-    DeepShadow, 
+    Overload, Overload_Burst, Overload_NotPerfect, // (ActivateByStand)
+    Immunity, // (CurseCard)
+    QuickAction, // (S_PlayerCard -> UpdateCardsByStartTrial)
+    Rebound, // (ActivateByStand)
+    Fix, // (S_PlayerCard -> UpdateCardsByStand)
+    Flexible, Leap, // (ActivateByStand)
+    Dismantle, // (ActivateByHit)
+    Mask,
 }
