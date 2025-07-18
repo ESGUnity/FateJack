@@ -34,8 +34,8 @@ public class S_HitBtnSystem : MonoBehaviour
     Vector3 STACK_CARD_ORIGIN_SCALE = new Vector3(1.7f, 1.7f, 1.7f);
 
     [Header("UI")]
-    Vector2 BTNS_HIDE_POS = new Vector2(0, -140);
-    Vector2 BTNS_ORIGIN_POS = new Vector2(0, 85);
+    Vector2 BTNS_HIDE_POS = new Vector2(0, -80);
+    Vector2 BTNS_ORIGIN_POS = new Vector2(0, 89);
 
     // 싱글턴
     static S_HitBtnSystem instance;
@@ -109,14 +109,14 @@ public class S_HitBtnSystem : MonoBehaviour
     }
 
     #region 버튼 함수
-    public void ClickHitBtnAsync() // 히트, 다이얼로그 시에만 작동
+    public async void ClickHitBtnAsync() // 히트, 다이얼로그 시에만 작동
     {
         // Dialog 시스템 전용. 다이얼로그에서 GameFlowState를 Hit으로 바꿔줘야한다.
         S_DialogInfoSystem.Instance.ClickNextBtn();
 
         if ((S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Hit) && !S_PlayerStat.Instance.IsBurst && !S_PlayerStat.Instance.IsPerfect && (S_PlayerCard.Instance.GetDeckCards().Count > 0 || S_PlayerCard.Instance.GetUsedCards().Count > 0))
         {
-            HitCard();
+            await HitCard();
         }
         else if (S_PlayerStat.Instance.IsBurst || S_PlayerStat.Instance.IsPerfect)
         {
@@ -133,9 +133,9 @@ public class S_HitBtnSystem : MonoBehaviour
             // 히트가 아닐 때 클릭 시
         }
     }
-    public void HitCard()
+    public async Task HitCard()
     {
-        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.HittingCard;
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
 
         List<S_CardBase> cards = new();
         if (S_PlayerStat.Instance.IsExpansion > 0)
@@ -159,7 +159,6 @@ public class S_HitBtnSystem : MonoBehaviour
             go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(0, 0);
             go.GetComponent<S_ExpansionCardObj>().SetAlphaValue(1, EXPANSION_TIME);
         }
-        AlignmentExpansionCards();
 
         // 블락 패널 켜기
         sprite_BlackBackgroundByExpansion.gameObject.SetActive(true);
@@ -170,6 +169,12 @@ public class S_HitBtnSystem : MonoBehaviour
 
         // 히트 버튼 퇴장
         DisappearHitBtn();
+        S_DialogInfoSystem.Instance.image_ViewDeckBlockingBackground.SetActive(true);
+
+        // 전개 카드 정렬
+        await AlignmentExpansionCards();
+
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.Expansion;
     }
     public void ClickStandBtn() // 히트, 다이얼로그 시에만 작동
     {
@@ -187,6 +192,8 @@ public class S_HitBtnSystem : MonoBehaviour
     }
     public async Task SelectHitCard(S_CardBase card) // S_ExpansionCard에서 호출하는 메서드
     {
+        S_DialogInfoSystem.Instance.image_ViewDeckBlockingBackground.SetActive(false);
+
         // 전개 및 우선 해제
         if (S_PlayerStat.Instance.IsExpansion > 0)
         {
@@ -200,7 +207,7 @@ public class S_HitBtnSystem : MonoBehaviour
         // 카드 내기
         await S_GameFlowManager.Instance.StartHitCardAsync(card);
     }
-    void AlignmentExpansionCards() // 전개 카드를 정렬하기
+    async Task AlignmentExpansionCards() // 전개 카드를 정렬하기
     {
         List<PRS> originCardPRS = SetExpansionCardsPos(expansionCardObjs.Count);
 
@@ -219,6 +226,8 @@ public class S_HitBtnSystem : MonoBehaviour
             expansionCardObjs[i].transform.DOLocalRotate(expansionCardObjs[i].GetComponent<S_ExpansionCardObj>().OriginPRS.Rot, S_EffectActivator.Instance.GetHitAndSortCardsTime()).SetEase(Ease.OutQuart);
             expansionCardObjs[i].transform.DOScale(expansionCardObjs[i].GetComponent<S_ExpansionCardObj>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime()).SetEase(Ease.OutQuart);
         }
+
+        await Task.Delay(Mathf.RoundToInt(S_EffectActivator.Instance.GetHitAndSortCardsTime() * 800));
     }
     List<PRS> SetExpansionCardsPos(int cardCount) // 카드 위치 설정하는 메서드
     {

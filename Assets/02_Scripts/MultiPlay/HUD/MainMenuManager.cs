@@ -49,6 +49,9 @@ public class MainMenuManager : MonoBehaviour
 
         // 최고 시련
         text_HighTrial.text = $"등반한 최고 시련 : {PlayerPrefs.GetInt("HighTrial"), 0}";
+
+        // 브금 틀기
+        S_AudioManager.Instance.PlayBGM(BGMEnum.Single);
     }
 
     public void PressTutorialBtn()

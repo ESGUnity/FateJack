@@ -46,6 +46,7 @@ public class S_PlayerCard : MonoBehaviour
         card.IsCursed = false;
 
         originPlayerDeck.Add(card);
+        deckCards.Add(card);
         S_DeckInfoSystem.Instance.AddDeck(card);
     }
     public void RemoveCard(S_CardBase card) // 덱에서 카드 제거
@@ -159,6 +160,10 @@ public class S_PlayerCard : MonoBehaviour
             }
         }
     }
+    public void UpdateCardsByStartTrialByTutorial() // 덱 카드 채우기
+    {
+        deckCards = GetOriginPlayerDeckCards();
+    }
     public async Task UpdateCardsByStand() // 사용한 카드 더미로 카드 보내기
     {
         List<S_CardBase> temp = new();
@@ -198,6 +203,10 @@ public class S_PlayerCard : MonoBehaviour
     {
         // 사용한 카드 더미 비우기 연출
         S_DeckInfoSystem.Instance.VacateViewUsedCards();
+        // 덱 카드 채우기 연출
+        S_DeckInfoSystem.Instance.AddDecks(GetOriginPlayerDeckCards());
+        S_DeckInfoSystem.Instance.UpdateCardsState();
+        S_DeckInfoSystem.Instance.ActivateViewDeckObj();
 
         // 덱 카드 정상화
         foreach (S_CardBase card in originPlayerDeck)
@@ -211,16 +220,13 @@ public class S_PlayerCard : MonoBehaviour
             card.HitCount = 0;
             card.ReboundCount = 0;
         }
+
         fieldCards.Clear();
         usedCards.Clear();
         deckCards = GetOriginPlayerDeckCards();
 
         // 필드에 있는 모든 카드가 돌아오는 연출
         await S_FieldInfoSystem.Instance.ResetCardsByEndTrialAsync();
-
-        // 덱 카드 업데이트
-        S_DeckInfoSystem.Instance.AddDecks(GetDeckCards());
-        S_DeckInfoSystem.Instance.UpdateCardsState();
     }
     #endregion
     #region 카드
@@ -237,6 +243,7 @@ public class S_PlayerCard : MonoBehaviour
 
         S_DeckInfoSystem.Instance.RemoveDeckCard(card);
         await S_FieldInfoSystem.Instance.HitFieldCard(card);
+        UpdateCardObjsState();
     }
     public void FlexibleCard(S_CardBase card)
     {
@@ -259,7 +266,6 @@ public class S_PlayerCard : MonoBehaviour
         S_FieldInfoSystem.Instance.UpdateCardState();
         S_DeckInfoSystem.Instance.UpdateCardsState();
     }
-
     #endregion
     #region 보조 메서드
     public List<S_CardBase> GetOriginPlayerDeckCards()
@@ -343,7 +349,7 @@ public class S_PlayerCard : MonoBehaviour
     }
     public S_CardBase GetPersistCardInRight(S_CardBase card, S_PersistEnum persist)
     {
-        S_CardBase result = new();
+        S_CardBase result = null;
 
         int index = fieldCards.IndexOf(card);
         if (index == -1 || index >= fieldCards.Count - 1) return result; // 카드가 첫 번째거나 없으면 왼쪽 없음
@@ -365,7 +371,7 @@ public class S_PlayerCard : MonoBehaviour
     }
     public S_CardBase GetPersistCardInLeft(S_CardBase card, S_PersistEnum persist)
     {
-        S_CardBase result = new();
+        S_CardBase result = null;
 
         int index = fieldCards.IndexOf(card);
         if (index <= 0) return result; // 카드가 첫 번째거나 없으면 왼쪽 없음

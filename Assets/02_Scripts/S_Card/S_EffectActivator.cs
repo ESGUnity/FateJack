@@ -22,7 +22,7 @@ public class S_EffectActivator : MonoBehaviour
     const float EFFECT_LOG_LIFE_TIME = 0.60f; // 로그는 효과보다 조금 더 오래 살아남는다.
     int logStartPosX = 80;
     int logStartPosY = 40;
-    int logStartPosYOffset = 250;
+    int logStartPosYOffset = 310;
     int logMoveAmount = 30;
     Vector3 HARM_READY_POS = new Vector3(0, 0, -1);
     Vector3 ATTACK_FOE_POS = new Vector3(0, 8.5f, -1.2f);
@@ -298,11 +298,17 @@ public class S_EffectActivator : MonoBehaviour
         {
             if (c.OriginEngraving.Contains(S_EngravingEnum.Flexible) || c.Engraving.Contains(S_EngravingEnum.Flexible))
             {
+                // 사운드
+                S_AudioManager.Instance.PlaySFX(SFXEnum.CardActivated);
+
                 pCard.FlexibleCard(c);
                 await S_FieldInfoSystem.Instance.FlexibleCard(c);
             }
             if (c.OriginEngraving.Contains(S_EngravingEnum.Leap) || c.Engraving.Contains(S_EngravingEnum.Leap))
             {
+                // 사운드
+                S_AudioManager.Instance.PlaySFX(SFXEnum.CardActivated);
+
                 pCard.LeapCard(c);
                 await S_FieldInfoSystem.Instance.LeapCard(c);
             }
@@ -311,10 +317,12 @@ public class S_EffectActivator : MonoBehaviour
         // 내 카드 계산
         foreach (S_CardBase card in pCard.GetFieldCards())
         {
+            Debug.Log($"{pCard.GetFieldCards().Count} 필드 카드 개수");
             // 효과 발동
             if (card.IsCursed) continue;
             foreach (S_UnleashStruct unleash in card.Unleash)
             {
+                Debug.Log($"{card.Key}의 발현 카운트 : {card.Unleash.Count}(제일 기본 발현 단계)");
                 await ActivateUnleash(card, unleash);
             }
             card.ReboundCount++;
@@ -324,7 +332,7 @@ public class S_EffectActivator : MonoBehaviour
             {
                 foreach (S_UnleashStruct unleash in card.Unleash)
                 {
-
+                    Debug.Log($"{card.Key}의 발현 카운트 : {card.Unleash.Count}(메아리 각인)");
                     await ActivateUnleash(card, unleash);
                 }
                 card.ReboundCount++;
@@ -337,6 +345,7 @@ public class S_EffectActivator : MonoBehaviour
                 {
                     foreach (S_UnleashStruct unleash in card.Unleash)
                     {
+                        Debug.Log($"{card.Key}의 발현 카운트 : {card.Unleash.Count}(행운 10당)");
                         await ActivateUnleash(card, unleash);
                     }
                     card.ReboundCount++;
@@ -350,6 +359,7 @@ public class S_EffectActivator : MonoBehaviour
                 {
                     foreach (S_UnleashStruct unleash in card.Unleash)
                     {
+                        Debug.Log($"{card.Key}의 발현 카운트 : {card.Unleash.Count}(왼쪽 행운에 메아리)");
                         await ActivateUnleash(card, unleash);
                     }
                     card.ReboundCount++;
@@ -363,6 +373,7 @@ public class S_EffectActivator : MonoBehaviour
                 {
                     foreach (S_UnleashStruct unleash in card.Unleash)
                     {
+                        Debug.Log($"{card.Key}의 발현 카운트 : {card.Unleash.Count}(오른쪽 메아리 2번)");
                         await ActivateUnleash(card, unleash);
                     }
                     card.ReboundCount++;
@@ -378,6 +389,7 @@ public class S_EffectActivator : MonoBehaviour
                     {
                         foreach (S_UnleashStruct unleash in card.Unleash)
                         {
+                            Debug.Log($"{card.Key}의 발현 카운트 : {card.Unleash.Count}(3장 이하)");
                             await ActivateUnleash(card, unleash);
                         }
                         card.ReboundCount++;
@@ -394,6 +406,7 @@ public class S_EffectActivator : MonoBehaviour
                     {
                         foreach (S_UnleashStruct unleash in card.Unleash)
                         {
+                            Debug.Log($"{card.Key}의 발현 카운트 : {card.Unleash.Count}(2번 적용 ㅌ이번턴처음낸)");
                             await ActivateUnleash(card, unleash);
                         }
                         card.ReboundCount++;
@@ -406,6 +419,7 @@ public class S_EffectActivator : MonoBehaviour
             {
                 foreach (S_UnleashStruct unleash in card.Unleash)
                 {
+                    Debug.Log($"{card.Key}의 발현 카운트 : {card.Unleash.Count}(모든 카드 메아리 1)");
                     await ActivateUnleash(card, unleash);
                 }
                 card.ReboundCount++;
@@ -419,19 +433,27 @@ public class S_EffectActivator : MonoBehaviour
         foreach (S_CardBase c in pCard.GetFieldCards())
         {
             if (c.IsCursed) continue;
+            bool isCursed = false;
             if (c.OriginEngraving.Contains(S_EngravingEnum.Overload) || c.Engraving.Contains(S_EngravingEnum.Overload))
             {
-                if (c.IsCursed) continue;
-                await CurseCard(c, null);
+                isCursed = true;
             }
-            if (pStat.IsBurst && (c.OriginEngraving.Contains(S_EngravingEnum.Overload_Burst) || c.Engraving.Contains(S_EngravingEnum.Overload_Burst)))
+            else if (pStat.IsBurst && (c.OriginEngraving.Contains(S_EngravingEnum.Overload_Burst) || c.Engraving.Contains(S_EngravingEnum.Overload_Burst)))
             {
-                if (c.IsCursed) continue;
-                await CurseCard(c, null);
+                isCursed = true;
             }
-            if (!pStat.IsPerfect && (c.OriginEngraving.Contains(S_EngravingEnum.Overload_NotPerfect) || c.Engraving.Contains(S_EngravingEnum.Overload_NotPerfect)))
+            else if(!pStat.IsPerfect && (c.OriginEngraving.Contains(S_EngravingEnum.Overload_NotPerfect) || c.Engraving.Contains(S_EngravingEnum.Overload_NotPerfect)))
             {
-                if (c.IsCursed) continue;
+                isCursed = true;
+            }
+            else if(pCard.GetPersistCardsInLeft(c, S_PersistEnum.Stand_Overload_AllRightCards).Count > 0)
+            {
+                isCursed = true;
+            }
+
+            if (isCursed)
+            {
+                // 저주
                 await CurseCard(c, null);
             }
         }
@@ -507,7 +529,7 @@ public class S_EffectActivator : MonoBehaviour
 
             case S_UnleashEnum.Harm: await HarmFoe(card, unleash.Stat, unleash.Value); break;
             case S_UnleashEnum.Harm_Per1CursedCard: await HarmFoe(card, unleash.Stat, unleash.Value * checker.GetAllCursedCards().Count); break;
-            case S_UnleashEnum.Harm_Per4CursedCard: await HarmFoe(card, unleash.Stat, unleash.Value * (checker.GetAllCursedCards().Count / 4)); break;
+            case S_UnleashEnum.Harm_Per3CursedCard: await HarmFoe(card, unleash.Stat, unleash.Value * (checker.GetAllCursedCards().Count / 3)); break;
             case S_UnleashEnum.Harm_Per1StrCard: await HarmFoe(card, unleash.Stat, unleash.Value * checker.GetSameTypeCardsInField(S_CardTypeEnum.Str).Count); break;
             case S_UnleashEnum.Harm_Per3StrCard: await HarmFoe(card, unleash.Stat, unleash.Value * (checker.GetSameTypeCardsInField(S_CardTypeEnum.Str).Count / 3)); break;
             case S_UnleashEnum.Harm_Per1MindCard: await HarmFoe(card, unleash.Stat, unleash.Value * checker.GetSameTypeCardsInField(S_CardTypeEnum.Mind).Count); break;
@@ -515,7 +537,7 @@ public class S_EffectActivator : MonoBehaviour
             case S_UnleashEnum.Harm_Per1LuckCard: await HarmFoe(card, unleash.Stat, unleash.Value * checker.GetSameTypeCardsInField(S_CardTypeEnum.Luck).Count); break;
             case S_UnleashEnum.Harm_Per3LuckCard: await HarmFoe(card, unleash.Stat, unleash.Value * (checker.GetSameTypeCardsInField(S_CardTypeEnum.Luck).Count / 3)); break;
             case S_UnleashEnum.Harm_Per1State: await HarmFoe(card, unleash.Stat, unleash.Value * (pStat.IsDelusion + pStat.IsExpansion + pStat.IsFirst + pStat.IsColdBlood)); break;
-            case S_UnleashEnum.Harm_Per4State: await HarmFoe(card, unleash.Stat, unleash.Value * ((pStat.IsDelusion + pStat.IsExpansion + pStat.IsFirst + pStat.IsColdBlood) / 4)); break;
+            case S_UnleashEnum.Harm_Per2State: await HarmFoe(card, unleash.Stat, unleash.Value * ((pStat.IsDelusion + pStat.IsExpansion + pStat.IsFirst + pStat.IsColdBlood) / 2)); break;
 
             case S_UnleashEnum.Health: await AddOrSubHealth(card, unleash.Value); break;
 
@@ -650,11 +672,11 @@ public class S_EffectActivator : MonoBehaviour
         switch (unleash.Unleash)
         {
             case S_UnleashEnum.Damaged: await HarmedByFoe(card, unleash.Value); break;
-            case S_UnleashEnum.Damaged_DiffLimitWeight: await HarmedByFoe(card, unleash.Value); break;
+            case S_UnleashEnum.Damaged_DiffLimitWeight: await HarmedByFoe(card, -Mathf.Abs(pStat.CurrentLimit - pStat.CurrentWeight)); break;
             case S_UnleashEnum.Damaged_CriticalBurst:
                 if (pStat.IsBurst)
                 {
-                    await HarmedByFoe(card, 99999);
+                    await HarmedByFoe(card, -999);
                 } break;
         }
     }
@@ -683,6 +705,8 @@ public class S_EffectActivator : MonoBehaviour
     // 기본 능력치 효과
     public async Task AddOrSubWeight(S_CardBase card, int value)
     {
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.CardActivated);
         // 바운싱 카드
         if (card != null)
         {
@@ -727,6 +751,8 @@ public class S_EffectActivator : MonoBehaviour
     }
     public async Task AddOrSubLimit(S_CardBase card, int value)
     {
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.CardActivated);
         // 바운싱 카드
         if (card != null)
         {
@@ -771,6 +797,8 @@ public class S_EffectActivator : MonoBehaviour
     }
     public async Task AddOrSubHealth(S_CardBase card, int value)
     {
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.CardActivated);
         // 바운싱 카드
         if (card != null)
         {
@@ -789,6 +817,8 @@ public class S_EffectActivator : MonoBehaviour
     // 전투 능력 효과
     public async Task AddOrSubStat(S_CardBase card, S_StatEnum stat, int value)
     {
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.CardActivated);
         // 바운싱 카드
         if (card != null)
         {
@@ -809,7 +839,12 @@ public class S_EffectActivator : MonoBehaviour
             if (stat == pers.Stat)
             {
                 value *= pers.Value;
-                S_FieldInfoSystem.Instance.BouncingFieldCard(multiCard);
+                //S_FieldInfoSystem.Instance.BouncingFieldCard(multiCard);
+            }
+            else if (pers.Stat == S_StatEnum.AllStat)
+            {
+                value *= pers.Value;
+                //S_FieldInfoSystem.Instance.BouncingFieldCard(multiCard);
             }
         }
         // 발현할 때마다 능력치 획득량이 증가하는 지속 효과
@@ -841,7 +876,7 @@ public class S_EffectActivator : MonoBehaviour
                 pStat.AddOrSubStr(value);
                 log = value > 0 ? $"힘 +{value}" : $"힘 {value}";
                 GenerateEffectLog(log);
-                await WaitEffectLifeTimeAsync();
+                //await WaitEffectLifeTimeAsync();
 
                 pStat.AddOrSubMind(value);
                 log = value > 0 ? $"정신력 +{value}" : $"정신력 {value}";
@@ -851,7 +886,7 @@ public class S_EffectActivator : MonoBehaviour
                 pStat.AddOrSubStr(value);
                 log = value > 0 ? $"힘 +{value}" : $"힘 {value}";
                 GenerateEffectLog(log);
-                await WaitEffectLifeTimeAsync();
+                //await WaitEffectLifeTimeAsync();
 
                 pStat.AddOrSubLuck(value);
                 log = value > 0 ? $"행운 +{value}" : $"행운 {value}";
@@ -861,7 +896,7 @@ public class S_EffectActivator : MonoBehaviour
                 pStat.AddOrSubMind(value);
                 log = value > 0 ? $"정신력 +{value}" : $"정신력 {value}";
                 GenerateEffectLog(log);
-                await WaitEffectLifeTimeAsync();
+                //await WaitEffectLifeTimeAsync();
 
                 pStat.AddOrSubLuck(value);
                 log = value > 0 ? $"행운 +{value}" : $"행운 {value}";
@@ -871,12 +906,12 @@ public class S_EffectActivator : MonoBehaviour
                 pStat.AddOrSubStr(value);
                 log = value > 0 ? $"힘 +{value}" : $"힘 {value}";
                 GenerateEffectLog(log);
-                await WaitEffectLifeTimeAsync();
+                //await WaitEffectLifeTimeAsync();
 
                 pStat.AddOrSubMind(value);
                 log = value > 0 ? $"정신력 +{value}" : $"정신력 {value}";
                 GenerateEffectLog(log);
-                await WaitEffectLifeTimeAsync();
+                //await WaitEffectLifeTimeAsync();
 
                 pStat.AddOrSubLuck(value);
                 log = value > 0 ? $"행운 +{value}" : $"행운 {value}";
@@ -889,6 +924,8 @@ public class S_EffectActivator : MonoBehaviour
         // 지속 효과 : 피해를 줄 수 없음
         if (pCard.GetPersistCardsInField(S_PersistEnum.Harm_CantHarm).Count > 0)
         {
+            // 사운드
+            S_AudioManager.Instance.PlaySFX(SFXEnum.CardActivated);
             // 바운싱 카드
             if (card != null)
             {
@@ -970,6 +1007,9 @@ public class S_EffectActivator : MonoBehaviour
             else if (value >= S_FoeInfoSystem.Instance.MaxHealth * 0.5f) S_CameraManager.Instance.ShakeCamera(1.5f);
             else if (value >= S_FoeInfoSystem.Instance.MaxHealth * 0.3f) S_CameraManager.Instance.ShakeCamera(1.0f);
             else S_CameraManager.Instance.ShakeCamera(0.5f);
+
+            // 사운드
+            S_AudioManager.Instance.PlaySFX(SFXEnum.Harm);
         });
         // 원위치
         seq.Append(cardObj.transform.DOLocalMove(cardObj.GetComponent<S_FieldCardObj>().OriginPRS.Pos, 0.25f).SetEase(Ease.OutQuart))
@@ -1012,6 +1052,9 @@ public class S_EffectActivator : MonoBehaviour
             if (value >= S_FoeInfoSystem.Instance.MaxHealth) S_CameraManager.Instance.ShakeCamera(2f);
             else if (value >= S_FoeInfoSystem.Instance.MaxHealth * 0.5f) S_CameraManager.Instance.ShakeCamera(1.5f);
             else S_CameraManager.Instance.ShakeCamera(1.0f);
+
+            // 사운드
+            S_AudioManager.Instance.PlaySFX(SFXEnum.Harm);
         });
         // 원위치
         seq.Append(cardObj.transform.DOLocalMove(cardObj.GetComponent<S_FieldCardObj>().OriginPRS.Pos, 0.25f).SetEase(Ease.OutQuart))
@@ -1022,6 +1065,8 @@ public class S_EffectActivator : MonoBehaviour
     // 상태
     public async Task AddOrSubState(S_CardBase card, S_UnleashEnum state, int value)
     {
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.CardActivated);
         // 바운싱 카드
         if (card != null)
         {
@@ -1091,6 +1136,8 @@ public class S_EffectActivator : MonoBehaviour
     // 저주
     public async Task CurseCard(S_CardBase cursedCard, S_CardBase triggerCard)
     {
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.CardActivated);
         // 바운싱 카드
         S_FieldInfoSystem.Instance.BouncingFieldCard(cursedCard);
         if (triggerCard != null)
@@ -1148,6 +1195,8 @@ public class S_EffectActivator : MonoBehaviour
     }
     public async Task DispelCard(S_CardBase cursedCard, S_CardBase triggerCard)
     {
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.CardActivated);
         // 바운싱 카드
         S_FieldInfoSystem.Instance.BouncingFieldCard(cursedCard);
         if (triggerCard != null)

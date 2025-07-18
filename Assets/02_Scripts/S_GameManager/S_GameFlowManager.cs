@@ -53,11 +53,11 @@ public class S_GameFlowManager : MonoBehaviour
             PlayerPrefs.SetInt("TutorialCompleted", 0);
             PlayerPrefs.Save();
 
-            S_TutorialManager.Instance.StartTrialByTutorial();
+            await S_TutorialManager.Instance.StartTrialByTutorial();
         }
         else if (PlayerPrefs.GetInt("TutorialCompleted") == 0) // 튜토리얼 시작이거나 튜토리얼을 완료하지 못한 경우
         {
-            S_TutorialManager.Instance.StartTrialByTutorial();
+            await S_TutorialManager.Instance.StartTrialByTutorial();
         }
         else // 그것도 아닌 경우
         {
@@ -70,7 +70,7 @@ public class S_GameFlowManager : MonoBehaviour
     public async void StartTrial()
     {
         /////////////////////////데모판 코드//////////////////////////
-        //if (CurrentTrial == 4)
+        //if (CurrentTrial == 10)
         //{
         //    S_DemoSystem.Instance.AppearDemoPanel();
         //    return;
@@ -97,7 +97,7 @@ public class S_GameFlowManager : MonoBehaviour
         // 턴 시작
         StartNewTurn();
     }
-    public async Task StartTrialByTutorialAsync()
+    public void StartTrialByTutorialAsync()
     {
         GameFlowState = S_GameFlowStateEnum.None;
 
@@ -107,14 +107,15 @@ public class S_GameFlowManager : MonoBehaviour
         CurrentTurn = 0;
 
         // 시련 시작 시 카쓸적 업데이트
-        await S_PlayerCard.Instance.UpdateCardsByStartTrial();
-        //await S_FoeInfoSystem.Instance.UpdateFoeByStartTrial();
+        S_PlayerCard.Instance.UpdateCardsByStartTrialByTutorial();
 
         // 시련 시작 시로 히스토리 저장
         S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.StartTrial);
 
-        // 턴 시작
-        StartNewTurn();
+        // 히트 버튼 등장
+        S_HitBtnSystem.Instance.AppearHitBtn();
+
+        GameFlowState = S_GameFlowStateEnum.Hit;
     }
     // 턴 시작 시
     public void StartNewTurn()
@@ -223,6 +224,20 @@ public class S_GameFlowManager : MonoBehaviour
         // 시련 종료로 히스토리 저장
         S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.EndTrial);
 
+        // 대사 다 들을 때까지 대기
+        List<DialogData> dialogs = S_DialogMetaData.GetDialogsByPrefix($"FoeDialog_EndTrial_{CurrentTrial}");
+        if (dialogs.Count > 0)
+        {
+            await S_DialogInfoSystem.Instance.StartQueueDialog(dialogs);
+
+            while (!S_DialogInfoSystem.Instance.IsCompletedTotaly)
+            {
+                await Task.Yield();
+            }
+
+            S_DialogInfoSystem.Instance.IsCompletedTotaly = false;
+        }
+
         // 보상 시작
         await StartRewardAsync();
     }
@@ -235,10 +250,28 @@ public class S_GameFlowManager : MonoBehaviour
         S_HitBtnSystem.Instance.DisappearHitBtn();
 
         // 적 카드 등장, 체력 채우기
-        await S_FoeInfoSystem.Instance.UpdateCardsByRewardTime();
+        await S_FoeInfoSystem.Instance.UpdateCardsByReward();
+
+        // 대사 다 들을 때까지 대기
+        List<DialogData> dialogs = S_DialogMetaData.GetDialogsByPrefix($"FoeDialog_Reward_{CurrentTrial}");
+        if (dialogs.Count > 0)
+        {
+            await S_DialogInfoSystem.Instance.StartQueueDialog(dialogs);
+
+            while (!S_DialogInfoSystem.Instance.IsCompletedTotaly)
+            {
+                await Task.Yield();
+            }
+
+            S_DialogInfoSystem.Instance.IsCompletedTotaly = false;
+        }
 
         // 보상 시작
         await S_RewardInfoSystem.Instance.StartReward();
+
+        // 상점 조우 대사
+        DialogData dialog = S_DialogMetaData.GetMonologs("Reward_Start");
+        S_DialogInfoSystem.Instance.StartMonolog(dialog.Name, dialog.Dialog, 8);
 
         GameFlowState = S_GameFlowStateEnum.Store;
     }
@@ -260,10 +293,10 @@ public class S_GameFlowManager : MonoBehaviour
         S_PlayerStat.Instance.SaveStatHistory(null, S_StatHistoryTriggerEnum.EndTrial);
 
         // 적 카드 등장, 체력 채우기
-        await S_FoeInfoSystem.Instance.UpdateCardsByRewardTime();
+        await S_FoeInfoSystem.Instance.UpdateCardsByReward();
 
         // 튜토리얼 보상 시작
-        await S_RewardInfoSystem.Instance.StartRewardByTutorial();
+        await S_RewardInfoSystem.Instance.StartReward();
 
         GameFlowState = S_GameFlowStateEnum.Store;
     }
@@ -290,6 +323,7 @@ public enum S_GameFlowStateEnum
     Dialog,
     Hit,
     HittingCard,
+    Expansion,
     Deck,
     Used,
     Twist,

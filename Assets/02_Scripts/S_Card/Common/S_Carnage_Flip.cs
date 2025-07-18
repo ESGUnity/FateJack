@@ -17,7 +17,7 @@ public class S_Carnage_Flip : S_CardBase
             new S_PersistStruct(S_PersistEnum.Harm_CantHarm, default, default, 0),
             new S_PersistStruct(S_PersistEnum.Stat_MultiStat, default, S_StatEnum.AllStat, 3)
         };
-        OriginEngraving = new() { S_EngravingEnum.Overload };
+        OriginEngraving = new() { };
         Engraving = new();
     }
 }

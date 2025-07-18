@@ -10,7 +10,7 @@ public class S_Resistance_Flip : S_CardBase
         CardType = S_CardTypeEnum.Common;
         Unleash = new()
         {
-            new S_UnleashStruct(S_UnleashEnum.Limit, default, -5)
+            new S_UnleashStruct(S_UnleashEnum.Limit, default, -2)
         };
         Persist = new()
         {

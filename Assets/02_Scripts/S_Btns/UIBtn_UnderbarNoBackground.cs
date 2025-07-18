@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class UIBtn_UnderbarNoBackground : UIBtnAction, IPointerEnterHandler, IPointerExitHandler
+public class UIBtn_UnderbarNoBackground : UIBtnAction, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [SerializeField] Image image_RightBar;
     [SerializeField] Image image_LeftBar;
@@ -47,6 +47,9 @@ public class UIBtn_UnderbarNoBackground : UIBtnAction, IPointerEnterHandler, IPo
                 .Join(image_LeftBar.DOFillAmount(1f, REACT_TIME).SetEase(Ease.OutQuart))
                 .Join(text_BtnText.DOColor(enterTextColor, REACT_TIME).SetEase(Ease.OutQuart));
         }
+
+        // 사운드
+        S_AudioManager.Instance.PlayUI(UIEnum.UI_Hovering);
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -56,5 +59,9 @@ public class UIBtn_UnderbarNoBackground : UIBtnAction, IPointerEnterHandler, IPo
         seq.Append(image_RightBar.DOFillAmount(0f, REACT_TIME).SetEase(Ease.OutQuart))
             .Join(image_LeftBar.DOFillAmount(0f, REACT_TIME).SetEase(Ease.OutQuart))
             .Join(text_BtnText.DOColor(exitTextColor, REACT_TIME).SetEase(Ease.OutQuart));
+    }
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        S_AudioManager.Instance.PlayUI(UIEnum.UI_Click);
     }
 }

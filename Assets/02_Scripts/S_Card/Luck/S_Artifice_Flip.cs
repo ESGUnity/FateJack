@@ -14,7 +14,7 @@ public class S_Artifice_Flip : S_CardBase
         };
         Persist = new()
         {
-            new S_PersistStruct(S_PersistEnum.Unleash_StatPer1Rebound, default, S_StatEnum.Luck, 2)
+            new S_PersistStruct(S_PersistEnum.Unleash_StatPer1Rebound, default, S_StatEnum.Luck, 1)
         };
         OriginEngraving = new() { };
         Engraving = new();

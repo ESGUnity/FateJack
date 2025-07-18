@@ -10,7 +10,7 @@ public class S_Grudge_Flip : S_CardBase
         CardType = S_CardTypeEnum.Str;
         Unleash = new()
         {
-            new S_UnleashStruct(S_UnleashEnum.Harm_Per4CursedCard, S_StatEnum.Str_Luck, 1)
+            new S_UnleashStruct(S_UnleashEnum.Harm_Per3CursedCard, S_StatEnum.Str_Luck, 1)
         };
         Persist = new()
         {

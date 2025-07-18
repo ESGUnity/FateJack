@@ -16,7 +16,7 @@ public class S_UntappedPower_Flip : S_CardBase
         {
 
         };
-        OriginEngraving = new() { S_EngravingEnum.Fix };
+        OriginEngraving = new() { };
         Engraving = new();
     }
 }

@@ -17,7 +17,7 @@ public class S_FinishingStrike_Flip : S_CardBase
         {
 
         };
-        OriginEngraving = new() { S_EngravingEnum.Immunity };
+        OriginEngraving = new() { };
         Engraving = new();
     }
 }

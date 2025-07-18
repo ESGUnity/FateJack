@@ -10,13 +10,13 @@ public class S_Chance_Flip : S_CardBase
         CardType = S_CardTypeEnum.Luck;
         Unleash = new()
         {
-            new S_UnleashStruct(S_UnleashEnum.Stat, S_StatEnum.Luck, 3)
+            new S_UnleashStruct(S_UnleashEnum.Stat, S_StatEnum.Luck, 2)
         };
         Persist = new()
         {
 
         };
-        OriginEngraving = new() { S_EngravingEnum.Overload };
+        OriginEngraving = new() { S_EngravingEnum.Overload, S_EngravingEnum.Leap };
         Engraving = new();
     }
 }

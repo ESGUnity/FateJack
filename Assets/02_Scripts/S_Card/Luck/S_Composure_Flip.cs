@@ -10,7 +10,7 @@ public class S_Composure_Flip : S_CardBase
         CardType = S_CardTypeEnum.Luck;
         Unleash = new()
         {
-            new S_UnleashStruct(S_UnleashEnum.Stat_Per1State, S_StatEnum.Luck, 1)
+            new S_UnleashStruct(S_UnleashEnum.Stat_Per1State, S_StatEnum.Luck, 3)
         };
         Persist = new()
         {

@@ -47,9 +47,9 @@ public enum S_UnleashEnum
     Stat, Stat_SubAllHighestStatAndStr3Multi, Stat_StrLuck5SubAndMind2Multi, Stat_Mind10SubAndStrLuck10Add, Stat_Per1State, 
     Stat_Per1MindCard, Stat_Per1LuckCard, Stat_Per1CommonCard,
     // 피해
-    Harm, Harm_Per1CursedCard, Harm_Per4CursedCard, Harm_Per1StrCard, Harm_Per3StrCard,
+    Harm, Harm_Per1CursedCard, Harm_Per3CursedCard, Harm_Per1StrCard, Harm_Per3StrCard,
     Harm_Per1MindCard, Harm_Per3MindCard, Harm_Per1LuckCard, Harm_Per3LuckCard, Harm_Per1State,
-    Harm_Per4State,
+    Harm_Per2State,
     // 체력
     Health,
     // 상태

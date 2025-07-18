@@ -94,6 +94,9 @@ public class S_ProductObj : MonoBehaviour
             DialogData dialog = S_DialogMetaData.GetMonologs($"Reward_{ProductInfo}");
             S_DialogInfoSystem.Instance.StartMonolog(dialog.Name, dialog.Dialog, 9999);
 
+            // 사운드
+            S_AudioManager.Instance.PlaySFX(SFXEnum.CardHovering);
+
             isEnter = true;
         }
     }
@@ -115,7 +118,12 @@ public class S_ProductObj : MonoBehaviour
     }
     public void PointerClickProductSprite(BaseEventData eventData)
     {
-        S_RewardInfoSystem.Instance.BuyProduct(this);
+        if (S_GameFlowManager.Instance.IsInState(VALID_STATES))
+        {
+            ForceExit();
+
+            S_RewardInfoSystem.Instance.BuyProduct(this);
+        }
     }
     #endregion
 }

@@ -23,7 +23,7 @@ public class S_FieldInfoSystem : MonoBehaviour
 
     Vector3 STACK_BASE_START_POS = new Vector3(-5.5f, 0, 0);
     Vector3 STACK_BASE_END_POS = new Vector3(5.5f, 0, 0);
-    Vector3 STACK_CARD_ORIGIN_SCALE = new Vector3(1.7f, 1.7f, 1.7f);
+    Vector3 STACK_CARD_ORIGIN_SCALE = new Vector3(1.6f, 1.6f, 1.6f);
     const float STACK_Z_VALUE = -0.02f;
     const float CARD_POS_OFFSET = 0.02f;
     const int MAX_CARD_COUNT = 8; // 고정 격차로 배치되는 최대 카드 개수
@@ -58,6 +58,9 @@ public class S_FieldInfoSystem : MonoBehaviour
         go.transform.SetParent(pos_FieldBase.transform, true);
         go.GetComponent<S_FieldCardObj>().SetCardInfo(card);
         fieldCardObjs.Add(go);
+
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.HitCard);
 
         await AlignmentFieldCards();
     }
@@ -153,6 +156,9 @@ public class S_FieldInfoSystem : MonoBehaviour
     {
         List<Task> animationTasks = new();
 
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.HitCard);
+
         foreach (GameObject go in fieldCardObjs)
         {
             Sequence seq = DOTween.Sequence();
@@ -209,7 +215,7 @@ public class S_FieldInfoSystem : MonoBehaviour
             }
         }
 
-        Debug.Log("스택에 없는 걸 왜 찾으려 하는가");
+        //Debug.Log("스택에 없는 걸 왜 찾으려 하는가");
         return null;
     }
     public void RemoveFieldCardObj(S_CardBase card)

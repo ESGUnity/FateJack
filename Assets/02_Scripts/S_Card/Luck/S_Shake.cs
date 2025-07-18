@@ -10,7 +10,7 @@ public class S_Shake : S_CardBase
         CardType = S_CardTypeEnum.Luck;
         Unleash = new()
         {
-            new S_UnleashStruct(S_UnleashEnum.Harm_Per4State, S_StatEnum.Str_Luck, 1)
+            new S_UnleashStruct(S_UnleashEnum.Harm_Per2State, S_StatEnum.Str_Luck, 1)
         };
         Persist = new()
         {

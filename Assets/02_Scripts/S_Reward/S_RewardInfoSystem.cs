@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ public class S_RewardInfoSystem : MonoBehaviour
 
     [Header("상품 연출")]
     [HideInInspector] public S_ProductEnum BuiedProduct;
-    List<GameObject> paidProductObjects = new();
+    List<GameObject> productObjs = new();
     Vector3 PRODUCTS_START_POS = new Vector3(-5.8f, 0, 0);
     Vector3 PRODUCTS_END_POS = new Vector3(5.8f, 0, 0);
     Vector3 PRODUCTS_SCALE_VALUE = new Vector3(1.5f, 1.5f, 1.5f);
@@ -36,7 +37,7 @@ public class S_RewardInfoSystem : MonoBehaviour
 
     [Header("UI")]
     Vector2 REWARD_BTNS_HIDE_POS = new Vector2(0, -80);
-    Vector2 REWARD_BTNS_ORIGIN_POS = new Vector2(0, 85);
+    Vector2 REWARD_BTNS_ORIGIN_POS = new Vector2(0, 89);
 
     // 싱글턴
     static S_RewardInfoSystem instance;
@@ -65,24 +66,11 @@ public class S_RewardInfoSystem : MonoBehaviour
         // 상품 생성
         GenerateNewProducts();
         AppearExitBtn();
-        await S_GameFlowManager.WaitPanelAppearTimeAsync();
 
         // 상품 등장
         AlignmentProducts();
 
-        //상점 조우 대사
-        DialogData dialog = S_DialogMetaData.GetMonologs("Reward_Start");
-        S_DialogInfoSystem.Instance.StartMonolog(dialog.Name, dialog.Dialog, 8);
-    }
-    public async Task StartRewardByTutorial()
-    {
-        // 상품 생성
-        GenerateNewProducts();
-        AppearExitBtn();
         await S_GameFlowManager.WaitPanelAppearTimeAsync();
-
-        // 상품 등장
-        AlignmentProducts();
     }
     #region UI
     public void AppearExitBtn()
@@ -101,8 +89,8 @@ public class S_RewardInfoSystem : MonoBehaviour
     }
     public void AppearMonlogByBuiedProduct() // 구매한 상품이 뭘 선택해야하는지 알려주는 메서드
     {
-        DialogData dialog = S_DialogMetaData.GetMonologs($"Reward_{BuiedProduct}_Buied");
-        S_DialogInfoSystem.Instance.StartMonolog(dialog.Name, dialog.Dialog, 9999);
+        DialogData dialog = S_DialogMetaData.GetMonologs($"Reward_{BuiedProduct.ToString()}_Buied");
+        S_DialogInfoSystem.Instance.StartMonolog(dialog.Name, dialog.Dialog, 999);
     }
     public void DisappearMonologByBuiedProduct()
     {
@@ -120,13 +108,13 @@ public class S_RewardInfoSystem : MonoBehaviour
         foreach (S_ProductEnum product in allProducts)
         {
             GameObject go = Instantiate(prefab_ProductObj, pos_PaidProductsBase.transform);
-            go.transform.localPosition = new Vector3(0, 0, -11);
+            go.transform.localPosition = new Vector3(0, 0, -15);
             go.GetComponent<S_ProductObj>().SetProductInfo(product);
-            paidProductObjects.Add(go);
+            productObjs.Add(go);
         }
 
         // 상품 정렬
-        AlignmentPaidProductsPrev();
+        AlignmentProductsPrev();
     }
     public async void BuyProduct(S_ProductObj product) // S_ProductObject에서 호출
     {
@@ -143,27 +131,38 @@ public class S_RewardInfoSystem : MonoBehaviour
             case S_ProductEnum.SpiritualMold: StartSelectOptionCards(3, S_CardTypeEnum.Mind); break;
             case S_ProductEnum.BrightMold: StartSelectOptionCards(3, S_CardTypeEnum.Luck); break;
             case S_ProductEnum.DelicateMold: StartSelectOptionCards(3, S_CardTypeEnum.Common); break;
+            case S_ProductEnum.Immunity: StartSelectMyCards(10); break;
+            case S_ProductEnum.QuickAction: StartSelectMyCards(10); break;
+            case S_ProductEnum.Rebound: StartSelectMyCards(10); break;
+            case S_ProductEnum.Fix: StartSelectMyCards(10); break;
+            case S_ProductEnum.Flexible: StartSelectMyCards(10); break;
+            case S_ProductEnum.Leap: StartSelectMyCards(10); break;
+            case S_ProductEnum.Dismantle: StartSelectMyCards(10); break;
+            case S_ProductEnum.Mask: StartSelectMyCards(10); break;
+            case S_ProductEnum.WasteBasket: StartSelectMyCards(10); break;
         }
 
         // 나가기 버튼 사라짐
         DisappearExitBtn();
 
-        // 구매한 옵션에 대한 모놀로그 띄우기
-        AppearMonlogByBuiedProduct();
-
         // 구매한 옵션은 제거
-        for (int i = 0; i < paidProductObjects.Count; i++)
+        for (int i = 0; i < productObjs.Count; i++)
         {
-            GameObject productObj = paidProductObjects[i];
+            GameObject productObj = productObjs[i];
             if (productObj.GetComponent<S_ProductObj>().ProductInfo == BuiedProduct)
             {
-                paidProductObjects.RemoveAt(i);
+                productObjs.RemoveAt(i);
                 Destroy(productObj);
                 break;
             }
         }
 
+        AlignmentProducts();
+
         await S_EffectActivator.Instance.WaitEffectLifeTimeAsync();
+
+        // 구매한 옵션에 대한 모놀로그 띄우기
+        AppearMonlogByBuiedProduct();
         S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.StoreBuying;
     }
     #endregion
@@ -179,7 +178,7 @@ public class S_RewardInfoSystem : MonoBehaviour
 
         AlignmentOptionCards();
     }
-    public void StartSelectMyCards(int count, S_CardTypeEnum cardType)
+    public void StartSelectMyCards(int count)
     {
         List<S_CardBase> cards = S_PlayerCard.Instance.GetOriginPlayerDeckCards();
 
@@ -209,6 +208,9 @@ public class S_RewardInfoSystem : MonoBehaviour
     {
         S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
 
+        // 대사 제거
+        DisappearMonologByBuiedProduct();
+
         // 선택한 카드를 가운데로 이동시키기
         GameObject obj = null;
         foreach (GameObject go in optionObjs)
@@ -226,17 +228,28 @@ public class S_RewardInfoSystem : MonoBehaviour
         showingObj.transform.eulerAngles = obj.transform.eulerAngles;
         showingObj.transform.localScale = obj.transform.localScale;
         showingObj.GetComponent<S_ShowingCardObj>().SetOrder(100);
+
         // 옵션 제거
         DestroyOptionObjs();
+
         // 가운데로 이동
         await showingObj.GetComponent<S_ShowingCardObj>().MoveShowingPos();
 
         // 카드 획득
+        DialogData dialog;
         if (BuiedProduct == S_ProductEnum.OldMold || BuiedProduct == S_ProductEnum.MeltedMold || BuiedProduct == S_ProductEnum.SpiritualMold ||
             BuiedProduct == S_ProductEnum.BrightMold || BuiedProduct == S_ProductEnum.DelicateMold)
         {
+            // 카드 선택 후 나오는 대사
+            dialog = S_DialogMetaData.GetMonologs($"DecideDeckCard_{card.CardType.ToString()}");
+            S_DialogInfoSystem.Instance.StartMonolog(dialog.Name, dialog.Dialog, 6);
+
             S_PlayerCard.Instance.AddCard(card);
             await showingObj.GetComponent<S_ShowingCardObj>().MoveDeckPos();
+        }
+        else if (BuiedProduct == S_ProductEnum.WasteBasket) // 카드 삭제
+        {
+
         }
         else // 각인 부여
         {
@@ -276,11 +289,11 @@ public class S_RewardInfoSystem : MonoBehaviour
         DisappearMonologByBuiedProduct();
 
         // 남아있는 상품 제거
-        foreach (GameObject go in paidProductObjects)
+        foreach (GameObject go in productObjs)
         {
             Destroy(go);
         }
-        paidProductObjects.Clear();
+        productObjs.Clear();
         BuiedProduct = S_ProductEnum.None;
 
         // 시련 다시 시작
@@ -300,47 +313,66 @@ public class S_RewardInfoSystem : MonoBehaviour
     async Task EndDecide() // 각종 UI를 구매 전으로, BuiedProduct 초기화, GameFlowState 되돌리기
     {
         AppearExitBtn();
-        DisappearMonologByBuiedProduct();
+        //DisappearMonologByBuiedProduct();
 
         await S_GameFlowManager.WaitPanelAppearTimeAsync();
 
         BuiedProduct = S_ProductEnum.None;
         S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.Store;
-    }  
-    void AlignmentPaidProductsPrev() // 상품 정렬(공중)
+
+        // 6초 후 productObjs.Count == 0일 경우 대사 실행
+        StartCoroutine(CheckProductAndStartMonologAfterDelay());
+    }
+    IEnumerator CheckProductAndStartMonologAfterDelay()
+    {
+        if (productObjs.Count == 0)
+        {
+            yield return new WaitForSeconds(6f); // 6초 대기
+
+            if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Store)
+            {
+                DialogData dialog = S_DialogMetaData.GetMonologs("Reward_NoProduct");
+                S_DialogInfoSystem.Instance.StartMonolog(dialog.Name, dialog.Dialog, 999);
+
+                StartCoroutine(CheckProductAndStartMonologAfterDelay());
+            }
+        }
+    }
+
+    void AlignmentProductsPrev() // 상품 정렬(공중)
     {
         // 유료 상품 정렬
-        List<PRS> originCardPRS2 = SetObjectsPos(paidProductObjects.Count, PRODUCTS_START_POS, PRODUCTS_END_POS, PRODUCTS_SCALE_VALUE);
+        List<PRS> originCardPRS2 = SetObjectsPos(productObjs.Count, PRODUCTS_START_POS, PRODUCTS_END_POS, PRODUCTS_SCALE_VALUE);
 
-        for (int i = 0; i < paidProductObjects.Count; i++)
+        for (int i = 0; i < productObjs.Count; i++)
         {
             // 위치 설정
-            paidProductObjects[i].GetComponent<S_ProductObj>().OriginPRS = originCardPRS2[i];
+            productObjs[i].GetComponent<S_ProductObj>().OriginPRS = originCardPRS2[i];
 
             // 소팅오더 설정
-            paidProductObjects[i].GetComponent<S_ProductObj>().OriginOrder = i;
-            paidProductObjects[i].GetComponent<S_ProductObj>().SetOrder(paidProductObjects[i].GetComponent<S_ProductObj>().OriginOrder);
+            productObjs[i].GetComponent<S_ProductObj>().OriginOrder = i;
+            productObjs[i].GetComponent<S_ProductObj>().SetOrder(productObjs[i].GetComponent<S_ProductObj>().OriginOrder);
 
-            paidProductObjects[i].transform.DOLocalMove(paidProductObjects[i].GetComponent<S_ProductObj>().OriginPRS.Pos + new Vector3(0, 0, -10f), 0);
-            paidProductObjects[i].transform.DOScale(paidProductObjects[i].GetComponent<S_ProductObj>().OriginPRS.Scale, 0);
+            productObjs[i].transform.DOLocalMove(productObjs[i].GetComponent<S_ProductObj>().OriginPRS.Pos + new Vector3(0, 0, -15), 0);
+            productObjs[i].transform.DOScale(productObjs[i].GetComponent<S_ProductObj>().OriginPRS.Scale, 0);
         }
     }
     void AlignmentProducts() // 상품 정렬
     {
         // 유료 상품 정렬
-        List<PRS> originCardPRS2 = SetObjectsPos(paidProductObjects.Count, PRODUCTS_START_POS, PRODUCTS_END_POS, PRODUCTS_SCALE_VALUE);
+        List<PRS> originCardPRS2 = SetObjectsPos(productObjs.Count, PRODUCTS_START_POS, PRODUCTS_END_POS, PRODUCTS_SCALE_VALUE);
 
-        for (int i = 0; i < paidProductObjects.Count; i++)
+        for (int i = 0; i < productObjs.Count; i++)
         {
             // 위치 설정
-            paidProductObjects[i].GetComponent<S_ProductObj>().OriginPRS = originCardPRS2[i];
+            productObjs[i].GetComponent<S_ProductObj>().OriginPRS = originCardPRS2[i];
 
             // 소팅오더 설정
-            paidProductObjects[i].GetComponent<S_ProductObj>().OriginOrder = i;
-            paidProductObjects[i].GetComponent<S_ProductObj>().SetOrder(paidProductObjects[i].GetComponent<S_ProductObj>().OriginOrder);
+            productObjs[i].GetComponent<S_ProductObj>().OriginOrder = i;
+            productObjs[i].GetComponent<S_ProductObj>().SetOrder(productObjs[i].GetComponent<S_ProductObj>().OriginOrder);
 
-            paidProductObjects[i].transform.DOLocalMove(paidProductObjects[i].GetComponent<S_ProductObj>().OriginPRS.Pos, S_EffectActivator.Instance.GetHitAndSortCardsTime()).SetEase(Ease.OutQuart);
-            paidProductObjects[i].transform.DOScale(paidProductObjects[i].GetComponent<S_ProductObj>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime()).SetEase(Ease.OutQuart);
+            productObjs[i].transform.DOLocalMove(productObjs[i].GetComponent<S_ProductObj>().OriginPRS.Pos, S_EffectActivator.Instance.GetHitAndSortCardsTime()).SetEase(Ease.OutQuart);
+            productObjs[i].transform.DOScale(productObjs[i].GetComponent<S_ProductObj>().OriginPRS.Scale, S_EffectActivator.Instance.GetHitAndSortCardsTime()).SetEase(Ease.OutQuart);
         }
     }
     void AlignmentOptionCards() // 카드 정렬

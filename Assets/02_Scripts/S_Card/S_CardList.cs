@@ -31,7 +31,7 @@ public static class S_CardList
     public static List<S_CardBase> GetInitCardsByStartGame() // 초기 카드
     {
         // 추출할 키 목록(시작 능력)
-        HashSet<string> targetKeys = new() { "Stimulus", "WrathStrike", "Focus", "PreciseStrike", "Chance", "SuddenStrike", };
+        HashSet<string> targetKeys = new() { "Stimulus", "WrathStrike", "Focus", "PreciseStrike", "Chance", "SuddenStrike" };
 
         // 특정 키를 가진 요소를 추출
         List<S_CardBase> initCards = cards.ToList().Where(r => targetKeys.Contains(r.Key)).ToList();

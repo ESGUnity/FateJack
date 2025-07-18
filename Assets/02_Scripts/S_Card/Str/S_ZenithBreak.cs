@@ -17,6 +17,6 @@ public class S_ZenithBreak : S_CardBase
             new S_PersistStruct(S_PersistEnum.Stat_MultiStat, default, S_StatEnum.Str, 3)
         };
         OriginEngraving = new() { };
-        Engraving = new();
+        Engraving = new() { };
     }
 }

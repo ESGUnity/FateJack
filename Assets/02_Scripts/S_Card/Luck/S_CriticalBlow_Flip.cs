@@ -16,7 +16,7 @@ public class S_CriticalBlow_Flip : S_CardBase
         {
             new S_PersistStruct(S_PersistEnum.Harm_AddDamagePer1Rebound, default, default, 4)
         };
-        OriginEngraving = new() { };
+        OriginEngraving = new() { S_EngravingEnum.Rebound };
         Engraving = new();
     }
 }

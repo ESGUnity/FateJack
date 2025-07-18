@@ -8,7 +8,7 @@ public class S_FieldCardObj : S_CardObj
 
     protected override void Awake()
     {
-        VALID_STATES = new() { S_GameFlowStateEnum.Hit, S_GameFlowStateEnum.Store };
+        VALID_STATES = new() { S_GameFlowStateEnum.Hit, S_GameFlowStateEnum.Store, S_GameFlowStateEnum.Expansion };
 
         CARD_ROT = new Vector3(0, 0, Random.Range(-LEAN_VALUE, LEAN_VALUE));
 

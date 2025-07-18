@@ -16,7 +16,7 @@ public class S_Dissolute : S_CardBase
         {
 
         };
-        OriginEngraving = new() { S_EngravingEnum.Overload_NotPerfect};
+        OriginEngraving = new() { S_EngravingEnum.Overload_NotPerfect };
         Engraving = new();
     }
 }

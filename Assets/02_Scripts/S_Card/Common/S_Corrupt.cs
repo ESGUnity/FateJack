@@ -10,7 +10,7 @@ public class S_Corrupt : S_CardBase
         CardType = S_CardTypeEnum.Common;
         Unleash = new()
         {
-            new S_UnleashStruct(S_UnleashEnum.Health, default, 5)
+            new S_UnleashStruct(S_UnleashEnum.Health, default, -2)
         };
         Persist = new()
         {

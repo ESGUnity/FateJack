@@ -31,7 +31,7 @@ public class S_DeckInfoSystem : MonoBehaviour
 
     [Header("UI")]
     Vector2 DECK_BTN_HIDE_POS = new Vector2(0, -80);
-    Vector2 DECK_BTN_ORIGIN_POS = new Vector2(0, 85);
+    Vector2 DECK_BTN_ORIGIN_POS = new Vector2(0, 89);
     S_GameFlowStateEnum prevState;
 
     [Header("연출")]
@@ -104,6 +104,8 @@ public class S_DeckInfoSystem : MonoBehaviour
         deckCardObjs.Add(go); // 덱 카드 오브젝트에 추가
 
         AlignmentDeckCards();
+
+        UpdateCardsState();
     }
     public void AddDecks(List<S_CardBase> cards)
     {
@@ -112,6 +114,12 @@ public class S_DeckInfoSystem : MonoBehaviour
             Destroy(go);
         }
         deckCardObjs.Clear();
+
+        foreach (GameObject go in usedCardObjs)
+        {
+            Destroy(go);
+        }
+        usedCardObjs.Clear();
 
         foreach (S_CardBase card in cards)
         {
@@ -132,6 +140,8 @@ public class S_DeckInfoSystem : MonoBehaviour
 
         deckCardObjs.Remove(removeObj);
         Destroy(removeObj);
+
+        CountViewDeckObj();
 
         AlignmentDeckCards();
     }
@@ -348,7 +358,7 @@ public class S_DeckInfoSystem : MonoBehaviour
             go.GetComponent<S_DeckCardObj>().transform.SetParent(pos_DeckBase.transform);
         }
 
-        deckCardObjs = usedCardObjs.ToList();
+        deckCardObjs.AddRange(usedCardObjs.ToList());
         usedCardObjs.Clear();
 
         AlignmentDeckCards();
@@ -438,6 +448,15 @@ public class S_DeckInfoSystem : MonoBehaviour
                 await CloseDeckInfoCommonProperty();
             }
         }
+
+        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Deck)
+        {
+            text_DeckCount.GetComponent<TMP_Text>().text = $"{S_PlayerCard.Instance.GetDeckCards().Count} / {S_PlayerCard.Instance.GetOriginPlayerDeckCards().Count}";
+        }
+        else if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Used)
+        {
+            text_DeckCount.GetComponent<TMP_Text>().text = $"{S_PlayerCard.Instance.GetUsedCards().Count} / {S_PlayerCard.Instance.GetOriginPlayerDeckCards().Count}";
+        }
     }
     public void PointerEnterViewDeckObj(PointerEventData eventData)
     {
@@ -451,6 +470,30 @@ public class S_DeckInfoSystem : MonoBehaviour
         foreach (Transform t in obj_ViewDeck.transform)
         {
             t.GetComponent<SpriteRenderer>().material = mat_Origin;
+        }
+    }
+    public void CountViewDeckObj()
+    {
+        int count = 0;
+        foreach (Transform t in obj_ViewDeck.transform)
+        {
+            if (count >= deckCardObjs.Count)
+            {
+                t.gameObject.SetActive(false);
+            }
+            else
+            {
+                t.gameObject.SetActive(true);
+            }
+
+            count++;
+        }
+    }
+    public void ActivateViewDeckObj()
+    {
+        foreach (Transform t in obj_ViewDeck.transform)
+        {
+            t.gameObject.SetActive(true);
         }
     }
     public async void ClickViewUsedObj(PointerEventData eventData) // 사용한 카드 더미 보기 스프라이트 클릭 시
@@ -536,6 +579,15 @@ public class S_DeckInfoSystem : MonoBehaviour
                 // 덱 정보 닫기
                 await CloseDeckInfoCommonProperty();
             }
+        }
+
+        if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Deck)
+        {
+            text_DeckCount.GetComponent<TMP_Text>().text = $"{S_PlayerCard.Instance.GetDeckCards().Count} / {S_PlayerCard.Instance.GetOriginPlayerDeckCards().Count}";
+        }
+        else if (S_GameFlowManager.Instance.GameFlowState == S_GameFlowStateEnum.Used)
+        {
+            text_DeckCount.GetComponent<TMP_Text>().text = $"{S_PlayerCard.Instance.GetUsedCards().Count} / {S_PlayerCard.Instance.GetOriginPlayerDeckCards().Count}";
         }
     }
     public void PointerEnterViewUsedObj(PointerEventData eventData)
@@ -657,7 +709,6 @@ public class S_DeckInfoSystem : MonoBehaviour
 
         // 카메라 이동 대기
         await S_GameFlowManager.WaitPanelAppearTimeAsync();
-
     }
     public async Task CloseDeckInfoCommonProperty()
     {

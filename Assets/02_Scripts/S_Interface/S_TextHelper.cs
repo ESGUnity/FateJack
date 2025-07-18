@@ -12,14 +12,14 @@ public static class S_TextHelper
         { "Accent_Engraving", "7AD1D6" },
     };
 
-    public static string WrapText(string input, int maxLen = 15)
+    public static string WrapText(string input, int maxLen)
     {
         StringBuilder result = new();
         int visibleCount = 0;
         bool insideTag = false;
 
-        int lastSpaceIndexInResult = -1;      // 마지막 공백 위치 (result 인덱스)
-        int visibleCountAtLastSpace = 0;      // 그 시점의 visibleCount
+        int lastSpaceIndexInResult = -1;
+        int visibleCountAtLastSpace = 0;
 
         for (int i = 0; i < input.Length; i++)
         {
@@ -34,42 +34,37 @@ public static class S_TextHelper
                 insideTag = false;
 
             if (insideTag)
-                continue; // 태그 안 글자는 visibleCount에 포함 안 함
+                continue;
 
-            // 공백 문자
             if (c == ' ')
             {
-                lastSpaceIndexInResult = result.Length - 1; // 공백 위치 저장
+                lastSpaceIndexInResult = result.Length - 1;
                 visibleCountAtLastSpace = visibleCount;
-            }
-
-            if (c != '\n' && c != ' ')
-            {
-                visibleCount++;
-            }
-
-            // visibleCount가 maxLen 이상일 때 줄바꿈 처리
-            if (visibleCount >= maxLen)
-            {
-                if (lastSpaceIndexInResult >= 0)
-                {
-                    // 마지막 공백을 줄바꿈으로 바꾸고 visibleCount 조정
-                    result[lastSpaceIndexInResult] = '\n';
-                    visibleCount = visibleCount - visibleCountAtLastSpace;
-                    lastSpaceIndexInResult = -1;
-                }
-                else
-                {
-                    // 공백이 없으면 바로 줄바꿈 추가 (단어 중간에 끊는 것)
-                    result.Append('\n');
-                    visibleCount = 0;
-                }
+                continue; // 공백은 visibleCount에 포함하지 않음
             }
 
             if (c == '\n')
             {
                 visibleCount = 0;
                 lastSpaceIndexInResult = -1;
+                continue;
+            }
+
+            visibleCount++;
+
+            if (visibleCount >= maxLen)
+            {
+                if (lastSpaceIndexInResult >= 0)
+                {
+                    result[lastSpaceIndexInResult] = '\n';
+                    visibleCount = visibleCount - visibleCountAtLastSpace;
+                    lastSpaceIndexInResult = -1;
+                }
+                else
+                {
+                    result.Append('\n');
+                    visibleCount = 0;
+                }
             }
         }
 
@@ -105,33 +100,36 @@ public static class S_TextHelper
             text = Regex.Replace(text, pattern, replacement, RegexOptions.Singleline);
         }
         // 2. 특수 태그: Accent_MultiPerHitCount
-        string multiHitPattern = @"<Accent_MultiPerHitCount>\d+</Accent_MultiPerHitCount>";
+        string multiHitPattern = @"<Accent_MultiPerHitCount>(\d+)</Accent_MultiPerHitCount>";
         text = Regex.Replace(text, multiHitPattern, match =>
         {
-            if (card == null || card.Unleash == null || card.Persist == null) return match.Value; // 카드 정보 없으면 원문 유지
+            string rawValue = match.Groups[1].Value; // 태그 안의 숫자
+
+            if (card == null || card.Unleash == null || card.Persist == null) return rawValue; // 태그 제거, 숫자만 반환
 
             try
             {
-                int unleash = card.Unleash.First().Value; // First가 가능한 이유는 이런 효과는 무조건 1개이기 때문.
+                int unleash = card.Unleash.First().Value;
                 int persist = card.Persist.First().Value;
                 int hit = card.HitCount;
 
-                if (hit <= 0) return match.Value;
+                if (hit <= 0) return rawValue;
 
                 int finalValue = unleash * persist * hit;
                 return $"<b><color=#57B842>{finalValue}</color></b>";
             }
             catch
             {
-                return match.Value;
+                return rawValue; // 에러 발생 시도 숫자만 반환
             }
         });
         // 3. 특수 태그: Accent_AddPerRebound
-        string addReboundPattern = @"<Accent_AddPerRebound>\d+</Accent_AddPerRebound>";
+        string addReboundPattern = @"<Accent_AddPerRebound>(\d+)</Accent_AddPerRebound>";
         text = Regex.Replace(text, addReboundPattern, match =>
         {
-            if (card == null || card.Unleash == null || card.Persist == null)
-                return match.Value;
+            string rawValue = match.Groups[1].Value; // 태그 내부 숫자만 추출
+
+            if (card == null || card.Unleash == null || card.Persist == null) return rawValue; // 태그 제거하고 숫자만 반환
 
             try
             {
@@ -144,7 +142,7 @@ public static class S_TextHelper
             }
             catch
             {
-                return match.Value;
+                return rawValue; // 예외 발생 시 숫자만 반환
             }
         });
 

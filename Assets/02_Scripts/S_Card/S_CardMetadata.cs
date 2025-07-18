@@ -24,7 +24,7 @@ public static class S_CardMetadata
             "불길한 충동", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>체력<sprite name=Health></Accent_Basic>을 1 잃고 <Accent_Basic>힘<sprite name=Str></Accent_Basic>을 8 얻습니다.",
             "SinisterImpulse", "") },
         { "SinisterImpulse_Flip", new S_TextProperty(
-            "뒤집힌 불길한 충동", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>속전속결</Accent_Basic>. <Accent_Basic>발현</Accent_Basic> : <Accent_Basic>망상<sprite name=Delusion></Accent_Basic>을 3 얻습니다. <Accent_Basic>지속</Accent_Basic> : 모든 피해가 2배 증가합니다.",
+            "뒤집힌 불길한 충동", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>속전속결</Accent_Basic>. <Accent_Basic>발현</Accent_Basic> : <Accent_Basic>망상<sprite name=Delusion></Accent_Basic>을 1 얻습니다. <Accent_Basic>지속</Accent_Basic> : 모든 피해가 2배 증가합니다.",
             "Flip SinisterImpulse", "") },
         { "FlowingSin", new S_TextProperty(
             "흐르는 죄악", "<Accent_Basic>발현</Accent_Basic> : 모든 <Accent_Basic>저주받은 카드</Accent_Basic> 1장 당 <Accent_Basic>힘<sprite name=Str></Accent_Basic>의 5배만큼 피해를 줍니다.",
@@ -60,7 +60,7 @@ public static class S_CardMetadata
             "마무리 일격", "<Accent_Basic>발현</Accent_Basic> : 오른쪽에 있는 모든 카드를 <Accent_Basic>저주</Accent_Basic>하고 <Accent_Basic>힘<sprite name=Str></Accent_Basic>의 50배만큼 피해를 줍니다.",
             "FinishingStrike", "") },
         { "FinishingStrike_Flip", new S_TextProperty(
-            "뒤집힌 마무리 일격", "<Accent_Basic>면역</Accent_Basic>. <Accent_Basic>발현</Accent_Basic> : <Accent_Basic>상태</Accent_Basic> 1 당 <Accent_Basic>힘<sprite name=Str></Accent_Basic>의 10배만큼 피해를 주고 <Accent_Basic>상태</Accent_Basic>를 모두 잃습니다.",
+            "뒤집힌 마무리 일격", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>상태</Accent_Basic> 1 당 <Accent_Basic>힘<sprite name=Str></Accent_Basic>의 10배만큼 피해를 주고 <Accent_Basic>상태</Accent_Basic>를 모두 잃습니다.",
             "Flip FinishingStrike", "") },
         { "ZenithBreak", new S_TextProperty(
             "정점 돌파", "<Accent_Basic>지속</Accent_Basic> : 얻는 <Accent_Basic>힘<sprite name=Str></Accent_Basic>이 3배 증가합니다.",
@@ -69,10 +69,10 @@ public static class S_CardMetadata
             "뒤집힌 정점 돌파", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>망상<sprite name=Delusion></Accent_Basic>을 2 얻습니다. <Accent_Basic>지속</Accent_Basic> : 얻는 <Accent_Basic>힘<sprite name=Str></Accent_Basic>이 4배 증가합니다.",
             "Flip ZenithBreak", "") },
         { "Grudge", new S_TextProperty(
-            "원한", "<Accent_Basic>발현</Accent_Basic> : 모든 <Accent_Basic>저주받은 카드</Accent_Basic> 4장 당 <Accent_Basic>힘<sprite name=Str></Accent_Basic>과 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>을 곱한만큼 피해를 줍니다.",
+            "원한", "<Accent_Basic>발현</Accent_Basic> : 모든 <Accent_Basic>저주받은 카드</Accent_Basic> 3장 당 <Accent_Basic>힘<sprite name=Str></Accent_Basic>과 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>을 곱한만큼 피해를 줍니다.",
             "Grudge", "") },
         { "Grudge_Flip", new S_TextProperty(
-            "뒤집힌 원한", "<Accent_Basic>발현</Accent_Basic> : 모든 <Accent_Basic>저주받은 카드</Accent_Basic> 4장 당 <Accent_Basic>힘<sprite name=Str></Accent_Basic>과 <Accent_Basic>정신력<sprite name=Mind></Accent_Basic>을 곱한만큼 피해를 줍니다.",
+            "뒤집힌 원한", "<Accent_Basic>발현</Accent_Basic> : 모든 <Accent_Basic>저주받은 카드</Accent_Basic> 3장 당 <Accent_Basic>힘<sprite name=Str></Accent_Basic>과 <Accent_Basic>정신력<sprite name=Mind></Accent_Basic>을 곱한만큼 피해를 줍니다.",
             "Flip Grudge", "") },
         { "BindingForce", new S_TextProperty(
             "억압", "<Accent_Basic>발현</Accent_Basic> : 필드에 있는 <Accent_Basic>힘 카드</Accent_Basic> 3장 당 <Accent_Basic>힘<sprite name=Str></Accent_Basic>과 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>을 곱한만큼 피해를 줍니다.",
@@ -104,7 +104,7 @@ public static class S_CardMetadata
             "해방", "<Accent_Basic>발현</Accent_Basic> : 필드에 있는 <Accent_Basic>정신력 카드</Accent_Basic> 1장 당 <Accent_Basic>정신력<sprite name=Mind></Accent_Basic>을 2 얻습니다.",
             "Unshackle", "") },
         { "Unshackle_Flip", new S_TextProperty(
-            "뒤집힌 해방", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>지속</Accent_Basic> : 카드가 <Accent_Basic>저주받은 카드</Accent_Basic>일 때마다 <Accent_Basic>무게</Accent_Basic>가 3 감소합니다.",
+            "뒤집힌 해방", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>지속</Accent_Basic> : 카드가 <Accent_Basic>저주</Accent_Basic>받을 때마다 <Accent_Basic>무게</Accent_Basic>가 3 감소합니다.",
             "Flip Unshackle", "") },
         { "SharpCut", new S_TextProperty(
             "절삭", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>지속</Accent_Basic> : 필드에 있는 <Accent_Basic>저주받은 카드</Accent_Basic>는 <Accent_Basic>고정</Accent_Basic>됩니다.",
@@ -160,25 +160,25 @@ public static class S_CardMetadata
             "기회", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>행운<sprite name=Luck></Accent_Basic>을 1 얻습니다.",
             "Chance", "") },
         { "Chance_Flip", new S_TextProperty(
-            "뒤집힌 기회", "<Accent_Basic>과부하</Accent_Basic>. <Accent_Basic>발현</Accent_Basic> : <Accent_Basic>행운<sprite name=Luck></Accent_Basic>을 3 얻습니다.",
+            "뒤집힌 기회", "<Accent_Basic>과부하</Accent_Basic>. <Accent_Basic>도약</Accent_Basic>. <Accent_Basic>발현</Accent_Basic> : <Accent_Basic>행운<sprite name=Luck></Accent_Basic>을 2 얻습니다.",
             "Flip Chance", "") },
         { "SuddenStrike", new S_TextProperty(
             "기습 타격", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>행운<sprite name=Luck></Accent_Basic>의 6배만큼 피해를 줍니다.",
             "SuddenStrike", "") },
         { "SuddenStrike_Flip", new S_TextProperty(
-            "뒤집힌 기습 타격", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>상태<sprite name=State></Accent_Basic> 1 당 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>의 3배만큼 피해를 줍니다.",
+            "뒤집힌 기습 타격", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>상태</Accent_Basic> 1 당 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>의 4배만큼 피해를 줍니다.",
             "Flip SuddenStrike", "") },
         { "Composure", new S_TextProperty(
             "여유부리기", "<Accent_Basic>지속</Accent_Basic> : <Accent_Basic>행운 카드</Accent_Basic>를 낼 때마다 <Accent_Basic>전개<sprite name=Expansion></Accent_Basic>를 1 얻습니다.",
             "Composure", "") },
         { "Composure_Flip", new S_TextProperty(
-            "뒤집힌 여유부리기", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>상태<sprite name=State></Accent_Basic> 1 당 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>을 1 얻습니다.",
+            "뒤집힌 여유부리기", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>상태</Accent_Basic> 1 당 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>을 3 얻습니다.",
             "Flip Composure", "") },
         { "SilentDomination", new S_TextProperty(
             "침묵의 정복", "<Accent_Basic>지속</Accent_Basic> : 오른쪽 카드 1장에 <Accent_Basic>행운<sprite name=Luck></Accent_Basic> 10 당 <Accent_Basic>메아리</Accent_Basic>를 1번 적용합니다.",
             "SilentDomination", "") },
         { "SilentDomination_Flip", new S_TextProperty(
-            "뒤집힌 침묵의 정복", "<Accent_Basic>발현</Accent_Basic> : 필드에 있는 <Accent_Basic>행운 카드</Accent_Basic> 1장 당 <Accent_Basic>모든 능력치<sprite name=Str><sprite name=Mind><sprite name=Luck></Accent_Basic>를 1 얻습니다.",
+            "뒤집힌 침묵의 정복", "<Accent_Basic>과부하</Accent_Basic>. <Accent_Basic>발현</Accent_Basic> : 필드에 있는 <Accent_Basic>행운 카드</Accent_Basic> 1장 당 <Accent_Basic>모든 능력치<sprite name=Str><sprite name=Mind><sprite name=Luck></Accent_Basic>를 2 얻습니다.",
             "Flip SilentDomination", "") },
         { "Grill", new S_TextProperty(
             "다그치기", "<Accent_Basic>지속</Accent_Basic> : <Accent_Basic>상태</Accent_Basic>를 얻을 수 없습니다.",
@@ -196,7 +196,7 @@ public static class S_CardMetadata
             "기교", "<Accent_Basic>지속</Accent_Basic> : 왼쪽에 있는 모든 <Accent_Basic>행운 카드</Accent_Basic>에 <Accent_Basic>메아리</Accent_Basic>를 1번 적용합니다.",
             "Artifice", "") },
         { "Artifice_Flip", new S_TextProperty(
-            "뒤집힌 기교", "<Accent_Basic>지속</Accent_Basic> : <Accent_Basic>발현</Accent_Basic> 효과가 발동할 때마다 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>을 2 얻습니다.",
+            "뒤집힌 기교", "<Accent_Basic>지속</Accent_Basic> : <Accent_Basic>발현</Accent_Basic> 효과가 발동할 때마다 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>을 1 얻습니다.",
             "Flip Artifice", "") },
         { "ForcedTake", new S_TextProperty(
             "강탈", "<Accent_Basic>지속</Accent_Basic> : <Accent_Basic>발현</Accent_Basic> 효과가 발동할 때마다 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>의 5배만큼 피해를 줍니다.",
@@ -208,7 +208,7 @@ public static class S_CardMetadata
             "하나를 위한 모두", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>모든 능력치<sprite name=Str><sprite name=Mind><sprite name=Luck></Accent_Basic>를 <Accent_AddPerRebound>1</Accent_AddPerRebound> 얻습니다. <Accent_Basic>지속</Accent_Basic> : 이 카드의 발현 효과가 발동할 때마다 능력치 획득량이 1 증가합니다.",
             "AllForOne", "") },
         { "AllForOne_Flip", new S_TextProperty(
-            "뒤집힌 하나를 위한 모두", "<Accent_Basic>지속</Accent_Basic> : 얻는 <Accent_Basic>상태<sprite name=State></Accent_Basic>가 2배 증가합니다.",
+            "뒤집힌 하나를 위한 모두", "<Accent_Basic>지속</Accent_Basic> : 얻는 <Accent_Basic>상태</Accent_Basic>가 2배 증가합니다.",
             "Flip AllForOne", "") },
         { "Disorder", new S_TextProperty(
             "무질서", "<Accent_Basic>지속</Accent_Basic> : 얻는 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>이 3배 증가합니다.",
@@ -217,10 +217,10 @@ public static class S_CardMetadata
             "뒤집힌 무질서", "<Accent_Basic>지속</Accent_Basic> : 적에게 피해를 줄 수 없지만 얻는 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>이 4배 증가합니다.",
             "Flip Disorder", "") },
         { "Shake", new S_TextProperty(
-            "떠보기", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>상태<sprite name=State></Accent_Basic> 4 당 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>과 <Accent_Basic>힘<sprite name=Str></Accent_Basic>을 곱한만큼 피해를 줍니다.",
+            "떠보기", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>상태</Accent_Basic> 2 당 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>과 <Accent_Basic>힘<sprite name=Str></Accent_Basic>을 곱한만큼 피해를 줍니다.",
             "Shake", "") },
         { "Shake_Flip", new S_TextProperty(
-            "뒤집힌 떠보기", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>상태<sprite name=State></Accent_Basic> 4 당 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>과 <Accent_Basic>정신력<sprite name=Mind></Accent_Basic>을 곱한만큼 피해를 줍니다.",
+            "뒤집힌 떠보기", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>상태</Accent_Basic> 2 당 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>과 <Accent_Basic>정신력<sprite name=Mind></Accent_Basic>을 곱한만큼 피해를 줍니다.",
             "Flip Shake", "") },
         { "FatalBlow", new S_TextProperty(
             "결정타", "<Accent_Basic>발현</Accent_Basic> : 필드에 <Accent_Basic>행운 카드</Accent_Basic> 3장 당 <Accent_Basic>행운<sprite name=Luck></Accent_Basic>과 <Accent_Basic>힘<sprite name=Str></Accent_Basic>을 곱한만큼 피해를 줍니다.",
@@ -249,16 +249,16 @@ public static class S_CardMetadata
             "뒤집힌 삼위일체", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>지속</Accent_Basic> : <Accent_Basic>정신력 카드</Accent_Basic>와 <Accent_Basic>행운 카드</Accent_Basic>를 같은 카드로 취급합니다.",
             "Flip Trinity", "") },
         { "Corrupt", new S_TextProperty(
-            "감염", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>속전속결</Accent_Basic>. <Accent_Basic>체력<sprite name=Health></Accent_Basic>를 5 잃습니다. <Accent_Basic>지속</Accent_Basic> : 모든 피해가 2배 증가합니다.",
+            "감염", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>속전속결</Accent_Basic>. <Accent_Basic>발현</Accent_Basic> : <Accent_Basic>체력<sprite name=Health></Accent_Basic>을 2 잃습니다. <Accent_Basic>지속</Accent_Basic> : 모든 피해가 2배 증가합니다.",
             "Corrupt", "") },
         { "Corrupt_Flip", new S_TextProperty(
             "뒤집힌 감염", "<Accent_Basic>과부하</Accent_Basic>. <Accent_Basic>지속</Accent_Basic> : 왼쪽에 있는 모든 카드에 <Accent_Basic>면역</Accent_Basic>을 적용합니다.",
             "Flip Corrupt", "") },
         { "Resistance", new S_TextProperty(
-            "저항", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>발현</Accent_Basic> : <Accent_Basic>한계<sprite name=Limit></Accent_Basic>를 1 얻습니다.",
+            "저항", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>한계<sprite name=Limit></Accent_Basic>를 1 얻습니다.",
             "Resistance", "") },
         { "Resistance_Flip", new S_TextProperty(
-            "뒤집힌 저항", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>속전속결</Accent_Basic>. <Accent_Basic>한계<sprite name=Limit></Accent_Basic>를 5 잃습니다. <Accent_Basic>지속</Accent_Basic> : 모든 피해가 2배 증가합니다.",
+            "뒤집힌 저항", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>속전속결</Accent_Basic>. <Accent_Basic>발현</Accent_Basic> : <Accent_Basic>한계<sprite name=Limit></Accent_Basic>를 2 잃습니다. <Accent_Basic>지속</Accent_Basic> : 모든 피해가 2배 증가합니다.",
             "Flip Resistance", "") },
         { "Adventure", new S_TextProperty(
             "모험", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>우선<sprite name=First></Accent_Basic>을 1 얻습니다.",
@@ -270,7 +270,7 @@ public static class S_CardMetadata
             "흉내", "<Accent_Basic>고정</Accent_Basic>. <Accent_Basic>지속</Accent_Basic> : 이번 턴에 처음 낸 카드에 <Accent_Basic>메아리</Accent_Basic>를 2번 적용합니다.",
             "Imitate", "") },
         { "Imitate_Flip", new S_TextProperty(
-            "뒤집힌 흉내", "<Accent_Basic>발현</Accent_Basic> : <Accent_Basic>공용 카드</Accent_Basic> 1장 당 <Accent_Basic>모든 능력치<sprite name=Str><sprite name=Mind><sprite name=Luck></Accent_Basic>를 1 얻습니다.",
+            "뒤집힌 흉내", "<Accent_Basic>발현</Accent_Basic> : 필드에 있는 <Accent_Basic>공용 카드</Accent_Basic> 1장 당 <Accent_Basic>모든 능력치<sprite name=Str><sprite name=Mind><sprite name=Luck></Accent_Basic>를 1 얻습니다.",
             "Flip Imitate", "") },
         { "Undertow", new S_TextProperty(
             "역류", "<Accent_Basic>지속</Accent_Basic> : 능력치를 얻을 수 없지만 필드에 있는 모든 카드에 <Accent_Basic>메아리</Accent_Basic>를 1번 적용합니다.",

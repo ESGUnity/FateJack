@@ -2,24 +2,15 @@ using UnityEngine;
 
 public enum BGMEnum
 {
-    Silent,
-    Title,
-    InGame
+    Single = 0,
 }
 public enum SFXEnum
 {
-    Move,
-    Attack = 2,
+    Dialog = 0, HitCard = 1, CardHovering = 2, CardActivated = 3, Harm = 4,
 }
 public enum UIEnum
 {
-    BtnEnter,
-    BtnClick,
-    NodeChange,
-    GameEnd,
-    RollDice,
-    SelectUnit,
-    PlacementUnit,
+    UI_Hovering = 0, UI_Click = 1, 
 }
 
 public class S_AudioManager : MonoBehaviour
@@ -48,7 +39,8 @@ public class S_AudioManager : MonoBehaviour
     // 간이 싱글턴
     static S_AudioManager instance;
     public static S_AudioManager Instance { get { return instance; } }
-    private void Awake()
+
+    void Awake()
     {
         if (instance == null)
         {
@@ -142,24 +134,22 @@ public class S_AudioManager : MonoBehaviour
     {
         if (bGMPlayer.isPlaying)
         {
-            bGMPlayer.Stop();
+            //bGMPlayer.Stop();
+            return;
         }
 
-        int randomIndex = 0;
-        if (bGM == BGMEnum.InGame)
-        {
-            randomIndex = UnityEngine.Random.Range(0, 3);
-        }
+        //int randomIndex = 0;
+        //if (bGM == BGMEnum.InGame)
+        //{
+        //    randomIndex = UnityEngine.Random.Range(0, 3);
+        //}
 
-        if (bGM == BGMEnum.Silent)
-        {
-            bGMPlayer.Stop();
-        }
-        else
-        {
-            bGMPlayer.clip = BGMClips[(int)bGM + randomIndex];
-            bGMPlayer.Play();
-        }
+        bGMPlayer.clip = BGMClips[(int)bGM]; // + randomIndex
+        bGMPlayer.Play();
+    }
+    public void StopBGM()
+    {
+        bGMPlayer.Stop();
     }
     public void PlaySFX(SFXEnum sFX) // SFX 재생 메서드
     {
@@ -173,16 +163,9 @@ public class S_AudioManager : MonoBehaviour
             }
             else
             {
-                // 소리가 여러 종류일 때 무작위 소리 재생하기
-                int randomIndex = 0;
-                if (sFX == SFXEnum.Move)
-                {
-                    randomIndex = UnityEngine.Random.Range(0, 2);
-                }
-
                 // 소리 재생
                 sFXchannelIndex = loopIndex;
-                sFXPlayers[loopIndex].clip = SFXClips[(int)sFX + randomIndex];
+                sFXPlayers[loopIndex].clip = SFXClips[(int)sFX];
                 sFXPlayers[loopIndex].Play();
                 break;
             }
@@ -194,7 +177,7 @@ public class S_AudioManager : MonoBehaviour
         {
             int loopIndex = (i + uIchannelIndex) % uIChannels;
 
-            if (uIPlayers[loopIndex].isPlaying)
+            if (uIPlayers[loopIndex].isPlaying) // 플레이 중이라면 다른 채널로 넘어가기
             {
                 continue;
             }

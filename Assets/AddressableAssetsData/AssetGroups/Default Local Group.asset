@@ -50,8 +50,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 10fa0e7243ee36344bf3dc05f3351844
+    m_Address: Sprite_Product_Flexible
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1c63fa895c2947940beafa17fc83e9c3
     m_Address: Sprite_CardEffect_Split
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1ca32487fa15ec9449184abaa18c0fe9
+    m_Address: Sprite_Product_Fix
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -80,6 +90,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2a7ce3ddbde5528489ea930230d01be7
+    m_Address: Sprite_Product_Mask
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2c02ef7e5dab6794e90ddfdbac82b900
     m_Address: Sprite_CardEffect_Imitate
     m_ReadOnly: 0
@@ -97,6 +112,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 33c65674d563c724088b83d38473f98b
     m_Address: Sprite_CardEffect_Condemnation
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 380c03caa8bb46a4087195f8a86b1364
+    m_Address: Sprite_Product_Dismantle
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -290,6 +310,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9fb4caf4d823bc047b646366c3869ad1
+    m_Address: Sprite_Product_Leap
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9fe6b0674dcf85d4bb67a78f68bdce6c
     m_Address: Sprite_CardEffect_AllForOne
     m_ReadOnly: 0
@@ -335,6 +360,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b60aeb49a94b950408891322ee889a54
+    m_Address: Sprite_Product_Immunity
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ba7668f484d9a414397c8254b08f5ac5
     m_Address: Sprite_CardEffect_CalamityApproaches
     m_ReadOnly: 0
@@ -375,6 +405,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2d7dd4b24856ea4cbdf7c758d61a087
+    m_Address: Sprite_Product_QuickAction
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d40fd3b69dcf6fd45be5aebe36475592
     m_Address: Sprite_CardEffect_WingsOfFreedom
     m_ReadOnly: 0
@@ -397,6 +432,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d91e96d5c8e404e49a0b3fd7b3378668
     m_Address: Sprite_CardEffect_FinishingStrike
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d96262abb9762464e8df669d633069ac
+    m_Address: Sprite_Product_Rebound
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

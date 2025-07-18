@@ -16,7 +16,7 @@ public class S_Accept : S_CardBase
         {
 
         };
-        OriginEngraving = new() { };
+        OriginEngraving = new() { S_EngravingEnum.Overload_NotPerfect };
         Engraving = new();
     }
 }

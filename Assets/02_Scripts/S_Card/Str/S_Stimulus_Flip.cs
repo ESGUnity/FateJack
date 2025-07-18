@@ -14,8 +14,8 @@ public class S_Stimulus_Flip : S_CardBase
             new S_UnleashStruct(S_UnleashEnum.Delusion, default, 1),
             new S_UnleashStruct(S_UnleashEnum.Stat, S_StatEnum.Str, 4)
         };
-        Persist = new();
-        OriginEngraving = new();
-        Engraving = new();
+        Persist = new() { };
+        OriginEngraving = new() { };
+        Engraving = new() { };
     }
 }

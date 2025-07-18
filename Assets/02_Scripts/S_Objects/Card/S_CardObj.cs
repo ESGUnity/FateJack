@@ -210,6 +210,9 @@ public class S_CardObj : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
 
             S_HoverInfoSystem.Instance.ActivateHoverInfoByCard(CardInfo, sprite_CardBase.gameObject);
 
+            // 사운드
+            S_AudioManager.Instance.PlaySFX(SFXEnum.CardHovering);
+
             isEnter = true;
         }
     }

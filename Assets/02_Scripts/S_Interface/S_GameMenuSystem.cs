@@ -15,14 +15,15 @@ public class S_GameMenuSystem : MonoBehaviour
     GameObject image_ForgiveBtnBase;
     GameObject image_ContinueBtnBase;
 
-    Slider masterVolumeSlider;
-    Slider bGMVolumeSlider;
-    Slider sFXVolumeSlider;
-    Slider uIVolumeSlider;
+
 
     [Header("씬 오브젝트")]
     [SerializeField] TMP_Dropdown dropdown_Resolution;
     [SerializeField] TMP_Dropdown dropdown_DisplayMode;
+    [SerializeField] Slider slider_MasterVolume;
+    [SerializeField] Slider slider_BGMVolume;
+    [SerializeField] Slider slider_SFXVolume;
+    [SerializeField] Slider slider_UIVolume;
 
     [Header("해상도 관련")]
     List<Resolution> resolutions = new List<Resolution>();
@@ -49,21 +50,6 @@ public class S_GameMenuSystem : MonoBehaviour
         image_ForgiveBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_ForgiveBtnBase")).gameObject;
         image_ContinueBtnBase = Array.Find(transforms, c => c.gameObject.name.Equals("Image_ContinueBtnBase")).gameObject;
 
-        masterVolumeSlider = Array.Find(sliders, c => c.gameObject.name.Equals("MasterVolumeSlider"));
-        bGMVolumeSlider = Array.Find(sliders, c => c.gameObject.name.Equals("BGMVolumeSlider"));
-        sFXVolumeSlider = Array.Find(sliders, c => c.gameObject.name.Equals("SFXVolumeSlider"));
-        uIVolumeSlider = Array.Find(sliders, c => c.gameObject.name.Equals("UIVolumeSlider"));
-
-        masterVolumeSlider.onValueChanged.AddListener(MasterVolumeValueChanged);
-        bGMVolumeSlider.onValueChanged.AddListener(BGMVolumeValueChanged);
-        sFXVolumeSlider.onValueChanged.AddListener(SFXVolumeValueChanged);
-        uIVolumeSlider.onValueChanged.AddListener(UIVolumeValueChanged);
-
-        masterVolumeSlider.value = PlayerPrefs.GetFloat("MasterVolume");
-        bGMVolumeSlider.value = PlayerPrefs.GetFloat("BGMVolume");
-        sFXVolumeSlider.value = PlayerPrefs.GetFloat("SFXVolume");
-        uIVolumeSlider.value = PlayerPrefs.GetFloat("UIVolume");
-
         // 싱글턴
         if (instance == null)
         {
@@ -76,6 +62,16 @@ public class S_GameMenuSystem : MonoBehaviour
     }
     void Start()
     {
+        slider_MasterVolume.onValueChanged.AddListener(MasterVolumeValueChanged);
+        slider_BGMVolume.onValueChanged.AddListener(BGMVolumeValueChanged);
+        slider_SFXVolume.onValueChanged.AddListener(SFXVolumeValueChanged);
+        slider_UIVolume.onValueChanged.AddListener(UIVolumeValueChanged);
+
+        slider_MasterVolume.value = PlayerPrefs.GetFloat("MasterVolume");
+        slider_BGMVolume.value = PlayerPrefs.GetFloat("BGMVolume");
+        slider_SFXVolume.value = PlayerPrefs.GetFloat("SFXVolume");
+        slider_UIVolume.value = PlayerPrefs.GetFloat("UIVolume");
+
         resolutions = new List<Resolution>
     {
         new Resolution { width = 1280, height = 720 },
@@ -161,7 +157,6 @@ public class S_GameMenuSystem : MonoBehaviour
         }
         else if (currentScene.name == "SingleGameScene")
         {
-
             if (Input.GetKeyDown(KeyCode.Escape) && S_GameFlowManager.Instance.GameFlowState != S_GameFlowStateEnum.GameOver)
             {
                 if (panel_GameMenuBase.activeInHierarchy || image_BlackBackground.activeInHierarchy)
@@ -209,6 +204,8 @@ public class S_GameMenuSystem : MonoBehaviour
         image_ForgiveBtnBase.SetActive(false);
         image_ContinueBtnBase.SetActive(false);
     }
+
+    #region 버튼 함수
     public void ClickForgiveBtn()
     {
         DisappearGameMenuPanel();
@@ -218,6 +215,8 @@ public class S_GameMenuSystem : MonoBehaviour
     {
         DisappearGameMenuPanel();
     }
+    #endregion
+    #region 해상도
     void SetupResolutionDropdown(int selectedIndex)
     {
         dropdown_Resolution.ClearOptions();
@@ -232,7 +231,6 @@ public class S_GameMenuSystem : MonoBehaviour
         dropdown_Resolution.value = selectedIndex;
         dropdown_Resolution.RefreshShownValue();
     }
-
     void SetupDisplayModeDropdown(int selectedIndex)
     {
         dropdown_DisplayMode.ClearOptions();
@@ -240,7 +238,14 @@ public class S_GameMenuSystem : MonoBehaviour
         dropdown_DisplayMode.value = selectedIndex;
         dropdown_DisplayMode.RefreshShownValue();
     }
-
+    void OnResolutionDropdownChanged(int newResIndex)
+    {
+        ApplyResolution(newResIndex, dropdown_DisplayMode.value);
+    }
+    void OnDisplayModeDropdownChanged(int newDisplayModeIndex)
+    {
+        ApplyResolution(dropdown_Resolution.value, newDisplayModeIndex);
+    }
     void ApplyResolution(int resolutionIndex, int displayModeIndex)
     {
         var resolution = resolutions[resolutionIndex];
@@ -260,16 +265,8 @@ public class S_GameMenuSystem : MonoBehaviour
         PlayerPrefs.SetInt(DISPLAY_MODE_INDEX_KEY, displayModeIndex);
         PlayerPrefs.Save();
     }
-    void OnResolutionDropdownChanged(int newResIndex)
-    {
-        ApplyResolution(newResIndex, dropdown_DisplayMode.value);
-    }
-
-    void OnDisplayModeDropdownChanged(int newDisplayModeIndex)
-    {
-        ApplyResolution(dropdown_Resolution.value, newDisplayModeIndex);
-    }
-
+    #endregion
+    #region 볼륨
     void MasterVolumeValueChanged(float value)
     {
         S_AudioManager.Instance.SetMasterVolume(value);
@@ -286,4 +283,5 @@ public class S_GameMenuSystem : MonoBehaviour
     {
         S_AudioManager.Instance.SetUIVolume(value);
     }
+    #endregion
 }

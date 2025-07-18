@@ -11,7 +11,7 @@ public class S_DialogInfoSystem : MonoBehaviour
     [Header("컴포넌트")]
     GameObject image_BlackBackground;
     GameObject image_HitBtnBlockingBackground;
-    GameObject image_ViewDeckBlockingBackground;
+    [HideInInspector] public GameObject image_ViewDeckBlockingBackground;
     GameObject image_ViewUsedBlockingBackground;
     GameObject image_FieldCardBlockingBackground;
 
@@ -35,6 +35,8 @@ public class S_DialogInfoSystem : MonoBehaviour
     bool isCompleteDialog;
     const float DIALOG_APPEAR_TIME = 0.15f;
     Vector3 DIALOG_SCALE_AMOUNT = new Vector3(1.05f, 1.05f, 1.05f);
+
+    public bool IsCompletedTotaly;
 
     // 싱글턴
     static S_DialogInfoSystem instance;
@@ -95,7 +97,7 @@ public class S_DialogInfoSystem : MonoBehaviour
 
         text_Name.text = name;
         text = S_TextHelper.ParseText(text);
-        text = S_TextHelper.WrapText(text, 25);
+        text = S_TextHelper.WrapText(text, 30);
         text_Dialog.text = text;
         if (monoSeq != null && monoSeq.IsActive())
         {
@@ -111,7 +113,10 @@ public class S_DialogInfoSystem : MonoBehaviour
             .Join(image_DialogBase.transform.DOScale(DIALOG_SCALE_AMOUNT, DIALOG_APPEAR_TIME).SetEase(Ease.OutQuart))
             .Append(image_DialogBase.transform.DOScale(Vector3.one, DIALOG_APPEAR_TIME).SetEase(Ease.OutQuart));
 
-        if (duration > 999)
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.Dialog);
+
+        if (duration > 99)
         {
             return;
         }
@@ -139,9 +144,9 @@ public class S_DialogInfoSystem : MonoBehaviour
 
         monoSeq = DOTween.Sequence();
 
-        monoSeq.Append(image_DialogBase.GetComponent<Image>().DOFade(0f, DIALOG_APPEAR_TIME)).SetEase(Ease.OutQuart)
-        .Join(text_Name.DOFade(0f, DIALOG_APPEAR_TIME)).SetEase(Ease.OutQuart)
-        .Join(text_Dialog.DOFade(0f, DIALOG_APPEAR_TIME)).SetEase(Ease.OutQuart)
+        monoSeq.Append(image_DialogBase.GetComponent<Image>().DOFade(0f, 0)).SetEase(Ease.OutQuart)
+        .Join(text_Name.DOFade(0f, 0)).SetEase(Ease.OutQuart)
+        .Join(text_Dialog.DOFade(0f, 0)).SetEase(Ease.OutQuart)
         .OnComplete(() =>
         {
             image_DialogBase.SetActive(false);
@@ -153,6 +158,7 @@ public class S_DialogInfoSystem : MonoBehaviour
     public async Task StartDialog(Queue<DialogData> keys) // 인게임 화면에서 대사를 출력하는 메서드
     {
         isCompleteDialog = false;
+        IsCompletedTotaly = false; 
 
         // 스테이트 담아두기
         prevState = S_GameFlowManager.Instance.GameFlowState;
@@ -175,16 +181,31 @@ public class S_DialogInfoSystem : MonoBehaviour
         diaSeq = DOTween.Sequence();
         diaSeq.Append(image_DialogBase.GetComponent<Image>().DOFade(1f, DIALOG_APPEAR_TIME)).SetEase(Ease.OutQuart)
             .Join(text_Name.DOFade(1f, DIALOG_APPEAR_TIME)).SetEase(Ease.OutQuart)
-            .Join(text_Dialog.DOFade(1f, DIALOG_APPEAR_TIME)).SetEase(Ease.OutQuart)
-            .Join(image_DialogBase.transform.DOScale(DIALOG_SCALE_AMOUNT, DIALOG_APPEAR_TIME).SetEase(Ease.OutQuart))
-            .Append(image_DialogBase.transform.DOScale(Vector3.one, DIALOG_APPEAR_TIME).SetEase(Ease.OutQuart));
+            .Join(text_Dialog.DOFade(1f, DIALOG_APPEAR_TIME)).SetEase(Ease.OutQuart);
 
         // 대사 설정
         while (keys.Count > 0)
         {
+            // 사운드
+            S_AudioManager.Instance.PlaySFX(SFXEnum.Dialog);
+
+            if (diaSeq.IsActive())
+            {
+                diaSeq.Join(image_DialogBase.transform.DOScale(DIALOG_SCALE_AMOUNT, DIALOG_APPEAR_TIME).SetEase(Ease.OutQuart))
+                    .Append(image_DialogBase.transform.DOScale(Vector3.one, DIALOG_APPEAR_TIME).SetEase(Ease.OutQuart));
+            }
+            else
+            {
+                diaSeq.Append(image_DialogBase.transform.DOScale(DIALOG_SCALE_AMOUNT, DIALOG_APPEAR_TIME).SetEase(Ease.OutQuart))
+                    .Append(image_DialogBase.transform.DOScale(Vector3.one, DIALOG_APPEAR_TIME).SetEase(Ease.OutQuart));
+            }
             DialogData data = keys.Dequeue();
             text_Name.text = data.Name;
-            text_Dialog.text = S_TextHelper.WrapText(data.Dialog, 25);
+
+            string text = data.Dialog;
+            text = S_TextHelper.ParseText(text);
+            text = S_TextHelper.WrapText(text, 30);
+            text_Dialog.text = text;
 
             // 버튼 설정
             SetBtn(data.ActivateUI);
@@ -215,10 +236,12 @@ public class S_DialogInfoSystem : MonoBehaviour
                 image_DialogBase.SetActive(false);
             });
 
-        await diaSeq.AsyncWaitForCompletion();
-
         S_GameFlowManager.Instance.GameFlowState = prevState; // 스테이트 원래대로 되돌리기
         OffBlockingPanel(); // 패널도 풀기
+
+        await diaSeq.AsyncWaitForCompletion();
+
+        IsCompletedTotaly = true;
     }
     public void SetBtn(S_ActivateBtnEnum btn)
     {
@@ -255,7 +278,7 @@ public class S_DialogInfoSystem : MonoBehaviour
         }
         // 능력치 UI
         statInfoCanvas.sortingLayerName = "UI";
-        statInfoCanvas.sortingOrder = 0;
+        statInfoCanvas.sortingOrder = 1;
         // 적 능력치(체력) UI
         foeInfoCanvas.sortingLayerName = "UI";
         foeInfoCanvas.sortingOrder = 0;
@@ -271,7 +294,8 @@ public class S_DialogInfoSystem : MonoBehaviour
                 break;
             case S_ActivateBtnEnum.Btn_Next_NoBlackBackground:
                 image_NextBtn.SetActive(true);
-                image_BlackBackground.SetActive(false);
+                image_BlackBackground.GetComponent<Image>().DOKill();
+                image_BlackBackground.GetComponent<Image>().DOFade(0, 0);
                 break;
             case S_ActivateBtnEnum.Btn_Hit:
                 image_NextBtn.SetActive(false);
@@ -336,7 +360,7 @@ public class S_DialogInfoSystem : MonoBehaviour
     public void OffBlockingPanel()
     {
         image_BlackBackground.GetComponent<Image>().DOKill();
-        image_BlackBackground.GetComponent<Image>().DOFade(0f, DIALOG_APPEAR_TIME)
+        image_BlackBackground.GetComponent<Image>().DOFade(0, DIALOG_APPEAR_TIME)
             .OnComplete(() =>
             {
                 image_BlackBackground.SetActive(false);

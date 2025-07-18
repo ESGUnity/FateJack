@@ -10,7 +10,7 @@ public class S_SuddenStrike_Flip : S_CardBase
         CardType = S_CardTypeEnum.Luck;
         Unleash = new()
         {
-            new S_UnleashStruct(S_UnleashEnum.Harm_Per1State, S_StatEnum.Luck, 3)
+            new S_UnleashStruct(S_UnleashEnum.Harm_Per1State, S_StatEnum.Luck, 4)
         };
         Persist = new()
         {

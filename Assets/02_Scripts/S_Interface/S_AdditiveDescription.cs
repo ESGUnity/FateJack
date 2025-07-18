@@ -62,7 +62,7 @@ public class S_AdditiveDescription : MonoBehaviour
 
         string description = S_CardMetadata.TermDatas[word].Description_Korean;
         description = S_TextHelper.ParseText(description);
-        description = S_TextHelper.WrapText(description, 20);
+        description = S_TextHelper.WrapText(description, 15);
         text_Description.text = description;
     }
     #endregion

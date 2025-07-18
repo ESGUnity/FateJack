@@ -38,7 +38,7 @@ public class S_FoeInfoSystem : MonoBehaviour
     Vector3 CARD_SPAWN_POS = new Vector3(0, 0, 10f);
     Vector3 FOE_CARDS_START_POS = new Vector3(-5.5f, 0, 0);
     Vector3 FOE_CARDS_END_POS = new Vector3(5.5f, 0, 0);
-    Vector3 FOE_CARDS_ORIGIN_SCALE = new Vector3(1.7f, 1.7f, 1.7f);
+    Vector3 FOE_CARDS_ORIGIN_SCALE = new Vector3(1.6f, 1.6f, 1.6f);
     const float STACK_Z_VALUE = -0.02f;
     const float CARD_POS_OFFSET = 0.02f;
     const int MAX_CARD_COUNT = 4; // 고정 격차로 배치되는 최대 카드 개수
@@ -77,7 +77,7 @@ public class S_FoeInfoSystem : MonoBehaviour
 
     #endregion
     #region 시련 진행에 따른 메서드
-    public async Task UpdateCardsByRewardTime() // 카드 등장, 적 체력 설정
+    public async Task UpdateCardsByReward() // 카드 등장, 적 체력 설정
     {
         // 주요 정보 할당
         S_FoeStruct foe = S_FoeList.FOES.First(x => x.Trial == S_GameFlowManager.Instance.CurrentTrial + 1);
@@ -88,8 +88,11 @@ public class S_FoeInfoSystem : MonoBehaviour
 
         // 체력바 세팅
         ChangeHealthValueVFX();
+        await S_EffectActivator.Instance.WaitEffectLifeTimeAsync();
 
         // 카드 세팅
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.HitCard);
         await SetFoeCardsByRewardTime(FoeCardList);
     }
     public async Task UpdateFoeByStartTrial()
@@ -99,6 +102,9 @@ public class S_FoeInfoSystem : MonoBehaviour
     public async Task ResetFoeCardsByEndTrial() // 시련 종료 시 적 카드를 제거하는 메서드
     {
         List<Task> animationTasks = new();
+
+        // 사운드
+        S_AudioManager.Instance.PlaySFX(SFXEnum.HitCard);
 
         foreach (GameObject go in foeCardObjs)
         {
@@ -168,7 +174,7 @@ public class S_FoeInfoSystem : MonoBehaviour
             allStackCards[i].GetComponent<S_FieldCardObj>().OriginPRS = originCardPRS[i];
 
             // 소팅오더 설정
-            allStackCards[i].GetComponent<S_FieldCardObj>().OriginOrder = (i + 1) * 10;
+            allStackCards[i].GetComponent<S_FieldCardObj>().OriginOrder = i - 15;
             allStackCards[i].GetComponent<S_FieldCardObj>().SetOrder(allStackCards[i].GetComponent<S_FieldCardObj>().OriginOrder);
 
             // 두트윈

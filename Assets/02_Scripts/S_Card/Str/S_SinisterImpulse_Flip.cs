@@ -10,7 +10,7 @@ public class S_SinisterImpulse_Flip : S_CardBase
         CardType = S_CardTypeEnum.Str;
         Unleash = new()
         {
-            new S_UnleashStruct(S_UnleashEnum.Delusion, default, 3),
+            new S_UnleashStruct(S_UnleashEnum.Delusion, default, 1),
         };
         Persist = new()
         {

@@ -21,24 +21,24 @@ public class S_TutorialManager : MonoBehaviour
         }
     }
 
-    public async void StartTrialByTutorial()
+    public async Task StartTrialByTutorial()
     {
-        Queue<DialogData> dialogs = new Queue<DialogData>();
-        List<DialogData> dialogList = new();
-
         // 시련 시작
-        await S_GameFlowManager.Instance.StartTrialByTutorialAsync();
+        S_GameFlowManager.Instance.StartTrialByTutorialAsync();
 
         // 다이얼로그 : 튜토리얼 인트로
         await S_DialogInfoSystem.Instance.StartQueueDialog(S_DialogMetaData.GetDialogsByPrefix("Tutorial_Intro"));
+
+        await S_FoeInfoSystem.Instance.UpdateCardsByReward();
 
         // 다이얼로그 : 튜토리얼 카드 내기
         await S_DialogInfoSystem.Instance.StartQueueDialog(S_DialogMetaData.GetDialogsByPrefix("Tutorial_Hit"));
 
         // 카드 내기 시작
-        S_HitBtnSystem.Instance.HitCard();
+        await S_HitBtnSystem.Instance.HitCard();
+        S_DialogInfoSystem.Instance.image_ViewDeckBlockingBackground.SetActive(true);
         // 온전히 카드를 낼 때까지 대기
-        while (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.HittingCard) || S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.None))
+        while (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.HittingCard) || S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.None) || S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.Expansion))
         {
             await Task.Yield();
         }
@@ -50,6 +50,7 @@ public class S_TutorialManager : MonoBehaviour
         S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.None;
         S_HitBtnSystem.Instance.DisappearHitBtn();
         await S_DeckInfoSystem.Instance.OpenDeckInfoCommonProperty(S_GameFlowStateEnum.Hit);
+        S_GameFlowManager.Instance.GameFlowState = S_GameFlowStateEnum.Deck;
         // 덱에서 스택으로 넘어올 때까지 대기
         while (S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.Deck) || S_GameFlowManager.Instance.IsGameFlowState(S_GameFlowStateEnum.None))
         {
@@ -58,6 +59,7 @@ public class S_TutorialManager : MonoBehaviour
 
         // 다이얼로그 : 튜토리얼 스탠드
         await S_DialogInfoSystem.Instance.StartQueueDialog(S_DialogMetaData.GetDialogsByPrefix("Tutorial_Stand"));
+        await S_GameFlowManager.Instance.StartStandAsync();
 
         // 다이얼로그 : 튜토리얼 아웃트로
         await S_DialogInfoSystem.Instance.StartQueueDialog(S_DialogMetaData.GetDialogsByPrefix("Tutorial_Outro"));
